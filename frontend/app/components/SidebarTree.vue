@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LockKeyhole } from '@lucide/vue'
+import { FileText, Folder, LockKeyhole } from '@lucide/vue'
 
 interface PageNode {
   path: string
@@ -24,6 +24,10 @@ function isActive(path: string): boolean {
 function isProtected(node: PageNode): boolean {
   return node.access === 'password'
 }
+
+function isDirectory(node: PageNode): boolean {
+  return node.has_index === true || (node.children?.length ?? 0) > 0
+}
 </script>
 
 <template>
@@ -38,6 +42,11 @@ function isProtected(node: PageNode): boolean {
           'hover:text-primary': !isActive(node.path),
         }"
       >
+        <Folder
+          v-if="isDirectory(node)"
+          class="h-3.5 w-3.5 text-muted-foreground"
+        />
+        <FileText v-else class="h-3.5 w-3.5 text-muted-foreground" />
         <LockKeyhole
           v-if="isProtected(node)"
           class="h-3.5 w-3.5 text-muted-foreground"
@@ -56,6 +65,7 @@ function isProtected(node: PageNode): boolean {
             'hover:text-primary': !isActive(node.path),
           }"
         >
+          <Folder class="h-3.5 w-3.5" />
           <LockKeyhole v-if="isProtected(node)" class="h-3.5 w-3.5" />
           <span>{{ node.title }}</span>
         </NuxtLink>
@@ -63,6 +73,7 @@ function isProtected(node: PageNode): boolean {
           v-else
           class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground"
         >
+          <Folder class="h-3.5 w-3.5" />
           <LockKeyhole v-if="isProtected(node)" class="h-3.5 w-3.5" />
           <span>{{ node.title }}</span>
         </span>

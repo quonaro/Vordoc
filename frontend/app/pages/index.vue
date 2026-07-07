@@ -46,28 +46,27 @@ function isProtected(doc: DocMeta): boolean {
     <SiteHeader :header="header" />
     <div class="p-8">
       <div class="mx-auto max-w-4xl">
-        <h1 class="mb-8 text-4xl font-bold">{{ rootTitle }}</h1>
-        <p class="mb-8 text-muted-foreground">
-          {{ t('root.availableDocumentation') }}
-        </p>
-
         <div v-if="enableRootPage" class="grid gap-4 sm:grid-cols-2">
           <NuxtLink
             v-for="doc in docs"
             :key="doc.name"
             :to="`/${doc.name}`"
-            class="rounded-lg border bg-card p-6 transition-colors hover:bg-accent"
+            class="group rounded-lg border bg-card p-6 transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <div class="flex items-center gap-2">
               <LockKeyhole
                 v-if="isProtected(doc)"
-                class="h-4 w-4 text-muted-foreground"
+                class="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground"
               />
-              <h2 class="text-xl font-semibold">{{ doc.title }}</h2>
+              <h2
+                class="text-xl font-semibold group-hover:text-accent-foreground"
+              >
+                {{ doc.title }}
+              </h2>
             </div>
             <p
               v-if="doc.description"
-              class="mt-2 text-sm text-muted-foreground"
+              class="mt-2 text-sm text-muted-foreground group-hover:text-accent-foreground"
             >
               {{ doc.description }}
             </p>

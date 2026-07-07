@@ -42,6 +42,11 @@ const loading = ref(true)
 const passwordRequired = ref(false)
 const contentRef = shallowRef<HTMLElement | null>(null)
 
+const sidebarNodes = useSidebarNodes(
+  computed(() => docMeta.value?.pages ?? []),
+  computed(() => pageData.value?.path ?? ''),
+)
+
 useSearchHighlight(
   contentRef,
   computed(() => pageData.value?.content ?? ''),
@@ -107,7 +112,7 @@ onMounted(async () => {
             {{ docMeta.title }}
           </NuxtLink>
           <SidebarTree
-            :nodes="docMeta.pages"
+            :nodes="sidebarNodes"
             :doc-name="docName"
             :current-path="pageData?.path ?? ''"
           />
