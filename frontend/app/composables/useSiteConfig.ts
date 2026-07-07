@@ -10,9 +10,11 @@ export interface FontConfig {
   size?: number
 }
 
+export type HeaderElement = 'logo' | 'search' | 'theme-switch'
+
 export interface HeaderConfig {
   enable: boolean
-  selector?: boolean
+  elements?: readonly HeaderElement[]
   title?: string
   logo?: LogoConfig
   font?: FontConfig

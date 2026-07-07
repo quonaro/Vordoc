@@ -10,7 +10,8 @@
     "disabled": "Documentation selection is disabled."
   },
   "doc": {
-    "noContent": "No content available."
+    "noContent": "No content available.",
+    "onThisPage": "On this page"
   },
   "search": {
     "placeholder": "Search...",

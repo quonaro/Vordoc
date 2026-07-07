@@ -3,6 +3,14 @@ import { markedHighlight } from 'marked-highlight'
 import hljs from 'highlight.js'
 import { sanitize } from 'isomorphic-dompurify'
 
+function isExternalHref(href: string): boolean {
+  return /^[a-z][a-z0-9+.-]*:/i.test(href)
+}
+
+function isWebHref(href: string): boolean {
+  return /^https?:/i.test(href) || href.startsWith('//')
+}
+
 interface HrefParts {
   path: string
   query: string
@@ -29,13 +37,6 @@ function splitHref(href: string): HrefParts {
   return { path, query, fragment }
 }
 
-function shouldTransform(href: string): boolean {
-  if (!href || href.startsWith('#')) return false
-  if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return false
-
-  const { path } = splitHref(href)
-  return path.toLowerCase().endsWith('.md')
-}
 
 function baseDirFromFilePath(docName: string, filePath: string): string {
   const slashIndex = filePath.lastIndexOf('/')
@@ -64,30 +65,39 @@ export function resolveMarkdownLink(
   docName: string,
   filePath: string,
 ): string | null {
-  if (!shouldTransform(href)) return null
+  if (!href || isExternalHref(href)) return null
 
   const { path, query, fragment } = splitHref(href)
-  const pathWithoutMd = path.slice(0, -3)
+  let resultPath: string | null = null
+  let transformed = false
 
-  let resolvedPath: string
-  if (href.startsWith('/')) {
-    resolvedPath = normalizeIndexPath(pathWithoutMd)
-  } else {
-    const baseDir = baseDirFromFilePath(docName, filePath)
-    resolvedPath = resolveRelativePath(baseDir, pathWithoutMd)
-    resolvedPath = normalizeIndexPath(resolvedPath)
+  if (path.toLowerCase().endsWith('.md')) {
+    const pathWithoutMd = path.slice(0, -3)
+    if (href.startsWith('/')) {
+      resultPath = normalizeIndexPath(pathWithoutMd)
+    } else {
+      const baseDir = baseDirFromFilePath(docName, filePath)
+      resultPath = normalizeIndexPath(resolveRelativePath(baseDir, pathWithoutMd))
+    }
+    if (!resultPath.startsWith('/')) {
+      resultPath = `/${resultPath}`
+    }
+    transformed = true
   }
 
-  if (!resolvedPath.startsWith('/')) {
-    resolvedPath = `/${resolvedPath}`
+  if (fragment) {
+    const slugFragment = `#${slugify(fragment.slice(1))}`
+    if (slugFragment !== fragment || transformed) {
+      return `${resultPath ?? path}${query}${slugFragment}`
+    }
   }
 
-  return `${resolvedPath}${query}${fragment}`
+  return transformed ? `${resultPath}${query}` : null
 }
 
 function shouldTransformImage(src: string): boolean {
   if (!src || src.startsWith('#')) return false
-  if (/^[a-z][a-z0-9+.-]*:/i.test(src)) return false
+  if (isExternalHref(src)) return false
   if (src.startsWith('/api/') || src.startsWith('/assets/')) return false
   return true
 }
@@ -121,18 +131,19 @@ export function resolveMarkdownImage(
   return `/api/v1/assets/${docName}/${resolvedPath}`
 }
 
-function slugify(text: string): string {
+export function slugify(text: string): string {
   return text
     .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}\s-]+/gu, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
-    .replace(/^[^a-z]+/, '')
+    .replace(/^-+|-+$/g, '')
     .slice(0, 64)
 }
 
-function extractPlainText(tokens: Token[]): string {
+export function extractPlainText(tokens: Token[]): string {
   let text = ''
   for (const token of tokens) {
     switch (token.type) {
@@ -181,6 +192,15 @@ function resolveMarkdownToken(
   }
 }
 
+function escapeHtmlAttribute(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
 marked.use(
   markedHighlight({
     emptyLangClass: 'hljs',
@@ -196,8 +216,21 @@ marked.use(
         const html = marked.Parser.parseInline(token.tokens, {
           async: false,
         }) as string
-        const id = slugify(extractPlainText(token.tokens))
-        return `<h${token.depth} id="${id}">${html}</h${token.depth}>`
+        const id = slugify(extractPlainText(token.tokens)) || `heading-${token.depth}`
+        return `<h${token.depth} id="${escapeHtmlAttribute(id)}">${html}</h${token.depth}>`
+      },
+      link(token: Tokens.Link) {
+        const href = escapeHtmlAttribute(token.href)
+        const text = marked.Parser.parseInline(token.tokens, {
+          async: false,
+        }) as string
+        const title = token.title
+          ? ` title="${escapeHtmlAttribute(token.title)}"`
+          : ''
+        const externalAttrs = isWebHref(token.href)
+          ? ' target="_blank" rel="noopener noreferrer"'
+          : ''
+        return `<a href="${href}"${title}${externalAttrs}>${text}</a>`
       },
     },
   },

@@ -13,7 +13,7 @@ type PageNode struct {
 // HeaderConfig represents header settings for a documentation or the root site.
 type HeaderConfig struct {
 	Enable   bool        `json:"enable"`
-	Selector *bool       `json:"selector,omitempty"`
+	Elements []string    `json:"elements,omitempty"`
 	Title    string      `json:"title,omitempty"`
 	Logo     *LogoConfig `json:"logo,omitempty"`
 	Font     *FontConfig `json:"font,omitempty"`

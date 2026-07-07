@@ -48,6 +48,9 @@ const sidebarNodes = useSidebarNodes(
   computed(() => pageData.value?.path ?? ''),
 )
 
+const tocItems = useToc(computed(() => pageData.value?.content ?? ''))
+const activeLink = useActiveAnchor(contentRef, tocItems)
+
 useSearchHighlight(
   contentRef,
   computed(() => pageData.value?.content ?? ''),
@@ -82,28 +85,28 @@ const renderedContent = computed(() => {
   )
 })
 
-onMounted(async () => {
-  try {
-    if (docMeta.value?.access === 'password') {
-      passwordRequired.value = true
-    } else if (docMeta.value?.index_page) {
-      pageData.value = docMeta.value.index_page
-      passwordRequired.value = false
-    } else {
-      await fetchPage()
-    }
-  } catch (e) {
-    console.error('failed to fetch doc', e)
-  } finally {
-    loading.value = false
+pageData.value = null
+
+try {
+  if (docMeta.value?.access === 'password') {
+    passwordRequired.value = true
+  } else if (docMeta.value?.index_page) {
+    pageData.value = docMeta.value.index_page
+    passwordRequired.value = false
+  } else {
+    await fetchPage()
   }
-})
+} catch (e) {
+  console.error('failed to fetch doc', e)
+} finally {
+  loading.value = false
+}
 </script>
 
 <template>
   <div class="min-h-screen bg-background">
     <SiteHeader :header="docMeta?.header" />
-    <div class="mx-auto flex max-w-6xl gap-8 p-8">
+    <div class="mx-auto flex max-w-7xl gap-8 p-8">
       <!-- Sidebar -->
       <aside
         v-if="docMeta?.pages?.length"
@@ -150,6 +153,9 @@ onMounted(async () => {
           {{ t('doc.noContent') }}
         </p>
       </main>
+
+      <!-- Table of contents -->
+      <DocOutline :items="tocItems" :active-link="activeLink" />
     </div>
   </div>
 </template>

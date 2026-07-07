@@ -108,19 +108,19 @@ function requiresPassword(): boolean {
   return node?.access === 'password'
 }
 
-onMounted(async () => {
-  try {
-    if (requiresPassword()) {
-      passwordRequired.value = true
-    } else {
-      await fetchPage()
-    }
-  } catch (e) {
-    console.error('failed to fetch doc page', e)
-  } finally {
-    loading.value = false
+pageData.value = null
+
+try {
+  if (requiresPassword()) {
+    passwordRequired.value = true
+  } else {
+    await fetchPage()
   }
-})
+} catch (e) {
+  console.error('failed to fetch doc page', e)
+} finally {
+  loading.value = false
+}
 </script>
 
 <template>

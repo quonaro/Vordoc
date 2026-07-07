@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HeaderConfig } from '~/composables/useSiteConfig'
+import type { HeaderConfig, HeaderElement } from '~/composables/useSiteConfig'
 import { resolveFont } from '~/utils/fonts'
 
 const { t } = useText()
@@ -11,7 +11,13 @@ const props = defineProps<{
 const title = computed(() => props.header?.title || t('app.title'))
 const logo = computed(() => props.header?.logo?.path || '/api/v1/logo')
 const logoSize = computed(() => props.header?.logo?.size ?? 40)
-const showThemeSelector = computed(() => props.header?.selector ?? true)
+
+const defaultElements: HeaderElement[] = ['logo', 'search', 'theme-switch']
+const elements = computed(() => {
+  const raw = props.header?.elements
+  if (raw === undefined || raw === null) return defaultElements
+  return raw
+})
 
 const font = computed(() => {
   const raw = props.header?.font?.name
@@ -40,6 +46,18 @@ useHead(() => ({
     ? [{ innerHTML: fontFace.value, type: 'text/css' }]
     : [],
 }))
+
+const positionClass = (id: HeaderElement): string => {
+  const idx = elements.value.indexOf(id)
+  if (idx === -1) return 'hidden'
+  const starts = ['col-start-1', 'col-start-2', 'col-start-3']
+  const aligns = [
+    'justify-self-start',
+    'justify-self-center',
+    'justify-self-end',
+  ]
+  return `${starts[idx]} ${aligns[idx]}`
+}
 </script>
 
 <template>
@@ -47,8 +65,7 @@ useHead(() => ({
     v-if="header?.enable"
     class="grid grid-cols-[minmax(220px,1fr)_auto_minmax(220px,1fr)] items-center border-b px-4 py-3"
   >
-    <DocSearch class="w-full max-w-sm justify-self-start" />
-    <div class="flex items-center justify-center gap-3">
+    <div :class="cn('flex items-center gap-3', positionClass('logo'))">
       <img
         :src="logo"
         :alt="t('app.logoAlt')"
@@ -63,7 +80,8 @@ useHead(() => ({
         >{{ title }}</span
       >
     </div>
-    <ThemeSelector v-if="showThemeSelector" class="justify-self-end" />
+    <DocSearch :class="cn('w-full max-w-sm', positionClass('search'))" />
+    <ThemeSelector :class="positionClass('theme-switch')" />
   </header>
 </template>
 

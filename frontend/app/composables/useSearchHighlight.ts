@@ -70,7 +70,7 @@ function highlightTerm(container: HTMLElement, term: string) {
         if (parent.classList.contains(SEARCH_MARK_CLASS)) {
           return NodeFilter.FILTER_REJECT
         }
-        if (parent.closest('pre, code, script, style')) {
+        if (parent.closest('script, style')) {
           return NodeFilter.FILTER_REJECT
         }
         return NodeFilter.FILTER_ACCEPT
@@ -85,6 +85,12 @@ function highlightTerm(container: HTMLElement, term: string) {
   }
 
   nodes.forEach((n) => wrapTextNode(n, pattern))
+}
+
+function scrollToFirstMark(container: HTMLElement) {
+  const mark = container.querySelector(`.${SEARCH_MARK_CLASS}`)
+  if (!mark) return
+  mark.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
 export function useSearchHighlight(
@@ -117,6 +123,7 @@ export function useSearchHighlight(
     const content = toValue(contentRef)
     if (!el || !term.value.trim() || !content) return
     highlightTerm(el, term.value)
+    scrollToFirstMark(el)
     timer = setTimeout(() => {
       unwrapMarks(el)
     }, duration)

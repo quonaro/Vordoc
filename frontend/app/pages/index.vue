@@ -17,7 +17,6 @@ const loading = ref(true)
 
 const rootPage = computed(() => siteConfig.data.value?.root)
 const enableRootPage = computed(() => rootPage.value?.enable ?? true)
-const rootTitle = computed(() => rootPage.value?.title || t('app.title'))
 const header = computed(() => siteConfig.data.value?.header)
 
 onMounted(async () => {

@@ -123,3 +123,34 @@ func TestScoreTerms(t *testing.T) {
 		t.Error("expected score 0 when not all terms match")
 	}
 }
+
+func TestStripMarkdown_keepsCodeBlock(t *testing.T) {
+	input := "Some text.\n\n```js\nconsole.log('hello')\n```\n\nMore text."
+	got := stripMarkdown(input)
+	want := "Some text. console.log('hello') More text."
+	if got != want {
+		t.Errorf("stripMarkdown = %q, want %q", got, want)
+	}
+}
+
+func TestProvider_SearchPages_codeBlock(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test\n")
+	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Home\n---\n```js\nconsole.log('hello')\n```\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	results, err := p.SearchPages(context.Background(), "doc", "console")
+	must(t, err)
+
+	if len(results) == 0 {
+		t.Fatal("expected search results for term inside code block")
+	}
+
+	if results[0].Title != "Home" {
+		t.Errorf("expected Home page, got %q", results[0].Title)
+	}
+}

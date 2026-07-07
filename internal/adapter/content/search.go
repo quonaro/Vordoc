@@ -155,8 +155,8 @@ var (
 	imageRegex = regexp.MustCompile(`!\[[^\]]*\]\([^)]*\)`)
 	// htmlTagRegex removes HTML tags.
 	htmlTagRegex = regexp.MustCompile(`<[^>]+>`)
-	// codeFenceRegex removes fenced code blocks.
-	codeFenceRegex = regexp.MustCompile("(?s)```.*?```")
+	// codeFenceRegex matches fenced code blocks and captures their inner content.
+	codeFenceRegex = regexp.MustCompile("(?s)```[ \t]*[^\n]*\n?(.*?)```")
 	// inlineCodeRegex removes inline code spans keeping the content.
 	inlineCodeRegex = regexp.MustCompile("`([^`]*)`")
 	// headingRegex removes leading hash marks from headings.
@@ -177,7 +177,13 @@ var (
 func stripMarkdown(markdown string) string {
 	// Preserve some spacing by replacing block markers with newlines first.
 	out := markdown
-	out = codeFenceRegex.ReplaceAllString(out, "\n")
+	out = codeFenceRegex.ReplaceAllStringFunc(out, func(match string) string {
+		parts := codeFenceRegex.FindStringSubmatch(match)
+		if len(parts) > 1 {
+			return "\n" + parts[1] + "\n"
+		}
+		return "\n"
+	})
 	out = imageRegex.ReplaceAllString(out, "")
 	out = linkRegex.ReplaceAllString(out, "$1")
 	out = inlineCodeRegex.ReplaceAllString(out, "$1")

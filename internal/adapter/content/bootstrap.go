@@ -17,7 +17,7 @@ const defaultRootConfigYAML = `# Vordoc root site configuration.
 # favicon:          path to the favicon, relative to the frontend public directory
 # header:           site-wide header settings
 #   enable:         show the header (true/false)
-#   selector:       show the theme selector in the header (true/false)
+#   elements:       ordered list of header elements: logo, search, theme-switch
 #   title:          site title used in the header
 #   logo:           logo settings
 #     path:         path to the logo file, relative to the content root
@@ -36,7 +36,7 @@ favicon: "favicon.ico"
 
 header:
   enable: true
-  selector: true
+  elements: ["logo", "search", "theme-switch"]
   title: "Vordoc"
   logo:
     path: "logotype.svg"

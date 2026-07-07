@@ -19,10 +19,9 @@ const defaultFontName = "FabergeDigital.otf"
 
 // defaultHeader returns the built-in header defaults.
 func defaultHeader() headerConfig {
-	selector := true
 	return headerConfig{
 		Enable:   true,
-		Selector: &selector,
+		Elements: []string{"logo", "search", "theme-switch"},
 		Title:    "Vordoc",
 		Logo: &logoConfig{
 			Path: defaultLogoFile,
@@ -44,11 +43,10 @@ func defaultTheme() themeConfig {
 }
 
 // headerConfig mirrors domain.HeaderConfig for YAML parsing.
-// Selector is a pointer so that an explicit "false" is distinguishable from
-// a missing value, which should fall back to the built-in default.
+// Elements controls which header elements are rendered and in what order.
 type headerConfig struct {
 	Enable   bool        `yaml:"enable"`
-	Selector *bool       `yaml:"selector"`
+	Elements []string    `yaml:"elements"`
 	Title    string      `yaml:"title"`
 	Logo     *logoConfig `yaml:"logo"`
 	Font     *fontConfig `yaml:"font"`
@@ -111,8 +109,8 @@ func loadSiteConfig(root string) (siteConfig, error) {
 // built-in defaults. The source value is never mutated.
 func fillHeaderDefaults(src headerConfig) headerConfig {
 	d := defaultHeader()
-	if src.Selector == nil {
-		src.Selector = d.Selector
+	if src.Elements == nil {
+		src.Elements = d.Elements
 	}
 	if src.Title == "" {
 		src.Title = d.Title
@@ -177,7 +175,7 @@ func (p *Provider) resolveDocHeader(name string, cfg docConfig) *domain.HeaderCo
 	if cfg.Header == nil && rootHeader != nil {
 		return &domain.HeaderConfig{
 			Enable:   rootHeader.Enable,
-			Selector: rootHeader.Selector,
+			Elements: rootHeader.Elements,
 			Title:    rootHeader.Title,
 			Logo: &domain.LogoConfig{
 				Path: fmt.Sprintf("/api/v1/logo?doc=%s", name),
@@ -190,7 +188,7 @@ func (p *Provider) resolveDocHeader(name string, cfg docConfig) *domain.HeaderCo
 	h := fillHeaderDefaults(*cfg.Header)
 	return &domain.HeaderConfig{
 		Enable:   h.Enable,
-		Selector: h.Selector,
+		Elements: h.Elements,
 		Title:    h.Title,
 		Logo: &domain.LogoConfig{
 			Path: fmt.Sprintf("/api/v1/logo?doc=%s", name),
@@ -259,7 +257,7 @@ func resolveRootConfig(cfg siteConfig) domain.RootConfig {
 		Favicon: favicon,
 		Header: &domain.HeaderConfig{
 			Enable:   h.Enable,
-			Selector: h.Selector,
+			Elements: h.Elements,
 			Title:    h.Title,
 			Logo: &domain.LogoConfig{
 				Path: "/api/v1/logo",

@@ -20,7 +20,7 @@ const icons: Record<ThemeMode, typeof Monitor> = {
 
 <template>
   <div
-    class="group flex items-center rounded-md border bg-background p-1 transition-all duration-200 hover:gap-1"
+    class="group flex items-center rounded-md bg-background p-1 transition-all duration-200 hover:gap-1"
   >
     <UiButton
       v-for="option in options"
