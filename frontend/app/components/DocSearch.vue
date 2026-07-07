@@ -21,6 +21,12 @@ const activeIndex = ref(-1)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 const wrapperRef = ref<HTMLElement | null>(null)
+const scrolled = ref(false)
+const SCROLL_THRESHOLD = 80
+
+function onScroll() {
+  scrolled.value = window.scrollY > SCROLL_THRESHOLD
+}
 
 const docName = computed(() => {
   const parts = route.path.split('/').filter(Boolean)
@@ -124,22 +130,39 @@ onMounted(() => {
     open.value = false
   }
   document.addEventListener('click', listener, true)
+
+  window.addEventListener('scroll', onScroll, { passive: true })
+  onScroll()
+
   onUnmounted(() => {
     document.removeEventListener('click', listener, true)
+    window.removeEventListener('scroll', onScroll)
   })
 })
 </script>
 
 <template>
-  <div ref="wrapperRef" class="relative w-full max-w-sm">
+  <div ref="wrapperRef" class="relative w-full max-w-xl">
     <template v-if="hasDoc">
-      <div class="relative flex items-center">
+      <div
+        :class="[
+          'flex items-center transition-all duration-300',
+          scrolled
+            ? 'fixed left-1/2 top-4 z-[100] w-[90%] max-w-2xl -translate-x-1/2 rounded-md border border-input bg-background/90 shadow-xl backdrop-blur'
+            : 'relative z-[100] w-full',
+        ]"
+      >
         <Search class="absolute left-3 h-4 w-4 text-muted-foreground" />
         <input
           v-model="query"
           type="text"
           :placeholder="t('search.placeholder')"
-          class="h-9 w-full rounded-md border border-input bg-background py-2 pl-9 pr-8 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          :class="[
+            'h-9 w-full py-2 pl-9 pr-8 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+            scrolled
+              ? 'rounded-md border-0 bg-transparent outline-none focus:outline-none focus-visible:ring-0'
+              : 'rounded-md border border-input bg-background shadow-sm',
+          ]"
           @focus="open = true"
           @keydown="onKeydown"
         />
@@ -151,55 +174,63 @@ onMounted(() => {
         >
           <X class="h-3.5 w-3.5" />
         </button>
+
+        <div
+          v-if="open && (query.trim().length >= 2 || results.length > 0)"
+          class="absolute left-0 top-full z-50 mt-2 w-full overflow-hidden rounded-md border bg-card shadow-lg"
+        >
+          <div v-if="loading" class="px-4 py-3 text-sm text-muted-foreground">
+            {{ t('search.searching') }}
+          </div>
+          <div
+            v-else-if="results.length === 0 && query.trim().length >= 2"
+            class="px-4 py-3 text-sm text-muted-foreground"
+          >
+            {{ t('search.noResults') }}
+          </div>
+          <ul
+            v-else-if="results.length > 0"
+            class="max-h-80 overflow-y-auto py-1"
+          >
+            <li
+              v-for="(result, idx) in results"
+              :key="result.path"
+              :class="[
+                'cursor-pointer border-l-2 border-transparent px-4 py-2 transition-all duration-150',
+                activeIndex === idx
+                  ? 'search-result-active'
+                  : 'hover:border-accent/50 hover:bg-muted/30 hover:pl-3',
+              ]"
+              @click="navigateToResult(result)"
+              @mouseenter="activeIndex = idx"
+            >
+              <div class="flex items-start gap-2">
+                <FileText
+                  class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                />
+                <div class="min-w-0">
+                  <div class="text-sm font-medium">
+                    {{ result.title }}
+                  </div>
+                  <!-- eslint-disable vue/no-v-html -->
+                  <div
+                    v-if="result.snippet"
+                    class="mt-0.5 line-clamp-2 text-xs text-muted-foreground"
+                    v-html="highlight(result.snippet, query)"
+                  />
+                  <!-- eslint-enable vue/no-v-html -->
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <div
-        v-if="open && (query.trim().length >= 2 || results.length > 0)"
-        class="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-md border bg-card shadow-lg"
-      >
-        <div v-if="loading" class="px-4 py-3 text-sm text-muted-foreground">
-          {{ t('search.searching') }}
-        </div>
-        <div
-          v-else-if="results.length === 0 && query.trim().length >= 2"
-          class="px-4 py-3 text-sm text-muted-foreground"
-        >
-          {{ t('search.noResults') }}
-        </div>
-        <ul
-          v-else-if="results.length > 0"
-          class="max-h-80 overflow-y-auto py-1"
-        >
-          <li
-            v-for="(result, idx) in results"
-            :key="result.path"
-            :class="[
-              'cursor-pointer border-l-2 border-transparent px-4 py-2 transition-all duration-150',
-              activeIndex === idx
-                ? 'search-result-active'
-                : 'hover:border-accent/50 hover:bg-muted/30 hover:pl-3',
-            ]"
-            @click="navigateToResult(result)"
-            @mouseenter="activeIndex = idx"
-          >
-            <div class="flex items-start gap-2">
-              <FileText class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <div class="min-w-0">
-                <div class="text-sm font-medium">
-                  {{ result.title }}
-                </div>
-                <!-- eslint-disable vue/no-v-html -->
-                <div
-                  v-if="result.snippet"
-                  class="mt-0.5 line-clamp-2 text-xs text-muted-foreground"
-                  v-html="highlight(result.snippet, query)"
-                />
-                <!-- eslint-enable vue/no-v-html -->
-              </div>
-            </div>
-          </li>
-        </ul>
-      </div>
+        v-if="open"
+        class="fixed inset-0 z-[90] bg-black/40 transition-opacity duration-200"
+        @click="close"
+      />
     </template>
   </div>
 </template>

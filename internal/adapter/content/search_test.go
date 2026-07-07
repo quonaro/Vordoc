@@ -6,7 +6,9 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"unicode/utf8"
 )
 
 func TestProvider_SearchPages(t *testing.T) {
@@ -133,6 +135,15 @@ func TestStripMarkdown_keepsCodeBlock(t *testing.T) {
 	}
 }
 
+func TestStripMarkdown_preservesCodeBlockBackticks(t *testing.T) {
+	input := "Text.\n\n```js\nconst s = `hello, ${name}!`;\n```\n"
+	got := stripMarkdown(input)
+	want := "Text. const s = `hello, ${name}!`;"
+	if got != want {
+		t.Errorf("stripMarkdown = %q, want %q", got, want)
+	}
+}
+
 func TestProvider_SearchPages_codeBlock(t *testing.T) {
 	root := t.TempDir()
 
@@ -152,5 +163,19 @@ func TestProvider_SearchPages_codeBlock(t *testing.T) {
 
 	if results[0].Title != "Home" {
 		t.Errorf("expected Home page, got %q", results[0].Title)
+	}
+}
+
+func TestSnippet_runeBoundaries(t *testing.T) {
+	// Build text where byte-based slicing would cut through a multi-byte rune.
+	text := strings.Repeat("а", 35) + "x target " + strings.Repeat("б", 100)
+	terms := []string{"target"}
+
+	got := snippet(text, terms)
+	if !utf8.ValidString(got) {
+		t.Errorf("snippet produced invalid UTF-8: %q", got)
+	}
+	if !strings.Contains(got, "target") {
+		t.Errorf("snippet does not contain the term: %q", got)
 	}
 }

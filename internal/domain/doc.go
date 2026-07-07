@@ -7,6 +7,7 @@ type PageNode struct {
 	Order    int        `json:"order,omitempty"`
 	Access   string     `json:"access,omitempty"`
 	HasIndex bool       `json:"has_index,omitempty"`
+	Show     bool       `json:"show,omitempty"`
 	Children []PageNode `json:"children,omitempty"`
 }
 

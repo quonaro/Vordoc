@@ -194,6 +194,45 @@ func TestProvider_scanDocPages_sorts_by_order(t *testing.T) {
 	}
 }
 
+func TestProvider_scanDocPages_hides_show_false(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test\n")
+	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Home\n---\nHome\n")
+	mustWrite(t, filepath.Join(docRoot, "visible.md"), "---\ntitle: Visible\n---\nVisible\n")
+	mustWrite(t, filepath.Join(docRoot, "hidden.md"), "---\ntitle: Hidden\nshow: false\n---\nHidden\n")
+
+	hiddenDir := filepath.Join(docRoot, "hidden-dir")
+	must(t, os.MkdirAll(hiddenDir, 0o755))
+	mustWrite(t, filepath.Join(hiddenDir, "index.md"), "---\ntitle: Hidden Dir\nshow: false\n---\nHidden dir\n")
+
+	visibleDir := filepath.Join(docRoot, "visible-dir")
+	must(t, os.MkdirAll(visibleDir, 0o755))
+	mustWrite(t, filepath.Join(visibleDir, "index.md"), "---\ntitle: Visible Dir\n---\nVisible dir\n")
+	mustWrite(t, filepath.Join(visibleDir, "child.md"), "---\ntitle: Child\nshow: false\n---\nChild\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	nodes, err := p.scanDocPages(docRoot)
+	must(t, err)
+
+	if findNode(nodes, "hidden") != nil {
+		t.Error("hidden page should be omitted")
+	}
+	if findNode(nodes, "hidden-dir") != nil {
+		t.Error("hidden directory should be omitted")
+	}
+
+	visibleDirNode := findNode(nodes, "visible-dir")
+	if visibleDirNode == nil {
+		t.Fatal("visible-dir node not found")
+	}
+	if findNode(visibleDirNode.Children, "child") != nil {
+		t.Error("hidden child page should be omitted")
+	}
+}
+
 func must(t *testing.T, err error) {
 	t.Helper()
 	if err != nil {

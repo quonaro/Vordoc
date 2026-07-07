@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"vordoc/internal/domain"
 )
@@ -175,14 +176,18 @@ var (
 
 // stripMarkdown returns a plain text approximation of a markdown body.
 func stripMarkdown(markdown string) string {
-	// Preserve some spacing by replacing block markers with newlines first.
-	out := markdown
-	out = codeFenceRegex.ReplaceAllStringFunc(out, func(match string) string {
+	// Replace fenced code blocks with placeholders so their content is not
+	// mangled by inline-code or emphasis rules.
+	placeholders := []string{}
+	out := codeFenceRegex.ReplaceAllStringFunc(markdown, func(match string) string {
 		parts := codeFenceRegex.FindStringSubmatch(match)
+		placeholder := fmt.Sprintf("VORDOC-CODEBLOCK-%d", len(placeholders))
 		if len(parts) > 1 {
-			return "\n" + parts[1] + "\n"
+			placeholders = append(placeholders, parts[1])
+		} else {
+			placeholders = append(placeholders, "")
 		}
-		return "\n"
+		return "\n" + placeholder + "\n"
 	})
 	out = imageRegex.ReplaceAllString(out, "")
 	out = linkRegex.ReplaceAllString(out, "$1")
@@ -193,19 +198,28 @@ func stripMarkdown(markdown string) string {
 	out = bulletRegex.ReplaceAllString(out, "")
 	out = numberedRegex.ReplaceAllString(out, "")
 	out = emphasisRegex.ReplaceAllString(out, "")
+	for i, block := range placeholders {
+		placeholder := fmt.Sprintf("VORDOC-CODEBLOCK-%d", i)
+		out = strings.Replace(out, placeholder, "\n"+block+"\n", 1)
+	}
 	out = whitespaceRegex.ReplaceAllString(out, " ")
 	out = strings.TrimSpace(out)
 	return out
 }
 
 // snippet extracts a short excerpt around the first term match.
+// It slices by rune boundaries so multi-byte characters are not broken.
 func snippet(text string, terms []string) string {
 	lowerText := strings.ToLower(text)
+	runes := []rune(text)
 	idx := -1
 	for _, term := range terms {
 		i := strings.Index(lowerText, term)
-		if i != -1 && (idx == -1 || i < idx) {
-			idx = i
+		if i != -1 {
+			runeIdx := utf8.RuneCountInString(lowerText[:i])
+			if idx == -1 || runeIdx < idx {
+				idx = runeIdx
+			}
 		}
 	}
 	if idx == -1 {
@@ -217,15 +231,15 @@ func snippet(text string, terms []string) string {
 		start = 0
 	}
 	end := idx + 140
-	if end > len(text) {
-		end = len(text)
+	if end > len(runes) {
+		end = len(runes)
 	}
 
-	excerpt := text[start:end]
+	excerpt := string(runes[start:end])
 	if start > 0 {
 		excerpt = "..." + excerpt
 	}
-	if end < len(text) {
+	if end < len(runes) {
 		excerpt = excerpt + "..."
 	}
 	return whitespaceRegex.ReplaceAllString(excerpt, " ")

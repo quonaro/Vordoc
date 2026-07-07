@@ -45,14 +45,17 @@ function wrapTextNode(node: Text, pattern: RegExp) {
   }
 }
 
-function highlightTerm(container: HTMLElement, term: string) {
-  const trimmed = term.trim()
-  if (!trimmed) return
-
-  const terms = trimmed
+function normalizeSearchTerms(term: string): string[] {
+  return term
     .toLowerCase()
+    .trim()
     .split(/\s+/)
+    .map((t) => t.replace(/^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/gu, ''))
     .filter((t) => t.length >= 2)
+}
+
+function highlightTerm(container: HTMLElement, term: string) {
+  const terms = normalizeSearchTerms(term)
   if (!terms.length) return
 
   const pattern = new RegExp(
@@ -90,7 +93,9 @@ function highlightTerm(container: HTMLElement, term: string) {
 function scrollToFirstMark(container: HTMLElement) {
   const mark = container.querySelector(`.${SEARCH_MARK_CLASS}`)
   if (!mark) return
-  mark.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  requestAnimationFrame(() => {
+    mark.scrollIntoView({ behavior: 'auto', block: 'center' })
+  })
 }
 
 export function useSearchHighlight(

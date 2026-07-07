@@ -6,6 +6,7 @@ interface PageNode {
   title: string
   access?: string
   has_index?: boolean
+  show?: boolean
   children?: PageNode[]
 }
 

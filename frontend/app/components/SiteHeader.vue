@@ -63,7 +63,7 @@ const positionClass = (id: HeaderElement): string => {
 <template>
   <header
     v-if="header?.enable"
-    class="grid grid-cols-[minmax(220px,1fr)_auto_minmax(220px,1fr)] items-center border-b px-4 py-3"
+    class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b px-4 py-3"
   >
     <div :class="cn('flex items-center gap-3', positionClass('logo'))">
       <img
@@ -80,7 +80,7 @@ const positionClass = (id: HeaderElement): string => {
         >{{ title }}</span
       >
     </div>
-    <DocSearch :class="cn('w-full max-w-sm', positionClass('search'))" />
+    <DocSearch :class="cn('w-full max-w-xl', positionClass('search'))" />
     <ThemeSelector :class="positionClass('theme-switch')" />
   </header>
 </template>

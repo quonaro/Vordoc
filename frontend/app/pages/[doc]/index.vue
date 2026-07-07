@@ -108,11 +108,8 @@ try {
     <SiteHeader :header="docMeta?.header" />
     <div class="mx-auto flex max-w-7xl gap-8 p-8">
       <!-- Sidebar -->
-      <aside
-        v-if="docMeta?.pages?.length"
-        class="hidden w-64 shrink-0 lg:block"
-      >
-        <nav class="sticky top-8 space-y-1">
+      <aside class="hidden w-64 shrink-0 lg:block">
+        <nav v-if="docMeta?.pages?.length" class="sticky top-8 space-y-1">
           <NuxtLink
             :to="`/${docName}`"
             class="mb-4 block font-semibold hover:text-primary"

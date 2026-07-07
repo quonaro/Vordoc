@@ -64,3 +64,16 @@ func getInt(m map[string]any, key string, fallback int) int {
 	}
 	return fallback
 }
+
+// getBool extracts a bool value from frontmatter with a fallback.
+func getBool(m map[string]any, key string, fallback bool) bool {
+	v, ok := m[key]
+	if !ok {
+		return fallback
+	}
+	b, ok := v.(bool)
+	if ok {
+		return b
+	}
+	return fallback
+}

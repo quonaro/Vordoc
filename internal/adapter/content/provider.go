@@ -138,6 +138,7 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 				Children: children,
 			}
 			hasIndex := false
+			show := true
 			idx := filepath.Join(fullPath, "index.md")
 			if data, err := os.ReadFile(idx); err == nil {
 				hasIndex = true
@@ -147,11 +148,16 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 				}
 				node.Order = getInt(fm, "order", 0)
 				node.Access, _ = resolveAccess(docPath, idx, fm)
+				show = getBool(fm, "show", true)
+			}
+			if !show {
+				continue
 			}
 			if len(children) == 0 && !hasIndex {
 				continue
 			}
 			node.HasIndex = hasIndex
+			node.Show = show
 			nodes = append(nodes, node)
 		} else if filepath.Ext(name) == ".md" {
 			if name == "index.md" && dir == docPath {
@@ -169,11 +175,16 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 			title := getString(fm, "title", strings.TrimSuffix(name, ".md"))
 			order := getInt(fm, "order", 0)
 			access, _ := resolveAccess(docPath, fullPath, fm)
+			show := getBool(fm, "show", true)
+			if !show {
+				continue
+			}
 			nodes = append(nodes, domain.PageNode{
 				Path:   strings.TrimSuffix(rel, ".md"),
 				Title:  title,
 				Order:  order,
 				Access: access,
+				Show:   show,
 			})
 		}
 	}

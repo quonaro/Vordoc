@@ -53,6 +53,9 @@ useSearchHighlight(
   computed(() => pageData.value?.content ?? ''),
 )
 
+const tocItems = useToc(computed(() => pageData.value?.content ?? ''))
+const activeLink = useActiveAnchor(contentRef, tocItems)
+
 async function fetchPage() {
   try {
     pageData.value = await $fetch<PageData>(
@@ -126,13 +129,10 @@ try {
 <template>
   <div class="min-h-screen bg-background">
     <SiteHeader :header="docMeta?.header" />
-    <div class="mx-auto flex max-w-6xl gap-8 p-8">
+    <div class="mx-auto flex max-w-7xl gap-8 p-8">
       <!-- Sidebar -->
-      <aside
-        v-if="docMeta?.pages?.length"
-        class="hidden w-64 shrink-0 lg:block"
-      >
-        <nav class="sticky top-8 space-y-1">
+      <aside class="hidden w-64 shrink-0 lg:block">
+        <nav v-if="docMeta?.pages?.length" class="sticky top-8 space-y-1">
           <NuxtLink
             :to="`/${docName}`"
             class="mb-4 block font-semibold hover:text-primary"
@@ -173,6 +173,9 @@ try {
           {{ t('doc.noContent') }}
         </p>
       </main>
+
+      <!-- Table of contents -->
+      <DocOutline :items="tocItems" :active-link="activeLink" />
     </div>
   </div>
 </template>
