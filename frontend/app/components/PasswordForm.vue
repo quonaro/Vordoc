@@ -18,11 +18,33 @@ function close() {
 const password = ref('')
 const submitting = ref(false)
 const error = ref<string | null>(null)
+const remember = ref(false)
 
 const config = useRuntimeConfig()
 
-async function submit() {
-  if (!password.value) return
+function storageKey(): string {
+  return `vordoc_pwd_${props.doc}_${props.pagePath || '_'}`
+}
+
+function savePassword(pwd: string) {
+  try {
+    localStorage.setItem(storageKey(), btoa(pwd))
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function loadPassword(): string | null {
+  try {
+    const raw = localStorage.getItem(storageKey())
+    return raw ? atob(raw) : null
+  } catch {
+    return null
+  }
+}
+
+async function verify(pwd: string) {
+  if (!pwd) return
 
   submitting.value = true
   error.value = null
@@ -31,7 +53,7 @@ async function submit() {
     await $fetch(`${config.public.apiBase}/v1/${props.doc}/${props.pagePath}`, {
       method: 'POST',
       credentials: 'include',
-      body: { password: password.value },
+      body: { password: pwd },
     })
     emit('success')
   } catch (e: unknown) {
@@ -44,6 +66,21 @@ async function submit() {
     submitting.value = false
   }
 }
+
+async function submit() {
+  if (!password.value) return
+  await verify(password.value)
+  if (!error.value && remember.value) {
+    savePassword(password.value)
+  }
+}
+
+onMounted(() => {
+  const saved = loadPassword()
+  if (saved) {
+    verify(saved)
+  }
+})
 </script>
 
 <template>
@@ -77,6 +114,17 @@ async function submit() {
               class="w-full rounded-md border border-input bg-background px-3 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
+
+          <label
+            class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground"
+          >
+            <input
+              v-model="remember"
+              type="checkbox"
+              class="h-4 w-4 rounded border-input accent-primary"
+            />
+            {{ t('password.remember') }}
+          </label>
 
           <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
 

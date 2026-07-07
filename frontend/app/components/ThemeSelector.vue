@@ -19,24 +19,25 @@ const icons: Record<ThemeMode, typeof Monitor> = {
 </script>
 
 <template>
-  <div class="flex items-center gap-1 rounded-md border bg-background p-1">
+  <div
+    class="group flex items-center rounded-md border bg-background p-1 transition-all duration-200 hover:gap-1"
+  >
     <UiButton
       v-for="option in options"
       :key="option"
       variant="ghost"
-      size="icon"
       :class="
         cn([
-          'h-8 w-8',
+          'h-8 px-0 flex items-center justify-center transition-all duration-200 overflow-hidden',
           theme === option
-            ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:text-foreground',
+            ? 'w-8 bg-accent text-accent-foreground'
+            : 'w-0 opacity-0 pointer-events-none group-hover:w-8 group-hover:opacity-100 group-hover:pointer-events-auto text-muted-foreground hover:text-foreground',
         ])
       "
       :title="labels[option]"
       @click="setTheme(option)"
     >
-      <component :is="icons[option]" class="h-4 w-4" />
+      <component :is="icons[option]" class="h-4 w-4 shrink-0" />
       <span class="sr-only">{{ labels[option] }}</span>
     </UiButton>
   </div>

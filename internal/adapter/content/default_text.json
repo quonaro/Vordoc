@@ -23,7 +23,8 @@
     "placeholder": "Password",
     "verifying": "Verifying...",
     "unlock": "Unlock",
-    "failed": "Failed to verify password"
+    "failed": "Failed to verify password",
+    "remember": "Remember"
   },
   "theme": {
     "system": "System",
