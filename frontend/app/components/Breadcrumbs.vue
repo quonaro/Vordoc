@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Home, ChevronRight } from '@lucide/vue'
+
 interface PageNode {
   path: string
   title: string
@@ -46,16 +48,30 @@ const crumbs = computed(() => {
 </script>
 
 <template>
-  <nav class="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
+  <nav
+    class="mb-6 inline-flex items-center gap-1 rounded-lg border bg-card px-4 py-2 text-sm shadow-sm"
+  >
+    <NuxtLink
+      :to="`/${docName}`"
+      class="flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
+      :class="{ 'font-medium text-primary': !crumbs.length }"
+    >
+      <Home :size="16" />
+      <span>{{ docTitle }}</span>
+    </NuxtLink>
+
     <template v-for="(crumb, i) in crumbs" :key="crumb.to">
-      <span v-if="i > 0">/</span>
+      <ChevronRight :size="14" class="text-muted-foreground/50" />
       <NuxtLink
+        v-if="i < crumbs.length - 1"
         :to="crumb.to"
-        class="transition-colors hover:text-foreground"
-        :class="{ 'text-foreground': i === crumbs.length - 1 }"
+        class="text-muted-foreground transition-colors hover:text-foreground"
       >
         {{ crumb.title }}
       </NuxtLink>
+      <span v-else class="font-medium text-primary">
+        {{ crumb.title }}
+      </span>
     </template>
   </nav>
 </template>
