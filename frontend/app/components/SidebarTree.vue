@@ -42,16 +42,10 @@ function isDirectory(node: PageNode): boolean {
           'hover:text-primary': !isActive(node.path),
         }"
       >
-        <Folder
-          v-if="isDirectory(node)"
-          class="h-3.5 w-3.5 text-muted-foreground"
-        />
-        <FileText v-else class="h-3.5 w-3.5 text-muted-foreground" />
-        <LockKeyhole
-          v-if="isProtected(node)"
-          class="h-3.5 w-3.5 text-muted-foreground"
-        />
-        <span>{{ node.title }}</span>
+        <Folder v-if="isDirectory(node)" class="h-3.5 w-3.5" />
+        <FileText v-else class="h-3.5 w-3.5" />
+        <span class="flex-1">{{ node.title }}</span>
+        <LockKeyhole v-if="isProtected(node)" class="ml-auto h-3.5 w-3.5" />
       </NuxtLink>
       <div v-else class="space-y-1">
         <NuxtLink
@@ -66,16 +60,16 @@ function isDirectory(node: PageNode): boolean {
           }"
         >
           <Folder class="h-3.5 w-3.5" />
-          <LockKeyhole v-if="isProtected(node)" class="h-3.5 w-3.5" />
-          <span>{{ node.title }}</span>
+          <span class="flex-1">{{ node.title }}</span>
+          <LockKeyhole v-if="isProtected(node)" class="ml-auto h-3.5 w-3.5" />
         </NuxtLink>
         <span
           v-else
           class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground"
         >
           <Folder class="h-3.5 w-3.5" />
-          <LockKeyhole v-if="isProtected(node)" class="h-3.5 w-3.5" />
-          <span>{{ node.title }}</span>
+          <span class="flex-1">{{ node.title }}</span>
+          <LockKeyhole v-if="isProtected(node)" class="ml-auto h-3.5 w-3.5" />
         </span>
         <div class="ml-3 border-l-2 border-border pl-3">
           <SidebarTree

@@ -19,6 +19,7 @@ const password = ref('')
 const submitting = ref(false)
 const error = ref<string | null>(null)
 const remember = ref(false)
+const autoVerify = ref(false)
 
 const config = useRuntimeConfig()
 
@@ -29,6 +30,14 @@ function storageKey(): string {
 function savePassword(pwd: string) {
   try {
     localStorage.setItem(storageKey(), btoa(pwd))
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function clearSavedPassword() {
+  try {
+    localStorage.removeItem(storageKey())
   } catch {
     // ignore storage errors
   }
@@ -62,6 +71,9 @@ async function verify(pwd: string) {
         ? (e as { data?: { error?: string } }).data?.error
         : undefined
     error.value = code ? t(`errors.${code}`) : t('password.failed')
+    if (autoVerify.value) {
+      clearSavedPassword()
+    }
   } finally {
     submitting.value = false
   }
@@ -78,7 +90,10 @@ async function submit() {
 onMounted(() => {
   const saved = loadPassword()
   if (saved) {
-    verify(saved)
+    autoVerify.value = true
+    verify(saved).finally(() => {
+      autoVerify.value = false
+    })
   }
 })
 </script>
@@ -94,6 +109,7 @@ onMounted(() => {
     leave-to-class="opacity-0"
   >
     <div
+      v-if="!autoVerify"
       class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
       @click.self="close"
     >
