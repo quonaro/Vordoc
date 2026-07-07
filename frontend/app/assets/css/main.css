@@ -97,6 +97,10 @@
     @apply border-l-2 border-accent bg-muted/50 pl-3;
   }
 
+  .markdown-link {
+    color: hsl(var(--accent));
+  }
+
   .hljs,
   .prose pre {
     background-color: #252525;

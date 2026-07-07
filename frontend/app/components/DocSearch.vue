@@ -23,9 +23,19 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null
 const wrapperRef = ref<HTMLElement | null>(null)
 const scrolled = ref(false)
 const SCROLL_THRESHOLD = 80
+const floatingFocused = ref(false)
+const floatingHovered = ref(false)
+const floatingActive = computed(
+  () => floatingFocused.value || floatingHovered.value,
+)
 
 function onScroll() {
   scrolled.value = window.scrollY > SCROLL_THRESHOLD
+}
+
+function onFloatingFocus() {
+  open.value = true
+  floatingFocused.value = true
 }
 
 const docName = computed(() => {
@@ -227,9 +237,13 @@ onMounted(() => {
         :class="[
           'flex items-center transition-all duration-300',
           scrolled
-            ? 'fixed left-1/2 top-4 z-[100] w-[90%] max-w-2xl -translate-x-1/2 scale-100 rounded-md border border-input bg-background/90 opacity-100 shadow-xl backdrop-blur'
-            : 'fixed left-1/2 top-4 z-[100] w-[90%] max-w-2xl -translate-x-1/2 scale-[0.98] rounded-md border border-input bg-background/90 opacity-0 shadow-xl backdrop-blur pointer-events-none',
+            ? floatingActive
+              ? 'fixed left-1/2 top-4 z-[100] w-[90%] max-w-2xl -translate-x-1/2 scale-100 rounded-md border border-input bg-background/95 opacity-100 shadow-xl backdrop-blur'
+              : 'fixed left-1/2 top-4 z-[100] w-[90%] max-w-2xl -translate-x-1/2 scale-100 rounded-md border border-input bg-background/60 opacity-70 shadow-xl backdrop-blur'
+            : 'fixed left-1/2 top-4 z-[100] w-[90%] max-w-2xl -translate-x-1/2 scale-[0.98] rounded-md border border-input bg-background/60 opacity-0 shadow-xl backdrop-blur pointer-events-none',
         ]"
+        @mouseenter="floatingHovered = true"
+        @mouseleave="floatingHovered = false"
       >
         <template v-if="scrolled">
           <Search class="absolute left-3 h-4 w-4 text-muted-foreground" />
@@ -238,7 +252,8 @@ onMounted(() => {
             type="text"
             :placeholder="t('search.placeholder')"
             class="h-9 w-full rounded-md border-0 bg-transparent py-2 pl-9 pr-8 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:outline-none focus-visible:outline-none focus-visible:ring-0"
-            @focus="open = true"
+            @focus="onFloatingFocus"
+            @blur="floatingFocused = false"
             @keydown="onKeydown"
           />
           <button

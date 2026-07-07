@@ -230,7 +230,7 @@ marked.use(
         const externalAttrs = isWebHref(token.href)
           ? ' target="_blank" rel="noopener noreferrer"'
           : ''
-        return `<a href="${href}"${title}${externalAttrs}>${text}</a>`
+        return `<a class="markdown-link" href="${href}"${title}${externalAttrs}>${text}</a>`
       },
     },
   },
