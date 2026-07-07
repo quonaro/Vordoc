@@ -214,12 +214,16 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 		return domain.Page{}, err
 	}
 
+	relFile, _ := filepath.Rel(docPath, pageFile)
+	relFile = filepath.ToSlash(relFile)
+
 	// Resolve access rules: frontmatter > access.yaml (walk up) > public default
 	access, passwordHash := resolveAccess(docPath, pageFile, fm)
 
 	page := domain.Page{
 		Doc:          docName,
 		Path:         pagePath,
+		FilePath:     relFile,
 		Title:        getString(fm, "title", filepath.Base(pagePath)),
 		Description:  getString(fm, "description", ""),
 		Order:        getInt(fm, "order", 0),
@@ -229,4 +233,47 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 	}
 
 	return page, nil
+}
+
+// GetAssetPath resolves a static asset path inside a documentation directory.
+func (p *Provider) GetAssetPath(_ context.Context, docName string, assetPath string) (string, error) {
+	docPath := filepath.Join(p.root, docName)
+	info, err := os.Stat(docPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("%w: %s", domain.ErrDocNotFound, docName)
+		}
+		return "", fmt.Errorf("stat doc: %w", err)
+	}
+	if !info.IsDir() {
+		return "", fmt.Errorf("%w: %s is not a directory", domain.ErrDocNotFound, docName)
+	}
+
+	safePath := filepath.Clean(filepath.Join("/", filepath.ToSlash(assetPath)))
+	fullPath := filepath.Join(docPath, safePath)
+
+	absDoc, err := filepath.Abs(docPath)
+	if err != nil {
+		return "", fmt.Errorf("resolving doc path: %w", err)
+	}
+	absAsset, err := filepath.Abs(fullPath)
+	if err != nil {
+		return "", fmt.Errorf("resolving asset path: %w", err)
+	}
+	if !strings.HasPrefix(absAsset, absDoc+string(filepath.Separator)) {
+		return "", fmt.Errorf("asset path escapes doc directory")
+	}
+
+	info, err = os.Stat(absAsset)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("%w: %s", domain.ErrAssetNotFound, assetPath)
+		}
+		return "", fmt.Errorf("stat asset: %w", err)
+	}
+	if info.IsDir() {
+		return "", fmt.Errorf("asset path is a directory")
+	}
+
+	return absAsset, nil
 }

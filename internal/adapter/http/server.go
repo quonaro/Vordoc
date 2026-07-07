@@ -58,6 +58,7 @@ func NewServer(cfg Config, appCfg config.Config, logger *slog.Logger, handlers H
 		r.Get("/text", handlers.Config.GetText)
 		r.Get("/docs", handlers.Docs.ListDocs)
 		r.Get("/logo", handlers.Docs.ServeLogo)
+		r.Get("/assets/{doc}/*", handlers.Docs.ServeAsset)
 		r.Get("/{doc}/search", handlers.Docs.Search)
 		r.Get("/*", handlers.Docs.GetDocOrPage)
 		r.Post("/*", handlers.Docs.VerifyPassword)

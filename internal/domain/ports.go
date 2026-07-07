@@ -22,6 +22,9 @@ type ContentProvider interface {
 	// GetLogoPath returns the filesystem path to the logo for a doc or the root site.
 	GetLogoPath(ctx context.Context, doc string) (string, error)
 
+	// GetAssetPath returns the filesystem path to a static asset inside a documentation directory.
+	GetAssetPath(ctx context.Context, doc string, assetPath string) (string, error)
+
 	// GetUIText returns the UI text configuration for the frontend.
 	GetUIText(ctx context.Context) (map[string]any, error)
 }

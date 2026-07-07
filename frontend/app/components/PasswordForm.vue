@@ -15,6 +15,10 @@ function close() {
   emit('close')
 }
 
+function onBackdropClick() {
+  if (!autoVerify.value) close()
+}
+
 const password = ref('')
 const submitting = ref(false)
 const error = ref<string | null>(null)
@@ -109,11 +113,23 @@ onMounted(() => {
     leave-to-class="opacity-0"
   >
     <div
-      v-if="!autoVerify"
       class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
-      @click.self="close"
+      @click.self="onBackdropClick"
     >
       <div
+        v-if="autoVerify"
+        class="password-card flex flex-col items-center gap-4 rounded-lg border bg-card p-8 shadow-xl"
+      >
+        <div
+          class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+        />
+        <p class="text-sm text-muted-foreground">
+          {{ t('password.authenticating') }}
+        </p>
+      </div>
+
+      <div
+        v-else
         class="password-card w-full max-w-md rounded-lg border bg-card p-8 shadow-xl"
       >
         <h2 class="mb-2 text-xl font-semibold">{{ t('password.title') }}</h2>

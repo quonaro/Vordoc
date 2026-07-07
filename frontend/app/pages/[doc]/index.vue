@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { marked } from 'marked'
 import type { HeaderConfig } from '~/composables/useSiteConfig'
+import { renderMarkdown } from '~/utils/markdown'
 
 const { t } = useText()
 
@@ -14,6 +14,7 @@ interface PageNode {
 interface PageData {
   doc: string
   path: string
+  filePath: string
   title: string
   order?: number
   content?: string
@@ -74,7 +75,11 @@ async function fetchPage() {
 
 const renderedContent = computed(() => {
   if (!pageData.value?.content) return ''
-  return marked.parse(pageData.value.content)
+  return renderMarkdown(
+    pageData.value.content,
+    docName,
+    pageData.value.filePath,
+  )
 })
 
 onMounted(async () => {

@@ -66,6 +66,7 @@ type Doc struct {
 type Page struct {
 	Doc          string `json:"doc"`
 	Path         string `json:"path"`
+	FilePath     string `json:"filePath"`
 	Title        string `json:"title"`
 	Description  string `json:"description,omitempty"`
 	Order        int    `json:"order,omitempty"`

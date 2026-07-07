@@ -116,6 +116,39 @@ func TestProvider_GetDoc_embeds_index_page(t *testing.T) {
 	}
 }
 
+func TestProvider_GetPage_sets_filePath(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test\n")
+	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Home\n---\nHome\n")
+
+	guideDir := filepath.Join(docRoot, "guide")
+	must(t, os.MkdirAll(guideDir, 0o755))
+	mustWrite(t, filepath.Join(guideDir, "index.md"), "---\ntitle: Guide\n---\nGuide\n")
+	mustWrite(t, filepath.Join(guideDir, "intro.md"), "---\ntitle: Intro\n---\nIntro\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	cases := []struct {
+		pagePath string
+		want     string
+	}{
+		{pagePath: "", want: "index.md"},
+		{pagePath: "guide", want: "guide/index.md"},
+		{pagePath: "guide/intro", want: "guide/intro.md"},
+	}
+
+	for _, c := range cases {
+		page, err := p.GetPage(context.Background(), "doc", c.pagePath)
+		must(t, err)
+		if page.FilePath != c.want {
+			t.Errorf("FilePath for %q = %q, want %q", c.pagePath, page.FilePath, c.want)
+		}
+	}
+}
+
 func TestProvider_GetDoc_description_from_index(t *testing.T) {
 	root := t.TempDir()
 

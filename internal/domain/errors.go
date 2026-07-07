@@ -16,3 +16,6 @@ var ErrInvalidPassword = errors.New("invalid password")
 
 // ErrAccessDenied is returned when access to a page is denied.
 var ErrAccessDenied = errors.New("access denied")
+
+// ErrAssetNotFound is returned when a static asset does not exist.
+var ErrAssetNotFound = errors.New("asset not found")
