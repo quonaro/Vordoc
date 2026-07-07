@@ -152,7 +152,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="wrapperRef" class="relative w-full max-w-xl">
+  <div ref="wrapperRef" class="relative z-[40] w-full max-w-xl">
     <template v-if="hasDoc">
       <div
         :class="[
@@ -244,6 +244,8 @@ onMounted(() => {
         ]"
         @mouseenter="floatingHovered = true"
         @mouseleave="floatingHovered = false"
+        @focusin="onFloatingFocus"
+        @focusout="floatingFocused = false"
       >
         <template v-if="scrolled">
           <Search class="absolute left-3 h-4 w-4 text-muted-foreground" />
@@ -266,7 +268,10 @@ onMounted(() => {
           </button>
 
           <div
-            v-if="open && (query.trim().length >= 2 || results.length > 0)"
+            v-if="
+              (open || floatingActive) &&
+              (query.trim().length >= 2 || results.length > 0)
+            "
             class="absolute left-0 top-full z-50 mt-2 w-full overflow-hidden rounded-md border bg-card shadow-lg"
           >
             <div v-if="loading" class="px-4 py-3 text-sm text-muted-foreground">
@@ -317,11 +322,20 @@ onMounted(() => {
         </template>
       </div>
 
-      <div
-        v-if="open"
-        class="fixed inset-0 z-[90] bg-black/40 transition-opacity duration-200"
-        @click="close"
-      />
+      <Transition
+        enter-active-class="transition-opacity duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="open || (scrolled && floatingActive)"
+          class="fixed inset-0 z-[90] bg-black/40"
+          @click="close"
+        />
+      </Transition>
     </template>
   </div>
 </template>
