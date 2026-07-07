@@ -73,3 +73,12 @@ type Page struct {
 	Access       string `json:"access,omitempty"`
 	PasswordHash string `json:"-"` // not serialized, used internally
 }
+
+// SearchResult represents a single search hit within a documentation.
+type SearchResult struct {
+	Title   string `json:"title"`
+	Path    string `json:"path"`
+	Snippet string `json:"snippet,omitempty"`
+	Access  string `json:"access,omitempty"`
+	Score   int    `json:"-"` // not serialized, used for ranking
+}

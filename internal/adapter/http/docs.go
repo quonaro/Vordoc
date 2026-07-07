@@ -46,6 +46,13 @@ type docSummary struct {
 	Access      string `json:"access,omitempty"`
 }
 
+// searchResult is a single search hit exposed to the frontend.
+type searchResult struct {
+	Title   string `json:"title"`
+	Path    string `json:"path"`
+	Snippet string `json:"snippet,omitempty"`
+}
+
 // ServeLogo serves the logo image for the root site or a documentation.
 func (h *DocsHandler) ServeLogo(w http.ResponseWriter, r *http.Request) {
 	doc := strings.TrimSpace(r.URL.Query().Get("doc"))
@@ -78,6 +85,49 @@ func (h *DocsHandler) ServeLogo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Cache-Control", "public, max-age=300")
 	http.ServeFile(w, r, path)
+}
+
+// Search searches within the current documentation for the given query.
+func (h *DocsHandler) Search(w http.ResponseWriter, r *http.Request) {
+	docName := strings.TrimSpace(chi.URLParam(r, "doc"))
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
+
+	if docName == "" {
+		writeError(w, http.StatusBadRequest, "doc name is required")
+		return
+	}
+	if query == "" {
+		writeJSON(w, http.StatusOK, map[string]any{"results": []searchResult{}})
+		return
+	}
+
+	results, err := h.contentProvider.SearchPages(r.Context(), docName, query)
+	if err != nil {
+		if strings.Contains(err.Error(), domain.ErrDocNotFound.Error()) {
+			writeError(w, http.StatusNotFound, "documentation not found")
+			return
+		}
+		h.logger.Error("failed to search pages", slog.String("error", err.Error()))
+		writeError(w, http.StatusInternalServerError, "failed to search")
+		return
+	}
+
+	out := make([]searchResult, 0, len(results))
+	for _, res := range results {
+		if res.Access == "password" {
+			if !h.hasValidCookie(r, docName, res.Path) {
+				// Hide snippet from protected pages without access.
+				res.Snippet = ""
+			}
+		}
+		out = append(out, searchResult{
+			Title:   res.Title,
+			Path:    res.Path,
+			Snippet: res.Snippet,
+		})
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"results": out})
 }
 
 // ListDocs returns all available documentations.

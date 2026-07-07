@@ -43,10 +43,10 @@ useHead(() => ({
 <template>
   <header
     v-if="header?.enable"
-    class="grid grid-cols-[1fr_auto_1fr] items-center border-b px-4 py-3"
+    class="grid grid-cols-[minmax(220px,1fr)_auto_minmax(220px,1fr)] items-center border-b px-4 py-3"
   >
-    <div />
-    <div class="flex items-center gap-3">
+    <DocSearch class="w-full max-w-sm justify-self-start" />
+    <div class="flex items-center justify-center gap-3">
       <img
         :src="logo"
         alt="logo"

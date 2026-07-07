@@ -13,6 +13,9 @@ type ContentProvider interface {
 	// GetPage returns a page's content and metadata.
 	GetPage(ctx context.Context, doc string, page string) (Page, error)
 
+	// SearchPages searches for query across all pages of a documentation.
+	SearchPages(ctx context.Context, doc string, query string) ([]SearchResult, error)
+
 	// GetRootConfig returns the root content configuration.
 	GetRootConfig(ctx context.Context) (RootConfig, error)
 
