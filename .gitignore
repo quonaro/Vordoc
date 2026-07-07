@@ -42,6 +42,3 @@ Thumbs.db
 # Logs
 *.log
 
-# Config with secrets
-vordoc.yaml
-!vordoc.yaml.example

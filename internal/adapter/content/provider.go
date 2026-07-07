@@ -70,11 +70,9 @@ func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) 
 	}
 
 	doc := domain.Doc{
-		Name:        name,
-		Title:       cfg.Title,
-		Description: cfg.Description,
-		Sidebar:     cfg.Sidebar,
-		Header:      p.resolveDocHeader(name, cfg),
+		Name:   name,
+		Title:  cfg.Title,
+		Header: p.resolveDocHeader(name, cfg),
 	}
 
 	if doc.Title == "" {
@@ -88,6 +86,7 @@ func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) 
 	// Load root index page if present.
 	if idx, err := p.GetPage(ctx, name, ""); err == nil {
 		doc.IndexPage = &idx
+		doc.Description = idx.Description
 	}
 
 	return doc, nil
@@ -143,6 +142,7 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 				if t := getString(fm, "title", ""); t != "" {
 					node.Title = t
 				}
+				node.Order = getInt(fm, "order", 0)
 				node.Access, _ = resolveAccess(docPath, idx, fm)
 			}
 			if len(children) == 0 && !hasIndex {
@@ -164,16 +164,21 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 			}
 			fm, _, _ := parseFrontmatter(data)
 			title := getString(fm, "title", strings.TrimSuffix(name, ".md"))
+			order := getInt(fm, "order", 0)
 			access, _ := resolveAccess(docPath, fullPath, fm)
 			nodes = append(nodes, domain.PageNode{
 				Path:   strings.TrimSuffix(rel, ".md"),
 				Title:  title,
+				Order:  order,
 				Access: access,
 			})
 		}
 	}
 
 	sort.Slice(nodes, func(i, j int) bool {
+		if nodes[i].Order != nodes[j].Order {
+			return nodes[i].Order < nodes[j].Order
+		}
 		return nodes[i].Path < nodes[j].Path
 	})
 
@@ -213,6 +218,7 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 		Doc:          docName,
 		Path:         pagePath,
 		Title:        getString(fm, "title", filepath.Base(pagePath)),
+		Description:  getString(fm, "description", ""),
 		Order:        getInt(fm, "order", 0),
 		Content:      body,
 		Access:       access,

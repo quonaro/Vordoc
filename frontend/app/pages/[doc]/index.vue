@@ -21,7 +21,6 @@ interface DocMeta {
   name: string
   title: string
   description?: string
-  sidebar?: string[]
   access?: string
   pages?: PageNode[]
   index_page?: PageData

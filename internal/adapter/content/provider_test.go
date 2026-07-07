@@ -116,6 +116,51 @@ func TestProvider_GetDoc_embeds_index_page(t *testing.T) {
 	}
 }
 
+func TestProvider_GetDoc_description_from_index(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
+	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Home\ndescription: From index\n---\nHome content\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	doc, err := p.GetDoc(context.Background(), "doc")
+	must(t, err)
+
+	if doc.Description != "From index" {
+		t.Errorf("doc.Description = %q, want %q", doc.Description, "From index")
+	}
+	if doc.IndexPage == nil || doc.IndexPage.Description != "From index" {
+		t.Errorf("index page description missing or incorrect")
+	}
+}
+
+func TestProvider_scanDocPages_sorts_by_order(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test\n")
+	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Home\n---\nHome\n")
+	mustWrite(t, filepath.Join(docRoot, "z-last.md"), "---\ntitle: Z Last\norder: 1\n---\nZ\n")
+	mustWrite(t, filepath.Join(docRoot, "a-first.md"), "---\ntitle: A First\norder: 0\n---\nA\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	nodes, err := p.scanDocPages(docRoot)
+	must(t, err)
+
+	if len(nodes) != 2 {
+		t.Fatalf("nodes len = %d, want 2", len(nodes))
+	}
+	if nodes[0].Path != "a-first" {
+		t.Errorf("nodes[0].Path = %q, want a-first", nodes[0].Path)
+	}
+	if nodes[1].Path != "z-last" {
+		t.Errorf("nodes[1].Path = %q, want z-last", nodes[1].Path)
+	}
+}
+
 func must(t *testing.T, err error) {
 	t.Helper()
 	if err != nil {

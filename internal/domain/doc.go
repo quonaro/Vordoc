@@ -4,6 +4,7 @@ package domain
 type PageNode struct {
 	Path     string     `json:"path"`
 	Title    string     `json:"title"`
+	Order    int        `json:"order,omitempty"`
 	Access   string     `json:"access,omitempty"`
 	HasIndex bool       `json:"has_index,omitempty"`
 	Children []PageNode `json:"children,omitempty"`
@@ -55,7 +56,6 @@ type Doc struct {
 	Name        string        `json:"name"`
 	Title       string        `json:"title"`
 	Description string        `json:"description,omitempty"`
-	Sidebar     []string      `json:"sidebar,omitempty"`
 	Access      string        `json:"access,omitempty"`
 	Pages       []PageNode    `json:"pages,omitempty"`
 	IndexPage   *Page         `json:"index_page,omitempty"`
@@ -67,6 +67,7 @@ type Page struct {
 	Doc          string `json:"doc"`
 	Path         string `json:"path"`
 	Title        string `json:"title"`
+	Description  string `json:"description,omitempty"`
 	Order        int    `json:"order,omitempty"`
 	Content      string `json:"content,omitempty"`
 	Access       string `json:"access,omitempty"`

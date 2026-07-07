@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log/slog"
 	"os"
@@ -20,17 +19,9 @@ import (
 )
 
 func main() {
-	configPath := flag.String("config", "vordoc.yaml", "path to config file")
-	flag.Parse()
-
 	logger := logging.New("vordoc", config.LogsConfig{Level: "info", Type: "pretty"})
 
-	loader := config.NewLoader(logger)
-	cfg := config.DefaultConfig()
-	if err := loader.LoadOrCreate(*configPath, &cfg); err != nil {
-		logger.Error("failed to load config", slog.String("error", err.Error()))
-		os.Exit(1)
-	}
+	cfg := config.LoadFromEnv(logger)
 
 	logger = logging.New("vordoc", cfg.App.Logs)
 
