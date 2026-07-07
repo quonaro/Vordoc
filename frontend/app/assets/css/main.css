@@ -203,6 +203,26 @@
     @apply text-red-700;
   }
 
+  .dark .callout.warning {
+    @apply border-yellow-500 bg-yellow-950/50;
+  }
+
+  .dark .callout.warning .callout-title {
+    @apply text-yellow-400;
+  }
+
+  .dark .callout.danger {
+    @apply border-red-500 bg-red-950/50;
+  }
+
+  .dark .callout.danger .callout-title {
+    @apply text-red-400;
+  }
+
+  .dark .callout-body {
+    @apply text-foreground/80;
+  }
+
   .files-gallery {
     @apply grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4;
   }
