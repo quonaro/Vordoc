@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { HeaderConfig } from '~/composables/useSiteConfig'
+import { findTocTitleByLink } from '~/composables/useToc'
 import { renderMarkdown } from '~/utils/markdown'
 
 const { t } = useText()
@@ -55,6 +56,18 @@ useSearchHighlight(
 
 const tocItems = useToc(computed(() => pageData.value?.content ?? ''))
 const activeLink = useActiveAnchor(contentRef, tocItems)
+
+const activeSectionTitle = computed(() => {
+  if (!activeLink.value) return undefined
+  return findTocTitleByLink(tocItems.value, activeLink.value)
+})
+
+const pageTitle = usePageTitle()
+pageTitle.set(() => [
+  docMeta.value?.title,
+  pageData.value?.title,
+  activeSectionTitle.value,
+])
 
 async function fetchPage() {
   try {
@@ -172,6 +185,13 @@ try {
         <p v-else-if="!passwordRequired" class="text-muted-foreground">
           {{ t('doc.noContent') }}
         </p>
+        <PageNavigation
+          v-if="!passwordRequired"
+          :doc-name="docName"
+          :doc-title="docMeta?.title ?? docName"
+          :pages="docMeta?.pages ?? []"
+          :current-path="pageData?.path ?? ''"
+        />
       </main>
 
       <!-- Table of contents -->

@@ -2,6 +2,10 @@ import { marked, type Token, type Tokens } from 'marked'
 import { markedHighlight } from 'marked-highlight'
 import hljs from 'highlight.js'
 import { sanitize } from 'isomorphic-dompurify'
+import { escapeHtmlAttribute } from '~/utils/markdown/escape'
+import { createDangerExtension } from '~/utils/markdown/extensions/danger'
+import { createGalleryExtension, type GalleryToken } from '~/utils/markdown/extensions/gallery'
+import { createWarningExtension } from '~/utils/markdown/extensions/warning'
 
 function isExternalHref(href: string): boolean {
   return /^[a-z][a-z0-9+.-]*:/i.test(href)
@@ -189,16 +193,15 @@ function resolveMarkdownToken(
     if (resolved) {
       image.href = resolved
     }
+    return
   }
-}
 
-function escapeHtmlAttribute(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  if (token.type === 'gallery') {
+    const gallery = token as GalleryToken
+    gallery.resolvedItems = gallery.items.map((src) =>
+      resolveMarkdownImage(src, docName, filePath) ?? src,
+    )
+  }
 }
 
 marked.use(
@@ -233,6 +236,13 @@ marked.use(
         return `<a class="markdown-link" href="${href}"${title}${externalAttrs}>${text}</a>`
       },
     },
+  },
+  {
+    extensions: [
+      createGalleryExtension(),
+      createWarningExtension(),
+      createDangerExtension(),
+    ],
   },
 )
 

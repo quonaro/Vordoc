@@ -19,6 +19,8 @@ const rootPage = computed(() => siteConfig.data.value?.root)
 const enableRootPage = computed(() => rootPage.value?.enable ?? true)
 const header = computed(() => siteConfig.data.value?.header)
 
+usePageTitle().set([])
+
 onMounted(async () => {
   try {
     await siteConfig.load()

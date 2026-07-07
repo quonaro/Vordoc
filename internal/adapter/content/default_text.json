@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "Vordoc",
-    "logoAlt": "logo"
+    "logoAlt": "logo",
+    "titleSeparator": "·"
   },
   "root": {
     "availableDocumentation": "Available documentation",
@@ -11,7 +12,9 @@
   },
   "doc": {
     "noContent": "No content available.",
-    "onThisPage": "On this page"
+    "onThisPage": "On this page",
+    "previousPage": "Previous page",
+    "nextPage": "Next page"
   },
   "search": {
     "placeholder": "Search...",

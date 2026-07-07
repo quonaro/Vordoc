@@ -29,6 +29,18 @@ export function buildTocTree(content: string): TocItem[] {
   return buildTree(headers)
 }
 
+export function findTocTitleByLink(
+  items: TocItem[],
+  link: string,
+): string | undefined {
+  for (const item of items) {
+    if (item.link === link) return item.title
+    const child = findTocTitleByLink(item.children, link)
+    if (child) return child
+  }
+  return undefined
+}
+
 function buildTree(headers: Omit<TocItem, 'children'>[]): TocItem[] {
   const result: TocItem[] = []
   const stack: TocItem[] = []
