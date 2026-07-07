@@ -60,17 +60,17 @@ func (h *DocsHandler) ServeLogo(w http.ResponseWriter, r *http.Request) {
 	path, err := h.contentProvider.GetLogoPath(r.Context(), doc)
 	if err != nil {
 		h.logger.Error("failed to resolve logo", slog.String("error", err.Error()))
-		writeError(w, http.StatusInternalServerError, "failed to resolve logo")
+		writeError(w, http.StatusInternalServerError, "failed_to_resolve_logo")
 		return
 	}
 
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
-			writeError(w, http.StatusNotFound, "logo not found")
+			writeError(w, http.StatusNotFound, "logo_not_found")
 			return
 		}
 		h.logger.Error("failed to stat logo", slog.String("error", err.Error()))
-		writeError(w, http.StatusInternalServerError, "failed to serve logo")
+		writeError(w, http.StatusInternalServerError, "failed_to_serve_logo")
 		return
 	}
 
@@ -93,7 +93,7 @@ func (h *DocsHandler) Search(w http.ResponseWriter, r *http.Request) {
 	query := strings.TrimSpace(r.URL.Query().Get("q"))
 
 	if docName == "" {
-		writeError(w, http.StatusBadRequest, "doc name is required")
+		writeError(w, http.StatusBadRequest, "doc_name_required")
 		return
 	}
 	if query == "" {
@@ -104,11 +104,11 @@ func (h *DocsHandler) Search(w http.ResponseWriter, r *http.Request) {
 	results, err := h.contentProvider.SearchPages(r.Context(), docName, query)
 	if err != nil {
 		if strings.Contains(err.Error(), domain.ErrDocNotFound.Error()) {
-			writeError(w, http.StatusNotFound, "documentation not found")
+			writeError(w, http.StatusNotFound, "doc_not_found")
 			return
 		}
 		h.logger.Error("failed to search pages", slog.String("error", err.Error()))
-		writeError(w, http.StatusInternalServerError, "failed to search")
+		writeError(w, http.StatusInternalServerError, "failed_to_search")
 		return
 	}
 
@@ -135,7 +135,7 @@ func (h *DocsHandler) ListDocs(w http.ResponseWriter, r *http.Request) {
 	names, err := h.contentProvider.ListDocs(r.Context())
 	if err != nil {
 		h.logger.Error("failed to list docs", slog.String("error", err.Error()))
-		writeError(w, http.StatusInternalServerError, "failed to list docs")
+		writeError(w, http.StatusInternalServerError, "failed_to_list_docs")
 		return
 	}
 
@@ -159,7 +159,7 @@ func (h *DocsHandler) GetDocOrPage(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(path, "/")
 
 	if len(parts) == 0 {
-		writeError(w, http.StatusBadRequest, "invalid path")
+		writeError(w, http.StatusBadRequest, "invalid_path")
 		return
 	}
 
@@ -169,11 +169,11 @@ func (h *DocsHandler) GetDocOrPage(w http.ResponseWriter, r *http.Request) {
 		doc, err := h.contentProvider.GetDoc(r.Context(), docName)
 		if err != nil {
 			if strings.Contains(err.Error(), domain.ErrDocNotFound.Error()) {
-				writeError(w, http.StatusNotFound, "documentation not found")
+				writeError(w, http.StatusNotFound, "doc_not_found")
 				return
 			}
 			h.logger.Error("failed to get doc", slog.String("error", err.Error()))
-			writeError(w, http.StatusInternalServerError, "failed to get doc")
+			writeError(w, http.StatusInternalServerError, "failed_to_get_doc")
 			return
 		}
 
@@ -195,18 +195,18 @@ func (h *DocsHandler) GetDocOrPage(w http.ResponseWriter, r *http.Request) {
 	page, err := h.contentProvider.GetPage(r.Context(), docName, pagePath)
 	if err != nil {
 		if strings.Contains(err.Error(), domain.ErrPageNotFound.Error()) {
-			writeError(w, http.StatusNotFound, "page not found")
+			writeError(w, http.StatusNotFound, "page_not_found")
 			return
 		}
 		h.logger.Error("failed to get page", slog.String("error", err.Error()))
-		writeError(w, http.StatusInternalServerError, "failed to get page")
+		writeError(w, http.StatusInternalServerError, "failed_to_get_page")
 		return
 	}
 
 	if page.Access == "password" {
 		if !h.hasValidCookie(r, docName, pagePath) {
 			writeJSON(w, http.StatusForbidden, map[string]any{
-				"error":             "password required",
+				"error":             "password_required",
 				"password_required": true,
 			})
 			return
@@ -233,7 +233,7 @@ func (h *DocsHandler) VerifyPassword(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(path, "/")
 
 	if len(parts) < 2 {
-		writeError(w, http.StatusBadRequest, "invalid path")
+		writeError(w, http.StatusBadRequest, "invalid_path")
 		return
 	}
 
@@ -242,7 +242,7 @@ func (h *DocsHandler) VerifyPassword(w http.ResponseWriter, r *http.Request) {
 
 	var input verifyInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		writeError(w, http.StatusBadRequest, "invalid_request_body")
 		return
 	}
 
@@ -250,11 +250,11 @@ func (h *DocsHandler) VerifyPassword(w http.ResponseWriter, r *http.Request) {
 	page, err := h.contentProvider.GetPage(r.Context(), docName, pagePath)
 	if err != nil {
 		if strings.Contains(err.Error(), domain.ErrPageNotFound.Error()) {
-			writeError(w, http.StatusNotFound, "page not found")
+			writeError(w, http.StatusNotFound, "page_not_found")
 			return
 		}
 		h.logger.Error("failed to get page for verify", slog.String("error", err.Error()))
-		writeError(w, http.StatusInternalServerError, "failed to verify")
+		writeError(w, http.StatusInternalServerError, "failed_to_verify")
 		return
 	}
 
@@ -264,12 +264,12 @@ func (h *DocsHandler) VerifyPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if page.PasswordHash == "" {
-		writeError(w, http.StatusInternalServerError, "password hash not configured")
+		writeError(w, http.StatusInternalServerError, "password_hash_not_configured")
 		return
 	}
 
 	if !h.passwordService.Verify(input.Password, page.PasswordHash) {
-		writeError(w, http.StatusUnauthorized, "invalid password")
+		writeError(w, http.StatusUnauthorized, "invalid_password")
 		return
 	}
 

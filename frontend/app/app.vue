@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { hexToHsl, hslCssValue, foregroundForHsl } from '~/utils/colors'
 
+const { t } = useText()
 const siteConfig = useSiteConfig()
 useTheme()
 
@@ -39,7 +40,7 @@ const accentStyle = computed(() => {
 })
 
 const pageTitle = computed(() => {
-  return siteConfig.data.value?.root?.title ?? 'Vordoc'
+  return siteConfig.data.value?.root?.title ?? t('app.title')
 })
 
 useHead(() => ({

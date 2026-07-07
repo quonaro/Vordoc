@@ -1,0 +1,53 @@
+{
+  "app": {
+    "title": "Vordoc",
+    "logoAlt": "logo"
+  },
+  "root": {
+    "availableDocumentation": "Available documentation",
+    "loading": "Loading...",
+    "noDocumentation": "No documentation found.",
+    "disabled": "Documentation selection is disabled."
+  },
+  "doc": {
+    "noContent": "No content available."
+  },
+  "search": {
+    "placeholder": "Search...",
+    "searching": "Searching...",
+    "noResults": "No results found."
+  },
+  "password": {
+    "title": "Password required",
+    "description": "This page is protected. Enter the password to continue.",
+    "placeholder": "Password",
+    "verifying": "Verifying...",
+    "unlock": "Unlock",
+    "failed": "Failed to verify password"
+  },
+  "theme": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "errors": {
+    "doc_not_found": "Documentation not found",
+    "page_not_found": "Page not found",
+    "password_required": "Password required",
+    "invalid_password": "Invalid password",
+    "access_denied": "Access denied",
+    "failed_to_verify": "Failed to verify password",
+    "failed_to_search": "Failed to search",
+    "failed_to_list_docs": "Failed to list documentation",
+    "failed_to_get_doc": "Failed to get documentation",
+    "failed_to_get_page": "Failed to get page",
+    "failed_to_resolve_logo": "Failed to resolve logo",
+    "logo_not_found": "Logo not found",
+    "failed_to_serve_logo": "Failed to serve logo",
+    "failed_to_load_config": "Failed to load configuration",
+    "invalid_request_body": "Invalid request body",
+    "password_hash_not_configured": "Password hash not configured",
+    "invalid_path": "Invalid path",
+    "doc_name_required": "Documentation name is required"
+  }
+}

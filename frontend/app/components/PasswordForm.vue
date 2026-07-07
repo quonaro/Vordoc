@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useText()
+
 const props = defineProps<{
   doc: string
   pagePath: string
@@ -33,11 +35,11 @@ async function submit() {
     })
     emit('success')
   } catch (e: unknown) {
-    const message =
+    const code =
       e && typeof e === 'object' && 'data' in e
         ? (e as { data?: { error?: string } }).data?.error
         : undefined
-    error.value = message || 'Failed to verify password'
+    error.value = code ? t(`errors.${code}`) : t('password.failed')
   } finally {
     submitting.value = false
   }
@@ -61,9 +63,9 @@ async function submit() {
       <div
         class="password-card w-full max-w-md rounded-lg border bg-card p-8 shadow-xl"
       >
-        <h2 class="mb-2 text-xl font-semibold">Password required</h2>
+        <h2 class="mb-2 text-xl font-semibold">{{ t('password.title') }}</h2>
         <p class="mb-6 text-sm text-muted-foreground">
-          This page is protected. Enter the password to continue.
+          {{ t('password.description') }}
         </p>
 
         <form class="space-y-4" @submit.prevent="submit">
@@ -71,7 +73,7 @@ async function submit() {
             <input
               v-model="password"
               type="password"
-              placeholder="Password"
+              :placeholder="t('password.placeholder')"
               class="w-full rounded-md border border-input bg-background px-3 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
@@ -83,7 +85,7 @@ async function submit() {
             class="w-full"
             :disabled="submitting || !password"
           >
-            {{ submitting ? 'Verifying...' : 'Unlock' }}
+            {{ submitting ? t('password.verifying') : t('password.unlock') }}
           </UiButton>
         </form>
       </div>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { LockKeyhole } from '@lucide/vue'
 
+const { t } = useText()
+
 interface DocMeta {
   name: string
   title: string
@@ -15,7 +17,7 @@ const loading = ref(true)
 
 const rootPage = computed(() => siteConfig.data.value?.root)
 const enableRootPage = computed(() => rootPage.value?.enable ?? true)
-const rootTitle = computed(() => rootPage.value?.title || 'Vordoc')
+const rootTitle = computed(() => rootPage.value?.title || t('app.title'))
 const header = computed(() => siteConfig.data.value?.header)
 
 onMounted(async () => {
@@ -45,7 +47,9 @@ function isProtected(doc: DocMeta): boolean {
     <div class="p-8">
       <div class="mx-auto max-w-4xl">
         <h1 class="mb-8 text-4xl font-bold">{{ rootTitle }}</h1>
-        <p class="mb-8 text-muted-foreground">Available documentation</p>
+        <p class="mb-8 text-muted-foreground">
+          {{ t('root.availableDocumentation') }}
+        </p>
 
         <div v-if="enableRootPage" class="grid gap-4 sm:grid-cols-2">
           <NuxtLink
@@ -71,11 +75,13 @@ function isProtected(doc: DocMeta): boolean {
         </div>
 
         <p v-if="!enableRootPage" class="text-muted-foreground">
-          Documentation selection is disabled.
+          {{ t('root.disabled') }}
         </p>
-        <p v-else-if="loading" class="text-muted-foreground">Loading...</p>
+        <p v-else-if="loading" class="text-muted-foreground">
+          {{ t('root.loading') }}
+        </p>
         <p v-else-if="docs.length === 0" class="text-muted-foreground">
-          No documentation found.
+          {{ t('root.noDocumentation') }}
         </p>
       </div>
     </div>

@@ -2,6 +2,8 @@
 import { marked } from 'marked'
 import type { HeaderConfig } from '~/composables/useSiteConfig'
 
+const { t } = useText()
+
 interface PageNode {
   path: string
   title: string
@@ -149,7 +151,7 @@ onMounted(async () => {
           <div v-html="renderedContent" />
         </div>
         <p v-else-if="!passwordRequired" class="text-muted-foreground">
-          No content available.
+          {{ t('doc.noContent') }}
         </p>
       </main>
     </div>

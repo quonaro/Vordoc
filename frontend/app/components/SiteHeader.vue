@@ -2,11 +2,13 @@
 import type { HeaderConfig } from '~/composables/useSiteConfig'
 import { resolveFont } from '~/utils/fonts'
 
+const { t } = useText()
+
 const props = defineProps<{
   header?: HeaderConfig
 }>()
 
-const title = computed(() => props.header?.title || 'Vordoc')
+const title = computed(() => props.header?.title || t('app.title'))
 const logo = computed(() => props.header?.logo?.path || '/api/v1/logo')
 const logoSize = computed(() => props.header?.logo?.size ?? 40)
 const showThemeSelector = computed(() => props.header?.selector ?? true)
@@ -49,7 +51,7 @@ useHead(() => ({
     <div class="flex items-center justify-center gap-3">
       <img
         :src="logo"
-        alt="logo"
+        :alt="t('app.logoAlt')"
         :style="{ height: `${logoSize}px`, width: 'auto' }"
       />
       <span

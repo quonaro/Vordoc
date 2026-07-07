@@ -2,13 +2,14 @@
 import { Moon, Sun, Monitor } from '@lucide/vue'
 import type { ThemeMode } from '~/composables/useTheme'
 
+const { t } = useText()
 const { theme, setTheme, options } = useTheme()
 
-const labels: Record<ThemeMode, string> = {
-  system: 'System',
-  light: 'Light',
-  dark: 'Dark',
-}
+const labels = computed<Record<ThemeMode, string>>(() => ({
+  system: t('theme.system'),
+  light: t('theme.light'),
+  dark: t('theme.dark'),
+}))
 
 const icons: Record<ThemeMode, typeof Monitor> = {
   system: Monitor,

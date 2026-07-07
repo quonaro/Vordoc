@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Search, X, FileText } from '@lucide/vue'
 
+const { t } = useText()
+
 interface SearchResult {
   title: string
   path: string
@@ -135,7 +137,7 @@ onMounted(() => {
       <input
         v-model="query"
         type="text"
-        placeholder="Search..."
+        :placeholder="t('search.placeholder')"
         class="h-9 w-full rounded-md border border-input bg-background py-2 pl-9 pr-8 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         @focus="open = true"
         @keydown="onKeydown"
@@ -155,13 +157,13 @@ onMounted(() => {
       class="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-md border bg-card shadow-lg"
     >
       <div v-if="loading" class="px-4 py-3 text-sm text-muted-foreground">
-        Searching...
+        {{ t('search.searching') }}
       </div>
       <div
         v-else-if="results.length === 0 && query.trim().length >= 2"
         class="px-4 py-3 text-sm text-muted-foreground"
       >
-        No results found.
+        {{ t('search.noResults') }}
       </div>
       <ul v-else-if="results.length > 0" class="max-h-80 overflow-y-auto py-1">
         <li

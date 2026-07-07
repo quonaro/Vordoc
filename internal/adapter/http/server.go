@@ -55,6 +55,7 @@ func NewServer(cfg Config, appCfg config.Config, logger *slog.Logger, handlers H
 	// API routes: versioned content API under /api/v1, public config under /api.
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/config", handlers.Config.GetConfig)
+		r.Get("/text", handlers.Config.GetText)
 		r.Get("/docs", handlers.Docs.ListDocs)
 		r.Get("/logo", handlers.Docs.ServeLogo)
 		r.Get("/{doc}/search", handlers.Docs.Search)

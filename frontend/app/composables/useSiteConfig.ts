@@ -37,6 +37,9 @@ export interface SiteConfig {
 
 interface SiteConfigState {
   data: SiteConfig | null
+  loading: boolean
+  error: Error | null
+  loadPromise: Promise<SiteConfig> | null
 }
 
 function readStoredData(): SiteConfig | null {
@@ -56,19 +59,41 @@ export function useSiteConfig() {
   const config = useRuntimeConfig()
   const state = useState<SiteConfigState>('site-config', () => ({
     data: readStoredData(),
+    loading: false,
+    error: null,
+    loadPromise: null,
   }))
 
-  async function load(): Promise<SiteConfig> {
-    const data = await $fetch<SiteConfig>(`${config.public.apiBase}/v1/config`)
-    state.value = { data }
-    if (import.meta.client) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-    }
-    return data
+  async function load(force = false): Promise<SiteConfig> {
+    if (!force && state.value.data) return state.value.data
+    if (state.value.loadPromise) return state.value.loadPromise
+
+    state.value.loading = true
+    state.value.error = null
+
+    const promise = $fetch<SiteConfig>(`${config.public.apiBase}/v1/config`)
+      .then((data) => {
+        state.value.data = data
+        state.value.loading = false
+        state.value.loadPromise = null
+        if (import.meta.client) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+        }
+        return data
+      })
+      .catch((err) => {
+        state.value.error = err
+        state.value.loading = false
+        state.value.loadPromise = null
+        throw err
+      })
+
+    state.value.loadPromise = promise
+    return promise
   }
 
   async function refresh(): Promise<SiteConfig> {
-    return load()
+    return load(true)
   }
 
   function get<T = unknown>(key: keyof SiteConfig): T | undefined
