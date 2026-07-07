@@ -4,6 +4,7 @@ import hljs from 'highlight.js'
 import { sanitize } from 'isomorphic-dompurify'
 import { escapeHtmlAttribute } from '~/utils/markdown/escape'
 import { createDangerExtension } from '~/utils/markdown/extensions/danger'
+import { createFilesGalleryExtension, type FilesGalleryToken } from '~/utils/markdown/extensions/files-gallery'
 import { createGalleryExtension, type GalleryToken } from '~/utils/markdown/extensions/gallery'
 import { createWarningExtension } from '~/utils/markdown/extensions/warning'
 
@@ -201,6 +202,18 @@ function resolveMarkdownToken(
     gallery.resolvedItems = gallery.items.map((src) =>
       resolveMarkdownImage(src, docName, filePath) ?? src,
     )
+    return
+  }
+
+  if (token.type === 'filesGallery') {
+    const filesGallery = token as FilesGalleryToken
+    for (const file of filesGallery.files) {
+      if (isExternalHref(file.src)) continue
+      const resolved = resolveMarkdownImage(file.src, docName, filePath)
+      if (resolved) {
+        file.resolvedSrc = resolved
+      }
+    }
   }
 }
 
@@ -242,6 +255,7 @@ marked.use(
       createGalleryExtension(),
       createWarningExtension(),
       createDangerExtension(),
+      createFilesGalleryExtension(),
     ],
   },
 )
@@ -289,18 +303,45 @@ export function renderMarkdown(
       'span',
       'sup',
       'sub',
+      'svg',
+      'path',
+      'polyline',
+      'rect',
+      'circle',
+      'line',
     ],
     ALLOWED_ATTR: [
       'href',
       'title',
       'target',
       'rel',
+      'download',
       'id',
       'class',
       'src',
       'alt',
       'width',
       'height',
+      'xmlns',
+      'viewBox',
+      'fill',
+      'stroke',
+      'stroke-width',
+      'stroke-linecap',
+      'stroke-linejoin',
+      'd',
+      'points',
+      'x',
+      'y',
+      'x1',
+      'y1',
+      'x2',
+      'y2',
+      'cx',
+      'cy',
+      'r',
+      'rx',
+      'ry',
     ],
   }) as string
 }

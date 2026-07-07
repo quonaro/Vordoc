@@ -203,6 +203,94 @@
     @apply text-red-700;
   }
 
+  .files-gallery {
+    @apply grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4;
+  }
+
+  .files-gallery__item {
+    @apply relative flex aspect-square flex-col items-center justify-between overflow-hidden rounded-2xl border border-border bg-background p-5 text-center no-underline shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-border/80 hover:shadow-md;
+  }
+
+  .files-gallery__format {
+    @apply absolute right-3 top-3 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-muted text-muted-foreground opacity-80 transition-opacity group-hover:opacity-100;
+  }
+
+  .files-gallery__icon {
+    @apply flex flex-1 items-center justify-center text-foreground transition-transform duration-200 group-hover:scale-110;
+  }
+
+  .files-gallery__icon svg {
+    @apply h-12 w-12;
+  }
+
+  .files-gallery__title {
+    @apply w-full max-w-full px-1 text-sm font-medium text-foreground truncate;
+  }
+
+  .files-gallery__item--pdf .files-gallery__icon {
+    @apply text-red-600;
+  }
+
+  .files-gallery__item--pdf .files-gallery__format {
+    @apply bg-red-50 text-red-600;
+  }
+
+  .files-gallery__item--document .files-gallery__icon {
+    @apply text-blue-600;
+  }
+
+  .files-gallery__item--document .files-gallery__format {
+    @apply bg-blue-50 text-blue-600;
+  }
+
+  .files-gallery__item--spreadsheet .files-gallery__icon {
+    @apply text-green-600;
+  }
+
+  .files-gallery__item--spreadsheet .files-gallery__format {
+    @apply bg-green-50 text-green-600;
+  }
+
+  .files-gallery__item--presentation .files-gallery__icon {
+    @apply text-orange-600;
+  }
+
+  .files-gallery__item--presentation .files-gallery__format {
+    @apply bg-orange-50 text-orange-600;
+  }
+
+  .files-gallery__item--archive .files-gallery__icon {
+    @apply text-slate-600;
+  }
+
+  .files-gallery__item--archive .files-gallery__format {
+    @apply bg-slate-100 text-slate-600;
+  }
+
+  .files-gallery__item--image .files-gallery__icon,
+  .files-gallery__item--video .files-gallery__icon,
+  .files-gallery__item--audio .files-gallery__icon {
+    @apply text-purple-600;
+  }
+
+  .files-gallery__item--image .files-gallery__format,
+  .files-gallery__item--video .files-gallery__format,
+  .files-gallery__item--audio .files-gallery__format {
+    @apply bg-purple-50 text-purple-600;
+  }
+
+  .files-gallery__item--code .files-gallery__icon,
+  .files-gallery__item--markdown .files-gallery__icon,
+  .files-gallery__item--text .files-gallery__icon {
+    @apply text-zinc-600;
+  }
+
+  .files-gallery__item--code .files-gallery__format,
+  .files-gallery__item--markdown .files-gallery__format,
+  .files-gallery__item--text .files-gallery__format {
+    @apply bg-zinc-100 text-zinc-600;
+  }
+
   .hljs,
   .prose pre {
     background-color: #252525;
