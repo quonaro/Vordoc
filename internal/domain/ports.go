@@ -13,9 +13,6 @@ type ContentProvider interface {
 	// GetPage returns a page's content and metadata.
 	GetPage(ctx context.Context, doc string, page string) (Page, error)
 
-	// GetTheme returns the CSS variables for a theme.
-	GetTheme(ctx context.Context, name string) (Theme, error)
-
 	// GetRootConfig returns the root content configuration.
 	GetRootConfig(ctx context.Context) (RootConfig, error)
 

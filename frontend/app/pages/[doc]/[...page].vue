@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { marked } from 'marked'
+import type { HeaderConfig } from '~/composables/useSiteConfig'
 
 interface PageNode {
   path: string
@@ -8,17 +9,10 @@ interface PageNode {
   children?: PageNode[]
 }
 
-interface HeaderConfig {
-  enable: boolean
-  title?: string
-  logo?: string
-}
-
 interface DocMeta {
   name: string
   title: string
   description?: string
-  theme?: string
   sidebar?: string[]
   access?: string
   pages?: PageNode[]

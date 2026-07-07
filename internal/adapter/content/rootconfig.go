@@ -13,17 +13,77 @@ import (
 
 const defaultLogoFile = "logotype.svg"
 
+const defaultLogoSize = 40
+const defaultFontSize = 24
+const defaultFontName = "FabergeDigital.otf"
+
+// defaultHeader returns the built-in header defaults.
+func defaultHeader() headerConfig {
+	selector := true
+	return headerConfig{
+		Enable:   true,
+		Selector: &selector,
+		Title:    "Vordoc",
+		Logo: &logoConfig{
+			Path: defaultLogoFile,
+			Size: defaultLogoSize,
+		},
+		Font: &fontConfig{
+			Name: defaultFontName,
+			Size: defaultFontSize,
+		},
+	}
+}
+
+// defaultTheme returns the built-in theme defaults.
+func defaultTheme() themeConfig {
+	return themeConfig{
+		Default:     "system",
+		AccentColor: "#3b82f6",
+	}
+}
+
 // headerConfig mirrors domain.HeaderConfig for YAML parsing.
+// Selector is a pointer so that an explicit "false" is distinguishable from
+// a missing value, which should fall back to the built-in default.
 type headerConfig struct {
+	Enable   bool        `yaml:"enable"`
+	Selector *bool       `yaml:"selector"`
+	Title    string      `yaml:"title"`
+	Logo     *logoConfig `yaml:"logo"`
+	Font     *fontConfig `yaml:"font"`
+}
+
+// logoConfig mirrors domain.LogoConfig for YAML parsing.
+type logoConfig struct {
+	Path string `yaml:"path"`
+	Size int    `yaml:"size"`
+}
+
+// fontConfig mirrors domain.FontConfig for YAML parsing.
+type fontConfig struct {
+	Name string `yaml:"name"`
+	Size int    `yaml:"size"`
+}
+
+// themeConfig mirrors domain.ThemeConfig for YAML parsing.
+type themeConfig struct {
+	Default     string `yaml:"default"`
+	AccentColor string `yaml:"accent-color"`
+}
+
+// rootPageConfig mirrors domain.RootPageConfig for YAML parsing.
+type rootPageConfig struct {
 	Enable bool   `yaml:"enable"`
 	Title  string `yaml:"title"`
-	Logo   string `yaml:"logo"`
 }
 
 // siteConfig holds the root content configuration.
 type siteConfig struct {
-	EnableRootPage bool          `yaml:"enable_root_page"`
-	Header         *headerConfig `yaml:"header"`
+	Root    *rootPageConfig `yaml:"root"`
+	Favicon string          `yaml:"favicon"`
+	Header  *headerConfig   `yaml:"header"`
+	Theme   *themeConfig    `yaml:"theme"`
 }
 
 // loadSiteConfig reads the root config.yaml from the content directory.
@@ -47,15 +107,55 @@ func loadSiteConfig(root string) (siteConfig, error) {
 	return cfg, nil
 }
 
+// fillHeaderDefaults copies the provided header and fills any unset fields with
+// built-in defaults. The source value is never mutated.
+func fillHeaderDefaults(src headerConfig) headerConfig {
+	d := defaultHeader()
+	if src.Selector == nil {
+		src.Selector = d.Selector
+	}
+	if src.Title == "" {
+		src.Title = d.Title
+	}
+	if src.Logo == nil {
+		src.Logo = d.Logo
+	} else {
+		if src.Logo.Path == "" {
+			src.Logo.Path = d.Logo.Path
+		}
+		if src.Logo.Size == 0 {
+			src.Logo.Size = d.Logo.Size
+		}
+	}
+	if src.Font == nil {
+		src.Font = d.Font
+	} else {
+		if src.Font.Name == "" {
+			src.Font.Name = d.Font.Name
+		}
+		if src.Font.Size == 0 {
+			src.Font.Size = d.Font.Size
+		}
+	}
+	return src
+}
+
+// defaultRootPage returns the built-in root page defaults.
+func defaultRootPage() rootPageConfig {
+	return rootPageConfig{
+		Enable: true,
+		Title:  "Vordoc",
+	}
+}
+
 // defaultSiteConfig returns the root configuration used when config.yaml is missing.
 func defaultSiteConfig() siteConfig {
+	d := defaultTheme()
+	h := defaultHeader()
 	return siteConfig{
-		EnableRootPage: true,
-		Header: &headerConfig{
-			Enable: true,
-			Title:  "Vordoc",
-			Logo:   defaultLogoFile,
-		},
+		Root:   &rootPageConfig{Enable: true, Title: "Vordoc"},
+		Header: &h,
+		Theme:  &themeConfig{Default: d.Default, AccentColor: d.AccentColor},
 	}
 }
 
@@ -72,47 +172,107 @@ func (p *Provider) GetRootConfig(_ context.Context) (domain.RootConfig, error) {
 // A doc-level header replaces the root header entirely when present.
 func (p *Provider) resolveDocHeader(name string, cfg docConfig) *domain.HeaderConfig {
 	rootCfg, _ := loadSiteConfig(p.root)
+	rootHeader := resolveRootConfig(rootCfg).Header
 
-	var h headerConfig
-	if cfg.Header != nil {
-		h = *cfg.Header
-	} else if rootCfg.Header != nil {
-		h = *rootCfg.Header
+	if cfg.Header == nil && rootHeader != nil {
+		return &domain.HeaderConfig{
+			Enable:   rootHeader.Enable,
+			Selector: rootHeader.Selector,
+			Title:    rootHeader.Title,
+			Logo: &domain.LogoConfig{
+				Path: fmt.Sprintf("/api/v1/logo?doc=%s", name),
+				Size: rootHeader.Logo.Size,
+			},
+			Font: rootHeader.Font,
+		}
 	}
 
-	if h.Title == "" {
-		h.Title = "Vordoc"
-	}
-	if h.Logo == "" {
-		h.Logo = defaultLogoFile
-	}
-
+	h := fillHeaderDefaults(*cfg.Header)
 	return &domain.HeaderConfig{
-		Enable: h.Enable,
-		Title:  h.Title,
-		Logo:   fmt.Sprintf("/api/v1/logo?doc=%s", name),
+		Enable:   h.Enable,
+		Selector: h.Selector,
+		Title:    h.Title,
+		Logo: &domain.LogoConfig{
+			Path: fmt.Sprintf("/api/v1/logo?doc=%s", name),
+			Size: h.Logo.Size,
+		},
+		Font: &domain.FontConfig{
+			Name: h.Font.Name,
+			Size: h.Font.Size,
+		},
 	}
+}
+
+// fillThemeDefaults copies the provided theme and fills any unset fields with
+// built-in defaults. The source value is never mutated.
+func fillThemeDefaults(src themeConfig) themeConfig {
+	d := defaultTheme()
+	if src.Default == "" {
+		src.Default = d.Default
+	}
+	if src.AccentColor == "" {
+		src.AccentColor = d.AccentColor
+	}
+	return src
+}
+
+// fillRootPageDefaults copies the provided root page config and fills any unset
+// fields with built-in defaults. The source value is never mutated.
+func fillRootPageDefaults(src rootPageConfig) rootPageConfig {
+	d := defaultRootPage()
+	if !src.Enable && src.Title == "" {
+		src.Enable = d.Enable
+	}
+	if src.Title == "" {
+		src.Title = d.Title
+	}
+	return src
 }
 
 // resolveRootConfig applies defaults and exposes the logo through the API endpoint.
 func resolveRootConfig(cfg siteConfig) domain.RootConfig {
-	h := cfg.Header
-	if h == nil {
-		h = &headerConfig{Enable: true}
+	h := defaultHeader()
+	if cfg.Header != nil {
+		h = fillHeaderDefaults(*cfg.Header)
 	}
-	if h.Title == "" {
-		h.Title = "Vordoc"
+
+	t := defaultTheme()
+	if cfg.Theme != nil {
+		t = fillThemeDefaults(*cfg.Theme)
 	}
-	if h.Logo == "" {
-		h.Logo = defaultLogoFile
+
+	r := defaultRootPage()
+	if cfg.Root != nil {
+		r = fillRootPageDefaults(*cfg.Root)
+	}
+
+	favicon := cfg.Favicon
+	if favicon == "" {
+		favicon = "/favicon.ico"
 	}
 
 	return domain.RootConfig{
-		EnableRootPage: cfg.EnableRootPage,
+		Root: domain.RootPageConfig{
+			Enable: r.Enable,
+			Title:  r.Title,
+		},
+		Favicon: favicon,
 		Header: &domain.HeaderConfig{
-			Enable: h.Enable,
-			Title:  h.Title,
-			Logo:   "/api/v1/logo",
+			Enable:   h.Enable,
+			Selector: h.Selector,
+			Title:    h.Title,
+			Logo: &domain.LogoConfig{
+				Path: "/api/v1/logo",
+				Size: h.Logo.Size,
+			},
+			Font: &domain.FontConfig{
+				Name: h.Font.Name,
+				Size: h.Font.Size,
+			},
+		},
+		Theme: &domain.ThemeConfig{
+			Default:     t.Default,
+			AccentColor: t.AccentColor,
 		},
 	}
 }

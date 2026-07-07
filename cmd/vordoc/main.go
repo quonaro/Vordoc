@@ -37,7 +37,11 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	contentProvider := content.NewProvider(cfg.Content.Root, cfg.Content.ThemesDir, logger)
+	contentProvider := content.NewProvider(cfg.Content.Root, logger)
+	if err := contentProvider.EnsureDefaults(ctx); err != nil {
+		logger.Error("failed to ensure content defaults", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
 	passwordService := service.NewPasswordService()
 
 	handlers := httpadapter.Handlers{

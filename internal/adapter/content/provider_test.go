@@ -13,7 +13,6 @@ import (
 
 func TestProvider_scanDocPages_detects_directory_index(t *testing.T) {
 	root := t.TempDir()
-	themes := t.TempDir()
 
 	docRoot := filepath.Join(root, "doc")
 	must(t, os.MkdirAll(docRoot, 0o755))
@@ -40,7 +39,7 @@ func TestProvider_scanDocPages_detects_directory_index(t *testing.T) {
 	skipDir := filepath.Join(docRoot, "skip")
 	must(t, os.MkdirAll(skipDir, 0o755))
 
-	p := NewProvider(root, themes, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	nodes, err := p.scanDocPages(docRoot)
 	must(t, err)
 
@@ -96,14 +95,13 @@ func findNode(nodes []domain.PageNode, path string) *domain.PageNode {
 
 func TestProvider_GetDoc_embeds_index_page(t *testing.T) {
 	root := t.TempDir()
-	themes := t.TempDir()
 
 	docRoot := filepath.Join(root, "doc")
 	must(t, os.MkdirAll(docRoot, 0o755))
 	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
 	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Home\n---\nHome content\n")
 
-	p := NewProvider(root, themes, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	doc, err := p.GetDoc(context.Background(), "doc")
 	must(t, err)
 

@@ -62,13 +62,6 @@ func NewServer(cfg Config, appCfg config.Config, logger *slog.Logger, handlers H
 	})
 	r.Get("/api/config", handlers.Config.GetConfig)
 
-	// Static themes with correct MIME types
-	themesPath := appCfg.Content.ThemesDir
-	if themesPath == "" {
-		themesPath = "./themes"
-	}
-	r.Mount("/themes/", http.StripPrefix("/themes/", newCSSFileServer(http.Dir(themesPath))))
-
 	// Health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -126,15 +119,4 @@ func newLoggingMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
 			)
 		})
 	}
-}
-
-// newCSSFileServer wraps http.FileServer to set correct Content-Type for CSS files.
-func newCSSFileServer(fs http.FileSystem) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path
-		if len(path) > 4 && path[len(path)-4:] == ".css" {
-			w.Header().Set("Content-Type", "text/css; charset=utf-8")
-		}
-		http.FileServer(fs).ServeHTTP(w, r)
-	})
 }

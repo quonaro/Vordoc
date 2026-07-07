@@ -18,8 +18,7 @@ type AppConfig struct {
 
 // ContentConfig holds filesystem content settings.
 type ContentConfig struct {
-	Root      string `yaml:"root"`
-	ThemesDir string `yaml:"themes_dir"`
+	Root string `yaml:"root"`
 }
 
 // AuthConfig holds authentication settings for page-level access.
@@ -45,8 +44,7 @@ func DefaultConfig() Config {
 			},
 		},
 		Content: ContentConfig{
-			Root:      "./content",
-			ThemesDir: "./themes",
+			Root: "./content",
 		},
 		Auth: AuthConfig{
 			PageSecret: "CHANGE_ME",

@@ -53,8 +53,8 @@ func (p *Provider) rootLogoPath() (string, error) {
 	}
 
 	logo := defaultLogoFile
-	if cfg.Header != nil && cfg.Header.Logo != "" {
-		logo = cfg.Header.Logo
+	if cfg.Header != nil && cfg.Header.Logo != nil && cfg.Header.Logo.Path != "" {
+		logo = cfg.Header.Logo.Path
 	}
 
 	return p.resolveLogoPath("", logo)
@@ -70,10 +70,10 @@ func (p *Provider) docLogoPath(doc string) (string, error) {
 	if cfg.Header == nil {
 		return "", nil
 	}
-	if cfg.Header.Logo == "" {
+	if cfg.Header.Logo == nil || cfg.Header.Logo.Path == "" {
 		return "", nil
 	}
-	return p.resolveLogoPath(doc, cfg.Header.Logo)
+	return p.resolveLogoPath(doc, cfg.Header.Logo.Path)
 }
 
 // resolveLogoPath cleans a logo path relative to the content root and prevents traversal.

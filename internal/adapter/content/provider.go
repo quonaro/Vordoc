@@ -14,17 +14,15 @@ import (
 
 // Provider implements domain.ContentProvider by reading from the filesystem.
 type Provider struct {
-	root      string
-	themesDir string
-	logger    *slog.Logger
+	root   string
+	logger *slog.Logger
 }
 
 // NewProvider creates a filesystem content provider.
-func NewProvider(root, themesDir string, logger *slog.Logger) *Provider {
+func NewProvider(root string, logger *slog.Logger) *Provider {
 	return &Provider{
-		root:      root,
-		themesDir: themesDir,
-		logger:    logger,
+		root:   root,
+		logger: logger,
 	}
 }
 
@@ -75,7 +73,6 @@ func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) 
 		Name:        name,
 		Title:       cfg.Title,
 		Description: cfg.Description,
-		Theme:       cfg.Theme,
 		Sidebar:     cfg.Sidebar,
 		Header:      p.resolveDocHeader(name, cfg),
 	}
@@ -223,21 +220,4 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 	}
 
 	return page, nil
-}
-
-// GetTheme returns the CSS variables for a theme.
-func (p *Provider) GetTheme(_ context.Context, name string) (domain.Theme, error) {
-	varsPath := filepath.Join(p.themesDir, name, "vars.css")
-	data, err := os.ReadFile(varsPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return domain.Theme{}, fmt.Errorf("%w: theme %s", domain.ErrDocNotFound, name)
-		}
-		return domain.Theme{}, fmt.Errorf("reading theme vars: %w", err)
-	}
-
-	return domain.Theme{
-		Name:    name,
-		VarsCSS: string(data),
-	}, nil
 }

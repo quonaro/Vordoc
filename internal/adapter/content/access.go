@@ -70,7 +70,6 @@ func resolveAccess(docPath string, pageFile string, fm map[string]any) (string, 
 type docConfig struct {
 	Title       string        `yaml:"title"`
 	Description string        `yaml:"description"`
-	Theme       string        `yaml:"theme"`
 	Sidebar     []string      `yaml:"sidebar"`
 	Header      *headerConfig `yaml:"header"`
 }
@@ -78,7 +77,6 @@ type docConfig struct {
 // loadDocConfig reads config.yaml from a doc directory.
 func loadDocConfig(path string) (docConfig, error) {
 	var cfg docConfig
-	cfg.Theme = "default"
 
 	data, err := os.ReadFile(path)
 	if err != nil {
