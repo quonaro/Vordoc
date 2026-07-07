@@ -40,6 +40,12 @@ const { data: docMeta } = await useFetch<DocMeta>(
 const pageData = useState<PageData | null>(`doc-page-${docName}`, () => null)
 const loading = ref(true)
 const passwordRequired = ref(false)
+const contentRef = shallowRef<HTMLElement | null>(null)
+
+useSearchHighlight(
+  contentRef,
+  computed(() => pageData.value?.content ?? ''),
+)
 
 async function fetchPage() {
   try {
@@ -146,6 +152,7 @@ onMounted(async () => {
         </h1>
         <div
           v-if="renderedContent"
+          ref="contentRef"
           class="prose prose-slate max-w-none dark:prose-invert"
         >
           <div v-html="renderedContent" />

@@ -67,7 +67,8 @@ function navigateToResult(result: SearchResult) {
   const name = docName.value
   if (!name) return
   const path = result.path ? `/${name}/${result.path}` : `/${name}`
-  router.push(path)
+  const q = query.value.trim()
+  router.push({ path, query: q ? { q } : undefined })
   close()
 }
 
@@ -112,8 +113,7 @@ function highlight(text: string | undefined, q: string): string {
   )
   return text.replace(
     pattern,
-    (match) =>
-      `<mark class="bg-accent text-accent-foreground rounded px-0.5">${match}</mark>`,
+    (match) => `<span class="search-mark">${match}</span>`,
   )
 }
 
@@ -170,8 +170,10 @@ onMounted(() => {
           v-for="(result, idx) in results"
           :key="result.path"
           :class="[
-            'cursor-pointer px-4 py-2 transition-colors',
-            activeIndex === idx ? 'bg-accent' : 'hover:bg-accent/50',
+            'cursor-pointer border-l-2 border-transparent px-4 py-2 transition-all duration-150',
+            activeIndex === idx
+              ? 'search-result-active'
+              : 'hover:border-accent/50 hover:bg-muted/30 hover:pl-3',
           ]"
           @click="navigateToResult(result)"
           @mouseenter="activeIndex = idx"

@@ -57,6 +57,45 @@
   }
 }
 
+@layer components {
+  @keyframes search-mark-in {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes search-mark-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  .search-mark {
+    @apply relative;
+  }
+
+  .search-mark::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-0.5 w-full bg-accent;
+    transform-origin: left;
+    transform: scaleX(0);
+    animation:
+      search-mark-in 0.4s ease-out forwards,
+      search-mark-pulse 1.4s ease-in-out infinite 0.4s;
+  }
+
+  .search-result-active {
+    @apply border-l-2 border-accent bg-muted/50 pl-3;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
