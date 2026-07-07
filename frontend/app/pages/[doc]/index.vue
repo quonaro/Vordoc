@@ -100,7 +100,12 @@ onMounted(async () => {
         class="hidden w-64 shrink-0 lg:block"
       >
         <nav class="sticky top-8 space-y-1">
-          <h3 class="mb-4 font-semibold">{{ docMeta.title }}</h3>
+          <NuxtLink
+            :to="`/${docName}`"
+            class="mb-4 block font-semibold hover:text-primary"
+          >
+            {{ docMeta.title }}
+          </NuxtLink>
           <SidebarTree
             :nodes="docMeta.pages"
             :doc-name="docName"
@@ -124,9 +129,6 @@ onMounted(async () => {
           @success="fetchPage"
           @close="navigateTo('/', { replace: true })"
         />
-        <h1 class="mb-4 text-3xl font-bold">
-          {{ pageData?.title ?? docMeta?.title ?? docName }}
-        </h1>
         <div
           v-if="renderedContent"
           ref="contentRef"

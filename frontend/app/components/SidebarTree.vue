@@ -32,8 +32,11 @@ function isProtected(node: PageNode): boolean {
       <NuxtLink
         v-if="!node.children?.length"
         :to="`/${docName}/${node.path}`"
-        class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
-        :class="{ 'bg-accent': isActive(node.path) }"
+        class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
+        :class="{
+          'bg-primary text-primary-foreground font-medium': isActive(node.path),
+          'hover:text-primary': !isActive(node.path),
+        }"
       >
         <LockKeyhole
           v-if="isProtected(node)"
@@ -45,8 +48,13 @@ function isProtected(node: PageNode): boolean {
         <NuxtLink
           v-if="node.has_index"
           :to="`/${docName}/${node.path}`"
-          class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
-          :class="{ 'bg-accent': isActive(node.path) }"
+          class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors"
+          :class="{
+            'bg-primary text-primary-foreground font-medium': isActive(
+              node.path,
+            ),
+            'hover:text-primary': !isActive(node.path),
+          }"
         >
           <LockKeyhole v-if="isProtected(node)" class="h-3.5 w-3.5" />
           <span>{{ node.title }}</span>
@@ -58,12 +66,13 @@ function isProtected(node: PageNode): boolean {
           <LockKeyhole v-if="isProtected(node)" class="h-3.5 w-3.5" />
           <span>{{ node.title }}</span>
         </span>
-        <SidebarTree
-          :nodes="node.children"
-          :doc-name="docName"
-          :current-path="currentPath"
-          class="ml-4"
-        />
+        <div class="ml-3 border-l-2 border-border pl-3">
+          <SidebarTree
+            :nodes="node.children"
+            :doc-name="docName"
+            :current-path="currentPath"
+          />
+        </div>
       </div>
     </li>
   </ul>

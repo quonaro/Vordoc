@@ -33,9 +33,7 @@ function buildCrumbs(
 }
 
 const crumbs = computed(() => {
-  const out: { to: string; title: string }[] = [
-    { to: `/${props.docName}`, title: props.docTitle || props.docName },
-  ]
+  const out: { to: string; title: string }[] = []
   if (!props.currentPath) return out
   const found = buildCrumbs(props.pages, props.currentPath)
   if (found) {

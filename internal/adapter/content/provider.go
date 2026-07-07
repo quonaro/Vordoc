@@ -75,10 +75,6 @@ func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) 
 		Header: p.resolveDocHeader(name, cfg),
 	}
 
-	if doc.Title == "" {
-		doc.Title = name
-	}
-
 	pages, _ := p.scanDocPages(docPath)
 	doc.Pages = pages
 	doc.Access = p.docAccess(docPath)
@@ -87,6 +83,13 @@ func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) 
 	if idx, err := p.GetPage(ctx, name, ""); err == nil {
 		doc.IndexPage = &idx
 		doc.Description = idx.Description
+		if doc.Title == "" && idx.Title != "" {
+			doc.Title = idx.Title
+		}
+	}
+
+	if doc.Title == "" {
+		doc.Title = name
 	}
 
 	return doc, nil
