@@ -2,13 +2,14 @@ package domain
 
 // PageNode represents a page or directory in the doc tree.
 type PageNode struct {
-	Path     string     `json:"path"`
-	Title    string     `json:"title"`
-	Order    int        `json:"order,omitempty"`
-	Access   string     `json:"access,omitempty"`
-	HasIndex bool       `json:"has_index,omitempty"`
-	Show     bool       `json:"show,omitempty"`
-	Children []PageNode `json:"children,omitempty"`
+	Path        string     `json:"path"`
+	Title       string     `json:"title"`
+	Order       int        `json:"order,omitempty"`
+	Access      string     `json:"access,omitempty"`
+	AccessScope string     `json:"access_scope,omitempty"`
+	HasIndex    bool       `json:"has_index,omitempty"`
+	Show        bool       `json:"show,omitempty"`
+	Children    []PageNode `json:"children,omitempty"`
 }
 
 // HeaderConfig represents header settings for a documentation or the root site.
@@ -54,13 +55,15 @@ type RootConfig struct {
 
 // Doc represents a documentation collection.
 type Doc struct {
-	Name        string        `json:"name"`
-	Title       string        `json:"title"`
-	Description string        `json:"description,omitempty"`
-	Access      string        `json:"access,omitempty"`
-	Pages       []PageNode    `json:"pages,omitempty"`
-	IndexPage   *Page         `json:"index_page,omitempty"`
-	Header      *HeaderConfig `json:"header,omitempty"`
+	Name         string        `json:"name"`
+	Title        string        `json:"title"`
+	Description  string        `json:"description,omitempty"`
+	Access       string        `json:"access,omitempty"`
+	AccessScope  string        `json:"access_scope,omitempty"`
+	PasswordHash string        `json:"-"`
+	Pages        []PageNode    `json:"pages,omitempty"`
+	IndexPage    *Page         `json:"index_page,omitempty"`
+	Header       *HeaderConfig `json:"header,omitempty"`
 }
 
 // Page represents a single documentation page.
@@ -73,14 +76,33 @@ type Page struct {
 	Order        int    `json:"order,omitempty"`
 	Content      string `json:"content,omitempty"`
 	Access       string `json:"access,omitempty"`
+	AccessScope  string `json:"-"`
 	PasswordHash string `json:"-"` // not serialized, used internally
 }
 
 // SearchResult represents a single search hit within a documentation.
 type SearchResult struct {
-	Title   string `json:"title"`
-	Path    string `json:"path"`
-	Snippet string `json:"snippet,omitempty"`
-	Access  string `json:"access,omitempty"`
-	Score   int    `json:"-"` // not serialized, used for ranking
+	Title       string `json:"title"`
+	Path        string `json:"path"`
+	Snippet     string `json:"snippet,omitempty"`
+	Access      string `json:"access,omitempty"`
+	AccessScope string `json:"-"`
+	Score       int    `json:"-"` // not serialized, used for ranking
+}
+
+// AccessInfo describes the resolved access rule for a content node.
+type AccessInfo struct {
+	Access       string
+	PasswordHash string
+	Scope        string
+}
+
+// DocSummary is a lightweight public summary of a documentation.
+type DocSummary struct {
+	Name         string
+	Title        string
+	Description  string
+	Access       string
+	PasswordHash string
+	Scope        string
 }

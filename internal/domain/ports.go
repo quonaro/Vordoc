@@ -10,6 +10,9 @@ type ContentProvider interface {
 	// GetDoc returns metadata for a documentation.
 	GetDoc(ctx context.Context, name string) (Doc, error)
 
+	// GetDocSummary returns a lightweight public summary for a documentation.
+	GetDocSummary(ctx context.Context, name string) (DocSummary, error)
+
 	// GetPage returns a page's content and metadata.
 	GetPage(ctx context.Context, doc string, page string) (Page, error)
 
@@ -24,6 +27,9 @@ type ContentProvider interface {
 
 	// GetAssetPath returns the filesystem path to a static asset inside a documentation directory.
 	GetAssetPath(ctx context.Context, doc string, assetPath string) (string, error)
+
+	// GetAssetAccess returns the effective access info for an asset path.
+	GetAssetAccess(ctx context.Context, doc string, assetPath string) (AccessInfo, error)
 
 	// GetUIText returns the UI text configuration for the frontend.
 	GetUIText(ctx context.Context) (map[string]any, error)

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"vordoc/internal/domain"
 
 	"gopkg.in/yaml.v3"
 )
@@ -30,7 +32,7 @@ func loadAccessConfig(dir string) (groupConfig, bool, error) {
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return groupConfig{}, false, fmt.Errorf("parsing access.yaml: %w", err)
 	}
-	if cfg.Access == "" {
+	if cfg.Access == "" || cfg.Access == "none" {
 		cfg.Access = "public"
 	}
 
@@ -40,18 +42,75 @@ func loadAccessConfig(dir string) (groupConfig, bool, error) {
 // resolveAccess determines the access level and password hash for a page.
 // Priority: frontmatter > nearest access.yaml (walking up) > default "public".
 func resolveAccess(docPath string, pageFile string, fm map[string]any) (string, string) {
-	// 1. Frontmatter override
+	info := resolveAccessInfo(docPath, pageFile, fm)
+	return info.Access, info.PasswordHash
+}
+
+// resolveAccessInfo returns the effective access rule, walking up the directory tree.
+// A node with access: password and no password_hash inherits the hash of the nearest
+// ancestor that has a password_hash. access: none and access: public stop inheritance.
+func resolveAccessInfo(docPath string, pageFile string, fm map[string]any) domain.AccessInfo {
+	// 1. Frontmatter override: the page itself owns the rule.
 	if access := getString(fm, "access", ""); access != "" {
-		return access, getString(fm, "password_hash", "")
+		if access == "none" {
+			access = "public"
+		}
+		info := domain.AccessInfo{
+			Access:       access,
+			PasswordHash: getString(fm, "password_hash", ""),
+		}
+		if access == "password" {
+			rel, _ := filepath.Rel(docPath, pageFile)
+			rel = filepath.ToSlash(rel)
+			info.Scope = strings.TrimSuffix(rel, ".md")
+			if info.Scope == "index" {
+				info.Scope = ""
+			}
+		}
+		return info
 	}
 
-	// 2. Walk up from page directory to doc root
+	// 2. Walk up from page directory to doc root.
 	dir := filepath.Dir(pageFile)
 	docPath = filepath.Clean(docPath)
+
+	var first domain.AccessInfo
+	firstSet := false
+
 	for {
 		cfg, found, err := loadAccessConfig(dir)
 		if err == nil && found {
-			return cfg.Access, cfg.PasswordHash
+			rel, _ := filepath.Rel(docPath, dir)
+			scope := filepath.ToSlash(rel)
+			if scope == "." {
+				scope = ""
+			}
+
+			if !firstSet {
+				firstSet = true
+				first = domain.AccessInfo{
+					Access:       cfg.Access,
+					PasswordHash: cfg.PasswordHash,
+					Scope:        scope,
+				}
+				if cfg.Access == "public" {
+					return first
+				}
+				if cfg.PasswordHash != "" {
+					return first
+				}
+			}
+
+			if first.Access == "password" && cfg.PasswordHash != "" {
+				return domain.AccessInfo{
+					Access:       "password",
+					PasswordHash: cfg.PasswordHash,
+					Scope:        scope,
+				}
+			}
+			if first.Access == "password" && cfg.Access == "public" {
+				return first
+			}
 		}
 		if dir == docPath {
 			break
@@ -63,7 +122,10 @@ func resolveAccess(docPath string, pageFile string, fm map[string]any) (string, 
 		dir = parent
 	}
 
-	return "public", ""
+	if first.Access == "password" {
+		return first
+	}
+	return domain.AccessInfo{Access: "public"}
 }
 
 // docConfig holds per-doc metadata.

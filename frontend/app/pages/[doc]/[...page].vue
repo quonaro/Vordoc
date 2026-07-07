@@ -9,6 +9,7 @@ interface PageNode {
   path: string
   title: string
   access?: string
+  access_scope?: string
   children?: PageNode[]
 }
 
@@ -17,6 +18,7 @@ interface DocMeta {
   title: string
   description?: string
   access?: string
+  access_scope?: string
   pages?: PageNode[]
   header?: HeaderConfig
 }
@@ -35,13 +37,11 @@ const config = useRuntimeConfig()
 const docName = route.params.doc as string
 const pagePath = (route.params.page as string[])?.join('/') ?? ''
 
-const { data: docMeta } = await useFetch<DocMeta>(
-  `${config.public.apiBase}/v1/${docName}`,
-  { key: `doc-meta-${docName}` },
-)
+const docMeta = ref<DocMeta | null>(null)
 const pageData = useState<PageData | null>(`doc-page-${docName}`, () => null)
 const loading = ref(true)
 const passwordRequired = ref(false)
+const passwordScope = ref('')
 const contentRef = shallowRef<HTMLElement | null>(null)
 
 const sidebarNodes = useSidebarNodes(
@@ -69,6 +69,28 @@ pageTitle.set(() => [
   activeSectionTitle.value,
 ])
 
+async function loadDocMeta(): Promise<boolean> {
+  try {
+    docMeta.value = await $fetch<DocMeta>(
+      `${config.public.apiBase}/v1/${docName}`,
+      { credentials: 'include' },
+    )
+    return true
+  } catch (e: unknown) {
+    const err = e as {
+      statusCode?: number
+      data?: { password_required?: boolean; scope?: string }
+    }
+    if (err?.statusCode === 403 && err?.data?.password_required) {
+      passwordRequired.value = true
+      passwordScope.value = err?.data?.scope ?? ''
+      return false
+    }
+    console.error('failed to fetch doc', e)
+    return false
+  }
+}
+
 async function fetchPage() {
   try {
     pageData.value = await $fetch<PageData>(
@@ -79,14 +101,21 @@ async function fetchPage() {
   } catch (e: unknown) {
     const err = e as {
       statusCode?: number
-      data?: { password_required?: boolean }
+      data?: { password_required?: boolean; scope?: string }
     }
     if (err?.statusCode === 403 && err?.data?.password_required) {
       passwordRequired.value = true
+      passwordScope.value = err?.data?.scope ?? ''
       return
     }
     console.error('failed to fetch doc page', e)
   }
+}
+
+async function onUnlock() {
+  const unlocked = await loadDocMeta()
+  if (!unlocked) return
+  await fetchPage()
 }
 
 const renderedContent = computed(() => {
@@ -115,28 +144,34 @@ function findPageNode(
   return undefined
 }
 
-function requiresPassword(): boolean {
+function checkPasswordRequired(): boolean {
   if (!docMeta.value) return false
   if (!pagePath) {
-    return docMeta.value.access === 'password'
+    if (docMeta.value.access === 'password') {
+      passwordScope.value = docMeta.value.access_scope ?? ''
+      return true
+    }
+    return false
   }
   const node = findPageNode(docMeta.value.pages, pagePath)
-  return node?.access === 'password'
+  if (node?.access === 'password') {
+    passwordScope.value = node.access_scope ?? ''
+    return true
+  }
+  return false
 }
 
 pageData.value = null
 
-try {
-  if (requiresPassword()) {
+const unlocked = await loadDocMeta()
+if (unlocked) {
+  if (checkPasswordRequired()) {
     passwordRequired.value = true
   } else {
     await fetchPage()
   }
-} catch (e) {
-  console.error('failed to fetch doc page', e)
-} finally {
-  loading.value = false
 }
+loading.value = false
 </script>
 
 <template>
@@ -172,7 +207,8 @@ try {
           v-if="passwordRequired"
           :doc="docName"
           :page-path="pagePath"
-          @success="fetchPage"
+          :scope="passwordScope"
+          @success="onUnlock"
           @close="navigateTo(`/${docName}`, { replace: true })"
         />
         <div

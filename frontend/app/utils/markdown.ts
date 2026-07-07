@@ -6,6 +6,7 @@ import { escapeHtmlAttribute } from '~/utils/markdown/escape'
 import { createDangerExtension } from '~/utils/markdown/extensions/danger'
 import { createFilesGalleryExtension, type FilesGalleryToken } from '~/utils/markdown/extensions/files-gallery'
 import { createGalleryExtension, type GalleryToken } from '~/utils/markdown/extensions/gallery'
+import { createImageExtension, type ImageToken } from '~/utils/markdown/extensions/image'
 import { createWarningExtension } from '~/utils/markdown/extensions/warning'
 
 function isExternalHref(href: string): boolean {
@@ -205,6 +206,17 @@ function resolveMarkdownToken(
     return
   }
 
+  if (token.type === 'customImage') {
+    const image = token as ImageToken
+    if (!isExternalHref(image.src)) {
+      const resolved = resolveMarkdownImage(image.src, docName, filePath)
+      if (resolved) {
+        image.resolvedSrc = resolved
+      }
+    }
+    return
+  }
+
   if (token.type === 'filesGallery') {
     const filesGallery = token as FilesGalleryToken
     for (const file of filesGallery.files) {
@@ -253,6 +265,7 @@ marked.use(
   {
     extensions: [
       createGalleryExtension(),
+      createImageExtension(),
       createWarningExtension(),
       createDangerExtension(),
       createFilesGalleryExtension(),

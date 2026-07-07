@@ -58,7 +58,7 @@ func (p *Provider) SearchPages(_ context.Context, docName string, query string) 
 
 		fm, body, _ := parseFrontmatter(data)
 		title := getString(fm, "title", "")
-		access, _ := resolveAccess(docPath, fullPath, fm)
+		accessInfo := resolveAccessInfo(docPath, fullPath, fm)
 
 		// Determine page path used in URLs.
 		pagePath := strings.TrimSuffix(rel, ".md")
@@ -77,11 +77,12 @@ func (p *Provider) SearchPages(_ context.Context, docName string, query string) 
 		}
 
 		results = append(results, domain.SearchResult{
-			Title:   title,
-			Path:    pagePath,
-			Snippet: snippet(cleanText, terms),
-			Access:  access,
-			Score:   score,
+			Title:       title,
+			Path:        pagePath,
+			Snippet:     snippet(cleanText, terms),
+			Access:      accessInfo.Access,
+			AccessScope: accessInfo.Scope,
+			Score:       score,
 		})
 		return nil
 	})

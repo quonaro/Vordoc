@@ -77,7 +77,7 @@ func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) 
 
 	pages, _ := p.scanDocPages(docPath)
 	doc.Pages = pages
-	doc.Access = p.docAccess(docPath)
+	doc.Access, doc.PasswordHash, doc.AccessScope = p.docAccess(docPath)
 
 	// Load root index page if present.
 	if idx, err := p.GetPage(ctx, name, ""); err == nil {
@@ -95,15 +95,50 @@ func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) 
 	return doc, nil
 }
 
-// docAccess returns the access level for the documentation root index page.
-func (p *Provider) docAccess(docPath string) string {
+// docAccess returns the access info for the documentation root index page.
+func (p *Provider) docAccess(docPath string) (string, string, string) {
 	idx := filepath.Join(docPath, "index.md")
 	var fm map[string]any
 	if data, err := os.ReadFile(idx); err == nil {
 		fm, _, _ = parseFrontmatter(data)
 	}
-	access, _ := resolveAccess(docPath, idx, fm)
-	return access
+	info := resolveAccessInfo(docPath, idx, fm)
+	return info.Access, info.PasswordHash, info.Scope
+}
+
+// GetDocSummary returns a lightweight public summary for a documentation.
+func (p *Provider) GetDocSummary(_ context.Context, name string) (domain.DocSummary, error) {
+	docPath := filepath.Join(p.root, name)
+	info, err := os.Stat(docPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return domain.DocSummary{}, fmt.Errorf("%w: %s", domain.ErrDocNotFound, name)
+		}
+		return domain.DocSummary{}, fmt.Errorf("stat doc: %w", err)
+	}
+	if !info.IsDir() {
+		return domain.DocSummary{}, fmt.Errorf("%w: %s is not a directory", domain.ErrDocNotFound, name)
+	}
+
+	cfg, err := loadDocConfig(filepath.Join(docPath, "config.yaml"))
+	if err != nil {
+		return domain.DocSummary{}, err
+	}
+
+	title := cfg.Title
+	if title == "" {
+		title = name
+	}
+
+	access, passwordHash, scope := p.docAccess(docPath)
+
+	return domain.DocSummary{
+		Name:         name,
+		Title:        title,
+		Access:       access,
+		PasswordHash: passwordHash,
+		Scope:        scope,
+	}, nil
 }
 
 func (p *Provider) scanDocPages(docPath string) ([]domain.PageNode, error) {
@@ -147,7 +182,9 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 					node.Title = t
 				}
 				node.Order = getInt(fm, "order", 0)
-				node.Access, _ = resolveAccess(docPath, idx, fm)
+				info := resolveAccessInfo(docPath, idx, fm)
+				node.Access = info.Access
+				node.AccessScope = info.Scope
 				show = getBool(fm, "show", true)
 			}
 			if !show {
@@ -174,17 +211,18 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 			fm, _, _ := parseFrontmatter(data)
 			title := getString(fm, "title", strings.TrimSuffix(name, ".md"))
 			order := getInt(fm, "order", 0)
-			access, _ := resolveAccess(docPath, fullPath, fm)
+			info := resolveAccessInfo(docPath, fullPath, fm)
 			show := getBool(fm, "show", true)
 			if !show {
 				continue
 			}
 			nodes = append(nodes, domain.PageNode{
-				Path:   strings.TrimSuffix(rel, ".md"),
-				Title:  title,
-				Order:  order,
-				Access: access,
-				Show:   show,
+				Path:        strings.TrimSuffix(rel, ".md"),
+				Title:       title,
+				Order:       order,
+				Access:      info.Access,
+				AccessScope: info.Scope,
+				Show:        show,
 			})
 		}
 	}
@@ -229,7 +267,7 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 	relFile = filepath.ToSlash(relFile)
 
 	// Resolve access rules: frontmatter > access.yaml (walk up) > public default
-	access, passwordHash := resolveAccess(docPath, pageFile, fm)
+	accessInfo := resolveAccessInfo(docPath, pageFile, fm)
 
 	page := domain.Page{
 		Doc:          docName,
@@ -239,11 +277,34 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 		Description:  getString(fm, "description", ""),
 		Order:        getInt(fm, "order", 0),
 		Content:      body,
-		Access:       access,
-		PasswordHash: passwordHash,
+		Access:       accessInfo.Access,
+		AccessScope:  accessInfo.Scope,
+		PasswordHash: accessInfo.PasswordHash,
 	}
 
 	return page, nil
+}
+
+// GetAssetAccess returns the effective access info for an asset path.
+func (p *Provider) GetAssetAccess(_ context.Context, docName string, assetPath string) (domain.AccessInfo, error) {
+	docPath := filepath.Join(p.root, docName)
+	info, err := os.Stat(docPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return domain.AccessInfo{}, fmt.Errorf("%w: %s", domain.ErrDocNotFound, docName)
+		}
+		return domain.AccessInfo{}, fmt.Errorf("stat doc: %w", err)
+	}
+	if !info.IsDir() {
+		return domain.AccessInfo{}, fmt.Errorf("%w: %s is not a directory", domain.ErrDocNotFound, docName)
+	}
+
+	fullPath, err := p.GetAssetPath(context.TODO(), docName, assetPath)
+	if err != nil {
+		return domain.AccessInfo{}, err
+	}
+
+	return resolveAccessInfo(docPath, filepath.Dir(fullPath), nil), nil
 }
 
 // GetAssetPath resolves a static asset path inside a documentation directory.

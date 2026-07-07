@@ -4,6 +4,7 @@ const { t } = useText()
 const props = defineProps<{
   doc: string
   pagePath: string
+  scope?: string
 }>()
 
 const emit = defineEmits<{
@@ -27,21 +28,25 @@ const autoVerify = ref(false)
 
 const config = useRuntimeConfig()
 
-function storageKey(): string {
-  return `vordoc_pwd_${props.doc}_${props.pagePath || '_'}`
+function effectiveScope(responseScope?: string): string {
+  return responseScope || props.scope || props.pagePath || '_'
 }
 
-function savePassword(pwd: string) {
+function storageKey(scope?: string): string {
+  return `vordoc_pwd_${props.doc}_${effectiveScope(scope)}`
+}
+
+function savePassword(pwd: string, scope?: string) {
   try {
-    localStorage.setItem(storageKey(), btoa(pwd))
+    localStorage.setItem(storageKey(scope), btoa(pwd))
   } catch {
     // ignore storage errors
   }
 }
 
-function clearSavedPassword() {
+function clearSavedPassword(scope?: string) {
   try {
-    localStorage.removeItem(storageKey())
+    localStorage.removeItem(storageKey(scope))
   } catch {
     // ignore storage errors
   }
@@ -56,19 +61,23 @@ function loadPassword(): string | null {
   }
 }
 
-async function verify(pwd: string) {
-  if (!pwd) return
+async function verify(pwd: string): Promise<string | undefined> {
+  if (!pwd) return undefined
 
   submitting.value = true
   error.value = null
 
   try {
-    await $fetch(`${config.public.apiBase}/v1/${props.doc}/${props.pagePath}`, {
+    const response = await $fetch<{
+      success?: boolean
+      scope?: string
+    }>(`${config.public.apiBase}/v1/${props.doc}/${props.pagePath}`, {
       method: 'POST',
       credentials: 'include',
       body: { password: pwd },
     })
     emit('success')
+    return response.scope
   } catch (e: unknown) {
     const code =
       e && typeof e === 'object' && 'data' in e
@@ -78,6 +87,7 @@ async function verify(pwd: string) {
     if (autoVerify.value) {
       clearSavedPassword()
     }
+    return undefined
   } finally {
     submitting.value = false
   }
@@ -85,9 +95,9 @@ async function verify(pwd: string) {
 
 async function submit() {
   if (!password.value) return
-  await verify(password.value)
+  const responseScope = await verify(password.value)
   if (!error.value && remember.value) {
-    savePassword(password.value)
+    savePassword(password.value, responseScope)
   }
 }
 
