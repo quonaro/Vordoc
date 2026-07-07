@@ -38,17 +38,17 @@ air
 go run ./cmd/vordoc
 ```
 
-Backend runs on `http://localhost:8080`.
+Backend runs on `http://localhost:12300`.
 
 **Terminal 2 — Frontend:**
 
 ```bash
 cd frontend
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
-Frontend dev server runs on `http://localhost:3000` and proxies `/api` and `/themes` to the Go backend.
+Frontend dev server runs on `http://localhost:12301` and proxies `/api` and `/themes` to the Go backend.
 
 ## Content Structure
 

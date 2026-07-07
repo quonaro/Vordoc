@@ -8,16 +8,6 @@ interface PageNode {
   children?: PageNode[]
 }
 
-interface DocMeta {
-  name: string
-  title: string
-  description?: string
-  theme?: string
-  sidebar?: string[]
-  access?: string
-  pages?: PageNode[]
-}
-
 interface PageData {
   doc: string
   path: string
@@ -26,11 +16,30 @@ interface PageData {
   content?: string
 }
 
+interface HeaderConfig {
+  enable: boolean
+  title?: string
+  logo?: string
+}
+
+interface DocMeta {
+  name: string
+  title: string
+  description?: string
+  theme?: string
+  sidebar?: string[]
+  access?: string
+  pages?: PageNode[]
+  index_page?: PageData
+  header?: HeaderConfig
+}
+
 const route = useRoute()
+const config = useRuntimeConfig()
 const docName = route.params.doc as string
 
 const { data: docMeta } = await useFetch<DocMeta>(
-  `http://localhost:8080/api/v1/${docName}`,
+  `${config.public.apiBase}/v1/${docName}`,
   { key: `doc-meta-${docName}` },
 )
 const pageData = useState<PageData | null>(`doc-page-${docName}`, () => null)
@@ -40,7 +49,7 @@ const passwordRequired = ref(false)
 async function fetchPage() {
   try {
     pageData.value = await $fetch<PageData>(
-      `http://localhost:8080/api/v1/${docName}/`,
+      `${config.public.apiBase}/v1/${docName}/`,
       { credentials: 'include' },
     )
     passwordRequired.value = false
@@ -66,6 +75,9 @@ onMounted(async () => {
   try {
     if (docMeta.value?.access === 'password') {
       passwordRequired.value = true
+    } else if (docMeta.value?.index_page) {
+      pageData.value = docMeta.value.index_page
+      passwordRequired.value = false
     } else {
       await fetchPage()
     }
@@ -79,6 +91,7 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-background">
+    <SiteHeader :header="docMeta?.header" />
     <div class="mx-auto flex max-w-6xl gap-8 p-8">
       <!-- Sidebar -->
       <aside

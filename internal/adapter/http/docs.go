@@ -7,7 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"mime"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -37,8 +40,44 @@ func NewDocsHandler(contentProvider domain.ContentProvider, passwordService *ser
 
 // docSummary is a lightweight list entry for a documentation.
 type docSummary struct {
-	Name   string `json:"name"`
-	Access string `json:"access,omitempty"`
+	Name        string `json:"name"`
+	Title       string `json:"title"`
+	Description string `json:"description,omitempty"`
+	Access      string `json:"access,omitempty"`
+}
+
+// ServeLogo serves the logo image for the root site or a documentation.
+func (h *DocsHandler) ServeLogo(w http.ResponseWriter, r *http.Request) {
+	doc := strings.TrimSpace(r.URL.Query().Get("doc"))
+
+	path, err := h.contentProvider.GetLogoPath(r.Context(), doc)
+	if err != nil {
+		h.logger.Error("failed to resolve logo", slog.String("error", err.Error()))
+		writeError(w, http.StatusInternalServerError, "failed to resolve logo")
+		return
+	}
+
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			writeError(w, http.StatusNotFound, "logo not found")
+			return
+		}
+		h.logger.Error("failed to stat logo", slog.String("error", err.Error()))
+		writeError(w, http.StatusInternalServerError, "failed to serve logo")
+		return
+	}
+
+	ext := strings.ToLower(filepath.Ext(path))
+	contentType := "application/octet-stream"
+	if ext == ".svg" {
+		contentType = "image/svg+xml"
+	} else if mt := mime.TypeByExtension(ext); mt != "" {
+		contentType = mt
+	}
+
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Cache-Control", "public, max-age=300")
+	http.ServeFile(w, r, path)
 }
 
 // ListDocs returns all available documentations.
@@ -52,11 +91,13 @@ func (h *DocsHandler) ListDocs(w http.ResponseWriter, r *http.Request) {
 
 	docs := make([]docSummary, 0, len(names))
 	for _, name := range names {
-		access := "public"
+		summary := docSummary{Name: name, Title: name, Access: "public"}
 		if doc, err := h.contentProvider.GetDoc(r.Context(), name); err == nil {
-			access = doc.Access
+			summary.Title = doc.Title
+			summary.Description = doc.Description
+			summary.Access = doc.Access
 		}
-		docs = append(docs, docSummary{Name: name, Access: access})
+		docs = append(docs, summary)
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{"docs": docs})
@@ -85,6 +126,16 @@ func (h *DocsHandler) GetDocOrPage(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusInternalServerError, "failed to get doc")
 			return
 		}
+
+		// Don't expose password-protected index content without a valid cookie.
+		if doc.IndexPage != nil {
+			if doc.IndexPage.Access == "password" && !h.hasValidCookie(r, docName, doc.IndexPage.Path) {
+				doc.IndexPage = nil
+			} else {
+				doc.IndexPage.Access = ""
+			}
+		}
+
 		writeJSON(w, http.StatusOK, doc)
 		return
 	}
@@ -112,38 +163,6 @@ func (h *DocsHandler) GetDocOrPage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	page.Access = ""
-	writeJSON(w, http.StatusOK, page)
-}
-
-// GetPage returns a page with access control.
-func (h *DocsHandler) GetPage(w http.ResponseWriter, r *http.Request) {
-	docName := chi.URLParam(r, "doc")
-	pagePath := strings.TrimPrefix(chi.URLParam(r, "*"), "/")
-
-	page, err := h.contentProvider.GetPage(r.Context(), docName, pagePath)
-	if err != nil {
-		if strings.Contains(err.Error(), domain.ErrPageNotFound.Error()) {
-			writeError(w, http.StatusNotFound, "page not found")
-			return
-		}
-		h.logger.Error("failed to get page", slog.String("error", err.Error()))
-		writeError(w, http.StatusInternalServerError, "failed to get page")
-		return
-	}
-
-	// Access control
-	if page.Access == "password" {
-		if !h.hasValidCookie(r, docName, pagePath) {
-			writeJSON(w, http.StatusForbidden, map[string]any{
-				"error":             "password required",
-				"password_required": true,
-			})
-			return
-		}
-	}
-
-	// Don't expose access level in response
 	page.Access = ""
 	writeJSON(w, http.StatusOK, page)
 }

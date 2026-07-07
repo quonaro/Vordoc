@@ -10,7 +10,7 @@
     "postinstall": "nuxt prepare",
     "format": "prettier --write .",
     "lint": "eslint .",
-    "lint:all": "pnpm lint && pnpm typecheck",
+    "lint:all": "npm run lint && npm run typecheck",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {

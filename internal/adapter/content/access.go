@@ -68,10 +68,11 @@ func resolveAccess(docPath string, pageFile string, fm map[string]any) (string, 
 
 // docConfig holds per-doc metadata.
 type docConfig struct {
-	Title       string   `yaml:"title"`
-	Description string   `yaml:"description"`
-	Theme       string   `yaml:"theme"`
-	Sidebar     []string `yaml:"sidebar"`
+	Title       string        `yaml:"title"`
+	Description string        `yaml:"description"`
+	Theme       string        `yaml:"theme"`
+	Sidebar     []string      `yaml:"sidebar"`
+	Header      *headerConfig `yaml:"header"`
 }
 
 // loadDocConfig reads config.yaml from a doc directory.

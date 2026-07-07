@@ -1,6 +1,7 @@
 package content
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"os"
@@ -91,6 +92,30 @@ func findNode(nodes []domain.PageNode, path string) *domain.PageNode {
 		}
 	}
 	return nil
+}
+
+func TestProvider_GetDoc_embeds_index_page(t *testing.T) {
+	root := t.TempDir()
+	themes := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
+	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Home\n---\nHome content\n")
+
+	p := NewProvider(root, themes, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	doc, err := p.GetDoc(context.Background(), "doc")
+	must(t, err)
+
+	if doc.IndexPage == nil {
+		t.Fatal("doc.IndexPage is nil")
+	}
+	if doc.IndexPage.Title != "Home" {
+		t.Errorf("IndexPage.Title = %q, want %q", doc.IndexPage.Title, "Home")
+	}
+	if doc.IndexPage.Content != "Home content" {
+		t.Errorf("IndexPage.Content = %q, want %q", doc.IndexPage.Content, "Home content")
+	}
 }
 
 func must(t *testing.T, err error) {

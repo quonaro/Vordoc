@@ -15,4 +15,10 @@ type ContentProvider interface {
 
 	// GetTheme returns the CSS variables for a theme.
 	GetTheme(ctx context.Context, name string) (Theme, error)
+
+	// GetRootConfig returns the root content configuration.
+	GetRootConfig(ctx context.Context) (RootConfig, error)
+
+	// GetLogoPath returns the filesystem path to the logo for a doc or the root site.
+	GetLogoPath(ctx context.Context, doc string) (string, error)
 }

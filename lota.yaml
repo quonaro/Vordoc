@@ -1,12 +1,28 @@
+ports:
+  show: false
+  script: |
+    set -u
+    for port in 12300 12301; do
+      pids=$(lsof -ti :"$port" 2>/dev/null || true)
+      if [ -n "$pids" ]; then
+        echo "Killing process on port $port"
+        echo "$pids" | xargs kill -9
+      fi
+    done
+
 backend:
   dev:
     show: false
+    depends:
+    - ports
     script: air
 
 frontend:
   dev:
     dir: frontend
     show: false
+    depends:
+    - ports
     script: npm run dev
 
 dev:

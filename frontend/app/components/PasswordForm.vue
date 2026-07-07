@@ -17,6 +17,8 @@ const password = ref('')
 const submitting = ref(false)
 const error = ref<string | null>(null)
 
+const config = useRuntimeConfig()
+
 async function submit() {
   if (!password.value) return
 
@@ -24,14 +26,11 @@ async function submit() {
   error.value = null
 
   try {
-    await $fetch(
-      `http://localhost:8080/api/v1/${props.doc}/${props.pagePath}`,
-      {
-        method: 'POST',
-        credentials: 'include',
-        body: { password: password.value },
-      },
-    )
+    await $fetch(`${config.public.apiBase}/v1/${props.doc}/${props.pagePath}`, {
+      method: 'POST',
+      credentials: 'include',
+      body: { password: password.value },
+    })
     emit('success')
   } catch (e: unknown) {
     const message =

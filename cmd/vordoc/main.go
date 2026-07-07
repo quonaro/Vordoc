@@ -42,7 +42,7 @@ func main() {
 
 	handlers := httpadapter.Handlers{
 		Docs:   httpadapter.NewDocsHandler(contentProvider, passwordService, cfg.Auth.PageSecret, logger),
-		Config: httpadapter.NewConfigHandler(cfg.Public, logger),
+		Config: httpadapter.NewConfigHandler(contentProvider, logger),
 	}
 
 	server := httpadapter.NewServer(httpadapter.Config{

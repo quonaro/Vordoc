@@ -8,6 +8,12 @@ interface PageNode {
   children?: PageNode[]
 }
 
+interface HeaderConfig {
+  enable: boolean
+  title?: string
+  logo?: string
+}
+
 interface DocMeta {
   name: string
   title: string
@@ -16,6 +22,7 @@ interface DocMeta {
   sidebar?: string[]
   access?: string
   pages?: PageNode[]
+  header?: HeaderConfig
 }
 
 interface PageData {
@@ -27,11 +34,12 @@ interface PageData {
 }
 
 const route = useRoute()
+const config = useRuntimeConfig()
 const docName = route.params.doc as string
 const pagePath = (route.params.page as string[])?.join('/') ?? ''
 
 const { data: docMeta } = await useFetch<DocMeta>(
-  `http://localhost:8080/api/v1/${docName}`,
+  `${config.public.apiBase}/v1/${docName}`,
   { key: `doc-meta-${docName}` },
 )
 const pageData = useState<PageData | null>(`doc-page-${docName}`, () => null)
@@ -41,7 +49,7 @@ const passwordRequired = ref(false)
 async function fetchPage() {
   try {
     pageData.value = await $fetch<PageData>(
-      `http://localhost:8080/api/v1/${docName}/${pagePath}`,
+      `${config.public.apiBase}/v1/${docName}/${pagePath}`,
       { credentials: 'include' },
     )
     passwordRequired.value = false
@@ -106,6 +114,7 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-background">
+    <SiteHeader :header="docMeta?.header" />
     <div class="mx-auto flex max-w-6xl gap-8 p-8">
       <!-- Sidebar -->
       <aside

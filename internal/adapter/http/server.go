@@ -54,11 +54,13 @@ func NewServer(cfg Config, appCfg config.Config, logger *slog.Logger, handlers H
 
 	// API routes: versioned content API under /api/v1, public config under /api.
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Get("/", handlers.Docs.ListDocs)
+		r.Get("/config", handlers.Config.GetConfig)
+		r.Get("/docs", handlers.Docs.ListDocs)
+		r.Get("/logo", handlers.Docs.ServeLogo)
 		r.Get("/*", handlers.Docs.GetDocOrPage)
 		r.Post("/*", handlers.Docs.VerifyPassword)
 	})
-	r.Get("/api/config/public", handlers.Config.GetPublic)
+	r.Get("/api/config", handlers.Config.GetConfig)
 
 	// Static themes with correct MIME types
 	themesPath := appCfg.Content.ThemesDir

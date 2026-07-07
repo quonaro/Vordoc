@@ -9,15 +9,30 @@ type PageNode struct {
 	Children []PageNode `json:"children,omitempty"`
 }
 
+// HeaderConfig represents header settings for a documentation or the root site.
+type HeaderConfig struct {
+	Enable bool   `json:"enable"`
+	Title  string `json:"title,omitempty"`
+	Logo   string `json:"logo,omitempty"`
+}
+
+// RootConfig represents the root content configuration.
+type RootConfig struct {
+	EnableRootPage bool          `json:"enable_root_page"`
+	Header         *HeaderConfig `json:"header,omitempty"`
+}
+
 // Doc represents a documentation collection.
 type Doc struct {
-	Name        string     `json:"name"`
-	Title       string     `json:"title"`
-	Description string     `json:"description,omitempty"`
-	Theme       string     `json:"theme,omitempty"`
-	Sidebar     []string   `json:"sidebar,omitempty"`
-	Access      string     `json:"access,omitempty"`
-	Pages       []PageNode `json:"pages,omitempty"`
+	Name        string        `json:"name"`
+	Title       string        `json:"title"`
+	Description string        `json:"description,omitempty"`
+	Theme       string        `json:"theme,omitempty"`
+	Sidebar     []string      `json:"sidebar,omitempty"`
+	Access      string        `json:"access,omitempty"`
+	Pages       []PageNode    `json:"pages,omitempty"`
+	IndexPage   *Page         `json:"index_page,omitempty"`
+	Header      *HeaderConfig `json:"header,omitempty"`
 }
 
 // Page represents a single documentation page.

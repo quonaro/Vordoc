@@ -4,10 +4,9 @@ import "time"
 
 // Config holds unified configuration for Vordoc.
 type Config struct {
-	App     AppConfig      `yaml:"app"`
-	Content ContentConfig  `yaml:"content"`
-	Auth    AuthConfig     `yaml:"auth"`
-	Public  map[string]any `yaml:"public"`
+	App     AppConfig     `yaml:"app"`
+	Content ContentConfig `yaml:"content"`
+	Auth    AuthConfig    `yaml:"auth"`
 }
 
 // AppConfig holds application-wide settings.
@@ -38,7 +37,7 @@ type LogsConfig struct {
 func DefaultConfig() Config {
 	return Config{
 		App: AppConfig{
-			HTTPPort:          8080,
+			HTTPPort:          12300,
 			ShutdownGracetime: 10 * time.Second,
 			Logs: LogsConfig{
 				Level: "info",
@@ -51,9 +50,6 @@ func DefaultConfig() Config {
 		},
 		Auth: AuthConfig{
 			PageSecret: "CHANGE_ME",
-		},
-		Public: map[string]any{
-			"enable_root_page": true,
 		},
 	}
 }

@@ -53,7 +53,7 @@ func (p *Provider) ListDocs(_ context.Context) ([]string, error) {
 }
 
 // GetDoc returns metadata for a documentation.
-func (p *Provider) GetDoc(_ context.Context, name string) (domain.Doc, error) {
+func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) {
 	docPath := filepath.Join(p.root, name)
 	info, err := os.Stat(docPath)
 	if err != nil {
@@ -77,6 +77,7 @@ func (p *Provider) GetDoc(_ context.Context, name string) (domain.Doc, error) {
 		Description: cfg.Description,
 		Theme:       cfg.Theme,
 		Sidebar:     cfg.Sidebar,
+		Header:      p.resolveDocHeader(name, cfg),
 	}
 
 	if doc.Title == "" {
@@ -86,6 +87,11 @@ func (p *Provider) GetDoc(_ context.Context, name string) (domain.Doc, error) {
 	pages, _ := p.scanDocPages(docPath)
 	doc.Pages = pages
 	doc.Access = p.docAccess(docPath)
+
+	// Load root index page if present.
+	if idx, err := p.GetPage(ctx, name, ""); err == nil {
+		doc.IndexPage = &idx
+	}
 
 	return doc, nil
 }

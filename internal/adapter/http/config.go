@@ -3,24 +3,28 @@ package http
 import (
 	"log/slog"
 	"net/http"
+
+	"vordoc/internal/domain"
 )
 
-// ConfigHandler exposes application runtime configuration.
+// ConfigHandler exposes the root content configuration.
 type ConfigHandler struct {
-	public map[string]any
-	logger *slog.Logger
+	contentProvider domain.ContentProvider
+	logger          *slog.Logger
 }
 
 // NewConfigHandler creates a new config handler.
-func NewConfigHandler(public map[string]any, logger *slog.Logger) *ConfigHandler {
-	if public == nil {
-		public = map[string]any{}
-	}
-	return &ConfigHandler{public: public, logger: logger}
+func NewConfigHandler(contentProvider domain.ContentProvider, logger *slog.Logger) *ConfigHandler {
+	return &ConfigHandler{contentProvider: contentProvider, logger: logger}
 }
 
-// GetPublic returns the public runtime config with a 10-minute cache header.
-func (h *ConfigHandler) GetPublic(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "public, max-age=600")
-	writeJSON(w, http.StatusOK, h.public)
+// GetConfig returns the root content configuration.
+func (h *ConfigHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
+	cfg, err := h.contentProvider.GetRootConfig(r.Context())
+	if err != nil {
+		h.logger.Error("failed to load root config", slog.String("error", err.Error()))
+		writeError(w, http.StatusInternalServerError, "failed to load root config")
+		return
+	}
+	writeJSON(w, http.StatusOK, cfg)
 }

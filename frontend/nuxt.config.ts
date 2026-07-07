@@ -7,9 +7,20 @@ export default defineNuxtConfig({
   components: [{ path: '~/components/ui', prefix: 'Ui' }, '~/components'],
   runtimeConfig: {
     public: {
-      apiBase: (import.meta as { dev?: boolean }).dev
-        ? 'http://localhost:8080'
-        : '/api',
+      apiBase: '/api',
+    },
+  },
+  devServer: {
+    port: 12301,
+  },
+  vite: {
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:12300',
+          changeOrigin: true,
+        },
+      },
     },
   },
 })
