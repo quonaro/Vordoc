@@ -1,0 +1,47 @@
+# Binaries
+bin/
+tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go
+*.test
+*.out
+vendor/
+
+# Frontend
+frontend/node_modules/
+frontend/.nuxt/
+frontend/.output/
+frontend/dist/
+frontend/.cache/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+
+# Ai
+.devin/
+
+# Binary
+vordoc
+
+# Content
+content/**
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Config with secrets
+vordoc.yaml
+!vordoc.yaml.example

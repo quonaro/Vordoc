@@ -1,0 +1,23 @@
+{
+  "files.exclude": {
+    "frontend/node_modules": true,
+    "frontend/.nuxt": true,
+    "frontend/.output": true,
+    "frontend/dist": true,
+    "frontend/.cache": true,
+    "tmp": true,
+    "bin": true,
+    "vendor": true,
+    "go.sum": true,
+    "**/.DS_Store": true
+  },
+  "search.exclude": {
+    "frontend/node_modules": true,
+    "frontend/.nuxt": true,
+    "frontend/.output": true,
+    "frontend/dist": true,
+    "tmp": true,
+    "bin": true,
+    "vendor": true
+  }
+}

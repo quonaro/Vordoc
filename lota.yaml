@@ -1,0 +1,17 @@
+backend:
+  dev:
+    show: false
+    script: air
+
+frontend:
+  dev:
+    dir: frontend
+    show: false
+    script: npm run dev
+
+dev:
+  script: echo "Starting development server..."
+  depends:
+  - backend.dev
+  - frontend.dev
+  parallel: true
