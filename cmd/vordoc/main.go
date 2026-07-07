@@ -15,10 +15,14 @@ import (
 	"vordoc/shared/config"
 	"vordoc/shared/logging"
 
+	"github.com/joho/godotenv"
 	"golang.org/x/sync/errgroup"
 )
 
 func main() {
+	// Load .env file if present; real environment variables take precedence.
+	_ = godotenv.Load()
+
 	logger := logging.New("vordoc", config.LogsConfig{Level: "info", Type: "pretty"})
 
 	cfg := config.LoadFromEnv(logger)

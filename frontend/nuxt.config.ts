@@ -5,6 +5,11 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
   css: ['~/assets/css/main.css'],
   components: [{ path: '~/components/ui', prefix: 'Ui' }, '~/components'],
+  app: {
+    head: {
+      title: 'Vordoc',
+    },
+  },
   runtimeConfig: {
     public: {
       apiBase: '/api',

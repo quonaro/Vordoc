@@ -38,7 +38,12 @@ const accentStyle = computed(() => {
   }
 })
 
+const pageTitle = computed(() => {
+  return siteConfig.data.value?.root?.title ?? 'Vordoc'
+})
+
 useHead(() => ({
+  title: pageTitle,
   link: [
     ...(favicon.value
       ? [{ rel: 'icon', type: 'image/x-icon', href: favicon.value }]
