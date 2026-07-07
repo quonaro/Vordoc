@@ -135,3 +135,46 @@ func TestDocsHandler_Search_emptyQuery(t *testing.T) {
 		t.Errorf("expected 0 results, got %d", len(body.Results))
 	}
 }
+
+func TestDocsHandler_ServeAsset(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	if err := os.MkdirAll(docRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(docRoot, "config.yaml"), []byte("title: Test Doc\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	imagesDir := filepath.Join(docRoot, "images")
+	if err := os.MkdirAll(imagesDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(imagesDir, "logo.svg"), []byte("<svg></svg>"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	provider := content.NewProvider(root, slog.New(slog.NewTextHandler(os.Stderr, nil)))
+	passwordService := service.NewPasswordService()
+	handler := NewDocsHandler(provider, passwordService, "secret", slog.New(slog.NewTextHandler(os.Stderr, nil)))
+
+	r := chi.NewRouter()
+	r.Get("/api/v1/assets/{doc}/*", handler.ServeAsset)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/assets/doc/images/logo.svg", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
+	}
+
+	if got := rec.Header().Get("Content-Type"); got != "image/svg+xml" {
+		t.Errorf("expected Content-Type image/svg+xml, got %q", got)
+	}
+
+	wantDisposition := `inline; filename="logo.svg"`
+	if got := rec.Header().Get("Content-Disposition"); got != wantDisposition {
+		t.Errorf("expected Content-Disposition %q, got %q", wantDisposition, got)
+	}
+}

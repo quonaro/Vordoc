@@ -20,6 +20,7 @@ export default defineNuxtConfig({
   },
   vite: {
     server: {
+      allowedHosts: true,
       proxy: {
         '/api': {
           target: 'http://localhost:12300',

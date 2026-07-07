@@ -2,9 +2,11 @@ package http
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"mime"
 	"net/http"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -27,7 +29,7 @@ func (h *DocsHandler) ServeAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	path, err := h.contentProvider.GetAssetPath(r.Context(), docName, assetPath)
+	filePath, err := h.contentProvider.GetAssetPath(r.Context(), docName, assetPath)
 	if err != nil {
 		if errors.Is(err, domain.ErrDocNotFound) {
 			writeError(w, http.StatusNotFound, "doc_not_found")
@@ -46,7 +48,7 @@ func (h *DocsHandler) ServeAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ext := strings.ToLower(filepath.Ext(path))
+	ext := strings.ToLower(filepath.Ext(filePath))
 	contentType := "application/octet-stream"
 	if mt := mime.TypeByExtension(ext); mt != "" {
 		contentType = mt
@@ -54,5 +56,6 @@ func (h *DocsHandler) ServeAsset(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Cache-Control", "public, max-age=300")
-	http.ServeFile(w, r, path)
+	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%q", path.Base(assetPath)))
+	http.ServeFile(w, r, filePath)
 }
