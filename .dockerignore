@@ -1,0 +1,50 @@
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+
+# Build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vordoc
+vendor/
+tmp/
+
+# Frontend build outputs
+frontend/node_modules/
+frontend/.nuxt/
+frontend/.output/
+frontend/dist/
+frontend/.cache/
+
+# Embedded frontend build (rebuilt inside Docker)
+internal/adapter/http/dist/*
+!internal/adapter/http/dist/.gitkeep
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Content (mount as volume instead)
+content/
+
+# Dev tooling
+.air.toml
+lota.yaml
+scripts/
+.devin/

@@ -26,7 +26,7 @@ func (p *Provider) GetAssetAccess(ctx context.Context, docName string, assetPath
 }
 
 // GetAssetPath resolves a static asset path inside a documentation directory.
-func (p *Provider) GetAssetPath(ctx context.Context, docName string, assetPath string) (string, error) {
+func (p *Provider) GetAssetPath(_ context.Context, docName string, assetPath string) (string, error) {
 	docPath, err := p.docPath(docName)
 	if err != nil {
 		return "", err

@@ -1,3 +1,4 @@
+// Package service implements application business logic for Vordoc.
 package service
 
 import "golang.org/x/crypto/bcrypt"

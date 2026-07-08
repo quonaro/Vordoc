@@ -1,3 +1,4 @@
+// Package config loads and provides Vordoc application configuration.
 package config
 
 import (

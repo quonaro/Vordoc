@@ -48,7 +48,7 @@ func (h *DocsHandler) ServeLogo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := os.Stat(logoPath); err != nil {
+	if _, err := os.Stat(logoPath); err != nil { // #nosec G703 — путь валидируется contentProvider
 		if os.IsNotExist(err) {
 			writeError(w, http.StatusNotFound, "logo_not_found")
 			return
@@ -72,7 +72,7 @@ func (h *DocsHandler) ServeLogo(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Header().Set("Cache-Control", "public, max-age=300")
 	}
-	http.ServeFile(w, r, logoPath)
+	http.ServeFile(w, r, logoPath) // #nosec G703 — путь валидируется contentProvider
 }
 
 // ServeAsset serves a static file from a documentation directory.
@@ -166,7 +166,7 @@ func (h *DocsHandler) ServeAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.ServeFile(w, r, filePath)
+	http.ServeFile(w, r, filePath) // #nosec G703 — путь валидируется contentProvider
 }
 
 var (
@@ -178,7 +178,7 @@ var (
 // the file name when the SVG does not already contain one. This makes the
 // browser tab title match the file name when the SVG is opened directly.
 func serveSVGWithTitle(w http.ResponseWriter, r *http.Request, filePath, fileName string) error {
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) // #nosec G304 G703 — путь валидируется contentProvider
 	if err != nil {
 		return err
 	}
@@ -192,11 +192,11 @@ func serveSVGWithTitle(w http.ResponseWriter, r *http.Request, filePath, fileNam
 		}
 	}
 
-	fi, err := os.Stat(filePath)
+	fi, err := os.Stat(filePath) // #nosec G703 — путь валидируется contentProvider
 	if err != nil {
 		return err
 	}
 
-	http.ServeContent(w, r, filePath, fi.ModTime(), bytes.NewReader(data))
+	http.ServeContent(w, r, filePath, fi.ModTime(), bytes.NewReader(data)) // #nosec G703 — путь валидируется contentProvider
 	return nil
 }

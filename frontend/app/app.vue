@@ -47,11 +47,9 @@ useGlobalSearchShortcut(() => {
 
 useHead(() => ({
   title: pageTitle.fullTitle,
-  link: [
-    ...(favicon.value
-      ? [{ rel: 'icon', type: 'image/x-icon', href: favicon.value }]
-      : []),
-  ],
+  link: favicon.value
+    ? [{ rel: 'icon', type: 'image/x-icon', href: favicon.value }]
+    : [],
   style: accentStyle.value
     ? [{ innerHTML: accentStyle.value, type: 'text/css' }]
     : [],

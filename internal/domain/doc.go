@@ -1,3 +1,4 @@
+// Package domain contains core business entities and errors for Vordoc.
 package domain
 
 // PageNode represents a page or directory in the doc tree.

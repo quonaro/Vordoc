@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"strings"
 
 	"vordoc/internal/domain"
 	"vordoc/internal/service"
@@ -70,12 +69,4 @@ func writePasswordRequired(w http.ResponseWriter, scope string) {
 		PasswordRequired: true,
 		Scope:            scope,
 	})
-}
-
-func splitDocPath(path string) (doc string, page string, ok bool) {
-	parts := strings.Split(strings.TrimPrefix(path, "/"), "/")
-	if len(parts) == 0 || parts[0] == "" {
-		return "", "", false
-	}
-	return parts[0], strings.Join(parts[1:], "/"), true
 }

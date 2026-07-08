@@ -1,3 +1,4 @@
+// Package logging provides structured logging helpers for Vordoc.
 package logging
 
 import (

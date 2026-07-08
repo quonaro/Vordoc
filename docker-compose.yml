@@ -1,0 +1,11 @@
+services:
+  vordoc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${VORDOC_PORT:-12300}:12300"
+    env_file: .env
+    volumes:
+      - ./content:/app/content:ro
+    restart: unless-stopped

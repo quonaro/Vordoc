@@ -51,7 +51,7 @@ func (p *Provider) SearchPages(_ context.Context, docName string, query string) 
 		rel, _ := filepath.Rel(docPath, fullPath)
 		rel = filepath.ToSlash(rel)
 
-		data, err := os.ReadFile(fullPath)
+		data, err := os.ReadFile(fullPath) // #nosec G304 G122 — путь формируется внутри приложения внутри WalkDir
 		if err != nil {
 			return nil
 		}
@@ -299,7 +299,7 @@ func snippet(text string, terms []string) string {
 		excerpt = "..." + excerpt
 	}
 	if end < len(runes) {
-		excerpt = excerpt + "..."
+		excerpt += "..."
 	}
 	return whitespaceRegex.ReplaceAllString(excerpt, " ")
 }

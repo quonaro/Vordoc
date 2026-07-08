@@ -37,7 +37,7 @@ type Handlers struct {
 }
 
 // NewServer builds HTTP server with injected handlers.
-func NewServer(cfg Config, appCfg config.Config, logger *slog.Logger, handlers Handlers) *Server {
+func NewServer(cfg Config, _ config.Config, logger *slog.Logger, handlers Handlers) *Server {
 	r := chi.NewRouter()
 
 	// CORS
@@ -68,7 +68,7 @@ func NewServer(cfg Config, appCfg config.Config, logger *slog.Logger, handlers H
 	r.Get("/api/config", handlers.Config.GetConfig)
 
 	// Health check
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte(`{"status":"ok"}`)); err != nil {

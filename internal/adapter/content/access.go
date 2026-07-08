@@ -1,3 +1,4 @@
+// Package content provides filesystem adapters for Vordoc content and configuration.
 package content
 
 import (
@@ -174,7 +175,7 @@ type docConfig struct {
 func loadDocConfig(path string) (docConfig, error) {
 	var cfg docConfig
 
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304 — путь формируется внутри приложения
 	if err != nil {
 		if os.IsNotExist(err) {
 			return cfg, nil

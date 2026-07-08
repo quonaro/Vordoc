@@ -1,3 +1,4 @@
+// Package main is the entry point for the Vordoc CLI and server.
 package main
 
 import (
@@ -102,7 +103,7 @@ func runServer(ctx context.Context, _ engine.NativeContext) error {
 	contentProvider := content.NewProvider(cfg.Content.Root, logger)
 	if err := contentProvider.EnsureDefaults(ctx); err != nil {
 		logger.Error("failed to ensure content defaults", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 	passwordService := service.NewPasswordService()
 
@@ -143,7 +144,7 @@ func runServer(ctx context.Context, _ engine.NativeContext) error {
 
 	if err := g.Wait(); err != nil && ctx.Err() == nil {
 		logger.Error("server exited with error", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 
 	logger.Info("shutdown complete")

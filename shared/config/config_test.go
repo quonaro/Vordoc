@@ -3,7 +3,6 @@ package config
 import (
 	"io"
 	"log/slog"
-	"os"
 	"testing"
 	"time"
 )
@@ -85,7 +84,6 @@ func TestLoadFromEnv_generates_different_secrets(t *testing.T) {
 
 	// Ensure no secret is inherited from the environment.
 	t.Setenv("VORDOC_PAGE_SECRET", "")
-	os.Unsetenv("VORDOC_PAGE_SECRET")
 
 	cfg1 := LoadFromEnv(logger)
 	cfg2 := LoadFromEnv(logger)

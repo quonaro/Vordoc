@@ -1,3 +1,4 @@
+// Package http provides HTTP handlers and server wiring for Vordoc.
 package http
 
 import (
@@ -48,7 +49,7 @@ func (h *AssetHandler) Serve(w http.ResponseWriter, r *http.Request) {
 		h.serveIndex(w, r)
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	stat, err := file.Stat()
 	if err != nil {
@@ -91,6 +92,7 @@ func (h *AssetHandler) servePath(w http.ResponseWriter, r *http.Request, filePat
 	w.Header().Set("Content-Type", contentType)
 	w.WriteHeader(http.StatusOK)
 	if r.Method == http.MethodGet {
+		// #nosec G705 — data прочитана из встроенной файловой системы
 		if _, err := w.Write(data); err != nil {
 			h.logger.Error("failed to write response", slog.String("error", err.Error()))
 		}
