@@ -29,6 +29,10 @@ frontend/.cache/
 # Ai
 .devin/
 
+# Embedded frontend build
+internal/adapter/http/dist/*
+!internal/adapter/http/dist/.gitkeep
+
 # Binary
 vordoc
 

@@ -14,9 +14,18 @@ const props = defineProps<{
   docTitle: string
   pages: PageNode[]
   currentPath: string
+  loading?: boolean
 }>()
 
 const { t } = useText()
+
+const linkClass = (align: 'start' | 'end'): string => {
+  const base =
+    'group flex max-w-[calc(50%-0.5rem)] flex-col gap-1 rounded-lg border border-border bg-background p-4 transition-colors hover:border-primary'
+  const alignClass = align === 'start' ? 'items-start' : 'items-end text-right'
+  const loadingClass = props.loading ? 'cursor-wait opacity-60' : ''
+  return `${base} ${alignClass} ${loadingClass}`
+}
 
 const neighbors = usePageNeighbors(
   computed(() => props.pages),
@@ -30,11 +39,14 @@ const neighbors = usePageNeighbors(
     v-if="neighbors.prev || neighbors.next"
     class="mt-12 flex justify-between gap-4 border-t border-border pt-8"
     aria-label="page"
+    :aria-busy="loading"
   >
     <NuxtLink
       v-if="neighbors.prev"
       :to="`/${docName}/${neighbors.prev.path}`"
-      class="group flex max-w-[calc(50%-0.5rem)] flex-col items-start gap-1 rounded-lg border border-border bg-background p-4 transition-colors hover:border-primary"
+      prefetch
+      :class="linkClass('start')"
+      :aria-disabled="loading"
     >
       <span class="flex items-center gap-1 text-xs text-muted-foreground">
         <ChevronLeft class="h-3.5 w-3.5" />
@@ -49,7 +61,9 @@ const neighbors = usePageNeighbors(
     <NuxtLink
       v-if="neighbors.next"
       :to="`/${docName}/${neighbors.next.path}`"
-      class="group flex max-w-[calc(50%-0.5rem)] flex-col items-end gap-1 rounded-lg border border-border bg-background p-4 text-right transition-colors hover:border-primary"
+      prefetch
+      :class="linkClass('end')"
+      :aria-disabled="loading"
     >
       <span class="flex items-center gap-1 text-xs text-muted-foreground">
         {{ t('doc.nextPage') }}

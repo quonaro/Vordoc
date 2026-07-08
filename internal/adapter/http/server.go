@@ -33,6 +33,7 @@ type Config struct {
 type Handlers struct {
 	Docs   *DocsHandler
 	Config *ConfigHandler
+	Assets *AssetHandler
 }
 
 // NewServer builds HTTP server with injected handlers.
@@ -74,6 +75,10 @@ func NewServer(cfg Config, appCfg config.Config, logger *slog.Logger, handlers H
 			logger.Error("failed to write health response", slog.String("error", err.Error()))
 		}
 	})
+
+	// Static SPA: must be registered after all API routes so that /api and /health
+	// are handled by the handlers above. Any unmatched path falls back to index.html.
+	r.Get("/*", handlers.Assets.Serve)
 
 	srv := &http.Server{
 		Addr:              cfg.Address,

@@ -58,7 +58,7 @@ useMermaid(contentRef, effectiveTheme)
 
 const sidebarNodes = useSidebarNodes(
   computed(() => docMeta.value?.pages ?? []),
-  computed(() => pageData.value?.path ?? ''),
+  computed(() => pagePath),
 )
 
 useSearchHighlight(
@@ -163,8 +163,6 @@ function checkPasswordRequired(): boolean {
   return node?.access === 'password'
 }
 
-pageData.value = null
-
 const unlocked = await loadDocMeta()
 if (unlocked) {
   if (checkPasswordRequired()) {
@@ -192,7 +190,7 @@ loading.value = false
           <SidebarTree
             :nodes="sidebarNodes"
             :doc-name="docName"
-            :current-path="pageData?.path ?? ''"
+            :current-path="pagePath"
           />
         </nav>
       </aside>
@@ -203,7 +201,7 @@ loading.value = false
           :doc-title="docMeta?.title ?? docName"
           :doc-name="docName"
           :pages="docMeta?.pages ?? []"
-          :current-path="pageData?.path ?? ''"
+          :current-path="pagePath"
         />
         <PasswordForm
           v-if="passwordRequired"
@@ -213,7 +211,19 @@ loading.value = false
           @close="navigateTo(`/${docName}`, { replace: true })"
         />
         <div
-          v-if="renderedContent"
+          v-if="loading"
+          class="space-y-4"
+          aria-busy="true"
+          aria-label="Loading page"
+        >
+          <div class="h-8 w-2/3 animate-pulse rounded bg-muted" />
+          <div class="h-4 w-full animate-pulse rounded bg-muted" />
+          <div class="h-4 w-5/6 animate-pulse rounded bg-muted" />
+          <div class="h-32 w-full animate-pulse rounded bg-muted" />
+          <div class="h-4 w-4/5 animate-pulse rounded bg-muted" />
+        </div>
+        <div
+          v-else-if="renderedContent"
           ref="contentRef"
           class="prose prose-slate max-w-none dark:prose-invert"
         >
@@ -227,7 +237,8 @@ loading.value = false
           :doc-name="docName"
           :doc-title="docMeta?.title ?? docName"
           :pages="docMeta?.pages ?? []"
-          :current-path="pageData?.path ?? ''"
+          :current-path="pagePath"
+          :loading="loading"
         />
       </main>
 

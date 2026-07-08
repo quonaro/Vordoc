@@ -23,7 +23,41 @@ frontend:
     show: false
     depends:
     - ports
-    script: npm run dev
+    script: pnpm dev
+
+build:
+  show: true
+  script: |
+    set -euo pipefail
+
+    echo "==> Installing frontend dependencies..."
+    (
+      cd frontend
+      pnpm install --frozen-lockfile
+    )
+
+    echo "==> Building frontend..."
+    (
+      cd frontend
+      pnpm run generate
+    )
+
+    echo "==> Embedding frontend into backend..."
+    rm -rf internal/adapter/http/dist
+    mkdir -p internal/adapter/http/dist
+    cp -R frontend/.output/public/. internal/adapter/http/dist/
+
+    echo "==> Building Go binary..."
+    go build -ldflags="-s -w" -o vordoc ./cmd/vordoc
+
+    echo "==> Build complete: ./vordoc"
+
+run:
+  depends:
+  - build
+  script: ./vordoc
+  vars:
+  - "import:env .env"
 
 dev:
   script: echo "Starting development server..."

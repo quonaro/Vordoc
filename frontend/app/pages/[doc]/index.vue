@@ -55,9 +55,11 @@ const effectiveTheme = computed(() => {
 useCopyCode(contentRef)
 useMermaid(contentRef, effectiveTheme)
 
+const currentPath = ''
+
 const sidebarNodes = useSidebarNodes(
   computed(() => docMeta.value?.pages ?? []),
-  computed(() => pageData.value?.path ?? ''),
+  computed(() => currentPath),
 )
 
 const tocItems = useToc(computed(() => pageData.value?.content ?? ''))
@@ -137,8 +139,6 @@ const renderedContent = computed(() => {
   )
 })
 
-pageData.value = null
-
 const unlocked = await loadDocMeta()
 if (unlocked) {
   if (docMeta.value?.index_page) {
@@ -167,7 +167,7 @@ loading.value = false
           <SidebarTree
             :nodes="sidebarNodes"
             :doc-name="docName"
-            :current-path="pageData?.path ?? ''"
+            :current-path="currentPath"
           />
         </nav>
       </aside>
@@ -178,7 +178,7 @@ loading.value = false
           :doc-title="docMeta?.title ?? docName"
           :doc-name="docName"
           :pages="docMeta?.pages ?? []"
-          :current-path="pageData?.path ?? ''"
+          :current-path="currentPath"
         />
         <PasswordForm
           v-if="passwordRequired"
@@ -188,7 +188,19 @@ loading.value = false
           @close="navigateTo('/', { replace: true })"
         />
         <div
-          v-if="renderedContent"
+          v-if="loading"
+          class="space-y-4"
+          aria-busy="true"
+          aria-label="Loading page"
+        >
+          <div class="h-8 w-2/3 animate-pulse rounded bg-muted" />
+          <div class="h-4 w-full animate-pulse rounded bg-muted" />
+          <div class="h-4 w-5/6 animate-pulse rounded bg-muted" />
+          <div class="h-32 w-full animate-pulse rounded bg-muted" />
+          <div class="h-4 w-4/5 animate-pulse rounded bg-muted" />
+        </div>
+        <div
+          v-else-if="renderedContent"
           ref="contentRef"
           class="prose prose-slate max-w-none dark:prose-invert"
         >
@@ -202,7 +214,8 @@ loading.value = false
           :doc-name="docName"
           :doc-title="docMeta?.title ?? docName"
           :pages="docMeta?.pages ?? []"
-          :current-path="pageData?.path ?? ''"
+          :current-path="currentPath"
+          :loading="loading"
         />
       </main>
 
