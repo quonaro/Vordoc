@@ -52,7 +52,10 @@ func (p *Provider) ListDocs(_ context.Context) ([]string, error) {
 
 // GetDoc returns metadata for a documentation.
 func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) {
-	docPath := filepath.Join(p.root, name)
+	docPath, err := p.docPath(name)
+	if err != nil {
+		return domain.Doc{}, err
+	}
 	info, err := os.Stat(docPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -108,7 +111,10 @@ func (p *Provider) docAccess(docPath string) (string, string, string) {
 
 // GetDocSummary returns a lightweight public summary for a documentation.
 func (p *Provider) GetDocSummary(_ context.Context, name string) (domain.DocSummary, error) {
-	docPath := filepath.Join(p.root, name)
+	docPath, err := p.docPath(name)
+	if err != nil {
+		return domain.DocSummary{}, err
+	}
 	info, err := os.Stat(docPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -251,6 +257,9 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 		} else {
 			return domain.Page{}, fmt.Errorf("%w: %s/%s", domain.ErrPageNotFound, docName, pagePath)
 		}
+	}
+	if !pagePathInsideDoc(docPath, pageFile) {
+		return domain.Page{}, fmt.Errorf("%w: %s/%s", domain.ErrPageNotFound, docName, pagePath)
 	}
 
 	data, err := os.ReadFile(pageFile)

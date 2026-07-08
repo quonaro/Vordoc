@@ -2,6 +2,7 @@ package content
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"os"
@@ -166,6 +167,28 @@ func TestProvider_GetDoc_description_from_index(t *testing.T) {
 	}
 	if doc.IndexPage == nil || doc.IndexPage.Description != "From index" {
 		t.Errorf("index page description missing or incorrect")
+	}
+}
+
+func TestProvider_GetPage_rejectsPathTraversal(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	otherRoot := filepath.Join(root, "other")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	must(t, os.MkdirAll(otherRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Doc\n")
+	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Home\n---\nHome\n")
+	mustWrite(t, filepath.Join(otherRoot, "secret.md"), "---\ntitle: Secret\n---\nSecret\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	_, err := p.GetPage(context.Background(), "doc", "../other/secret")
+	if err == nil {
+		t.Fatal("expected error for path traversal, got nil")
+	}
+	if !errors.Is(err, domain.ErrPageNotFound) {
+		t.Fatalf("expected ErrPageNotFound, got %v", err)
 	}
 }
 

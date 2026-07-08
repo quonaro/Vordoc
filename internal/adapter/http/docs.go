@@ -59,10 +59,12 @@ func writeJSON(w http.ResponseWriter, status int, data any) {
 }
 
 func writeError(w http.ResponseWriter, status int, message string) {
+	w.Header().Set("Cache-Control", "no-store")
 	writeJSON(w, status, map[string]any{"error": message})
 }
 
 func writePasswordRequired(w http.ResponseWriter, scope string) {
+	w.Header().Set("Cache-Control", "no-store")
 	writeJSON(w, http.StatusForbidden, passwordRequiredResponse{
 		Error:            "password_required",
 		PasswordRequired: true,

@@ -225,3 +225,40 @@ func TestDocsHandler_ServeAsset_SVG_KeepsExistingTitle(t *testing.T) {
 		t.Errorf("expected existing title not to be overwritten")
 	}
 }
+
+func TestDocsHandler_GetDocOrPage_rejectsPathTraversal(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	otherRoot := filepath.Join(root, "other")
+	if err := os.MkdirAll(docRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(otherRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(docRoot, "config.yaml"), []byte("title: Test Doc\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(docRoot, "index.md"), []byte("---\ntitle: Home\n---\nHome\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(otherRoot, "secret.md"), []byte("---\ntitle: Secret\n---\nSecret content\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	provider := content.NewProvider(root, slog.New(slog.NewTextHandler(os.Stderr, nil)))
+	passwordService := service.NewPasswordService()
+	handler := NewDocsHandler(provider, passwordService, "secret", slog.New(slog.NewTextHandler(os.Stderr, nil)))
+
+	r := chi.NewRouter()
+	r.Get("/api/v1/*", handler.GetDocOrPage)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/doc/../other/secret", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("expected 404 for path traversal, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
