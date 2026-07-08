@@ -80,7 +80,9 @@ const positionClass = (id: HeaderElement): string => {
         >{{ title }}</span
       >
     </div>
-    <DocSearch :class="cn('w-full max-w-xl', positionClass('search'))" />
+    <GlobalSearchTrigger
+      :class="cn('w-full max-w-xl', positionClass('search'))"
+    />
     <ThemeSelector :class="positionClass('theme-switch')" />
   </header>
 </template>

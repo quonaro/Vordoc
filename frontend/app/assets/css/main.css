@@ -352,3 +352,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .mermaid {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .mermaid[data-processed='true'] {
+    opacity: 1;
+    display: flex;
+    justify-content: center;
+  }
+}

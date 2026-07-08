@@ -106,3 +106,19 @@ type DocSummary struct {
 	PasswordHash string
 	Scope        string
 }
+
+// GlobalSearchPageResult is a single page hit within a documentation.
+type GlobalSearchPageResult struct {
+	Title   string `json:"title"`
+	Path    string `json:"path"`
+	Snippet string `json:"snippet,omitempty"`
+}
+
+// GlobalSearchResult groups search hits for one documentation.
+type GlobalSearchResult struct {
+	Name        string                   `json:"name"`
+	Title       string                   `json:"title"`
+	Description string                   `json:"description,omitempty"`
+	Access      string                   `json:"access,omitempty"`
+	Pages       []GlobalSearchPageResult `json:"pages,omitempty"`
+}

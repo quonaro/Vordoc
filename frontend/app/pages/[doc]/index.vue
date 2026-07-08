@@ -42,6 +42,19 @@ const loading = ref(true)
 const passwordRequired = ref(false)
 const contentRef = shallowRef<HTMLElement | null>(null)
 
+const theme = useTheme()
+const effectiveTheme = computed(() => {
+  if (theme.theme.value === 'dark') return 'dark'
+  if (theme.theme.value === 'light') return 'light'
+  if (!import.meta.client) return 'light'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light'
+})
+
+useCopyCode(contentRef)
+useMermaid(contentRef, effectiveTheme)
+
 const sidebarNodes = useSidebarNodes(
   computed(() => docMeta.value?.pages ?? []),
   computed(() => pageData.value?.path ?? ''),

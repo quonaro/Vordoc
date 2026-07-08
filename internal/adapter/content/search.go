@@ -101,6 +101,64 @@ func (p *Provider) SearchPages(_ context.Context, docName string, query string) 
 	return results, nil
 }
 
+// SearchAllDocs searches for query across all available documentations.
+func (p *Provider) SearchAllDocs(ctx context.Context, query string) ([]domain.GlobalSearchResult, error) {
+	query = strings.TrimSpace(query)
+	if query == "" {
+		return nil, nil
+	}
+
+	docNames, err := p.ListDocs(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("listing docs for global search: %w", err)
+	}
+
+	const maxPagesPerDoc = 10
+
+	var all []domain.GlobalSearchResult
+	for _, name := range docNames {
+		summary, err := p.GetDocSummary(ctx, name)
+		if err != nil {
+			continue
+		}
+
+		group := domain.GlobalSearchResult{
+			Name:        summary.Name,
+			Title:       summary.Title,
+			Description: summary.Description,
+			Access:      summary.Access,
+		}
+
+		if summary.Access != "password" {
+			pages, err := p.SearchPages(ctx, name, query)
+			if err != nil {
+				continue
+			}
+			if len(pages) == 0 {
+				continue
+			}
+			if len(pages) > maxPagesPerDoc {
+				pages = pages[:maxPagesPerDoc]
+			}
+			for _, page := range pages {
+				group.Pages = append(group.Pages, domain.GlobalSearchPageResult{
+					Title:   page.Title,
+					Path:    page.Path,
+					Snippet: page.Snippet,
+				})
+			}
+		}
+
+		all = append(all, group)
+	}
+
+	sort.Slice(all, func(i, j int) bool {
+		return strings.ToLower(all[i].Title) < strings.ToLower(all[j].Title)
+	})
+
+	return all, nil
+}
+
 // searchTerms splits a query into normalized lowercase tokens, removing punctuation.
 func searchTerms(query string) []string {
 	var terms []string

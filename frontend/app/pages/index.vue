@@ -46,7 +46,14 @@ function isProtected(doc: DocMeta): boolean {
   <div class="min-h-screen bg-background">
     <SiteHeader :header="header" />
     <div class="p-8">
-      <div class="mx-auto max-w-4xl">
+      <div class="mx-auto max-w-4xl space-y-8">
+        <div class="space-y-2">
+          <h1 class="text-2xl font-semibold tracking-tight">
+            {{ t('root.availableDocumentation') }}
+          </h1>
+          <GlobalSearch inline />
+        </div>
+
         <div v-if="enableRootPage" class="grid gap-4 sm:grid-cols-2">
           <NuxtLink
             v-for="doc in docs"

@@ -19,6 +19,9 @@ type ContentProvider interface {
 	// SearchPages searches for query across all pages of a documentation.
 	SearchPages(ctx context.Context, doc string, query string) ([]SearchResult, error)
 
+	// SearchAllDocs searches for query across all available documentations.
+	SearchAllDocs(ctx context.Context, query string) ([]GlobalSearchResult, error)
+
 	// GetRootConfig returns the root content configuration.
 	GetRootConfig(ctx context.Context) (RootConfig, error)
 

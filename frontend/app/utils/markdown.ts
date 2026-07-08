@@ -3,10 +3,12 @@ import { markedHighlight } from 'marked-highlight'
 import hljs from 'highlight.js'
 import { sanitize } from 'isomorphic-dompurify'
 import { escapeHtmlAttribute } from '~/utils/markdown/escape'
+import { wrapCodeBlocksWithCopyButton } from '~/utils/markdown/extensions/copy-code'
 import { createDangerExtension } from '~/utils/markdown/extensions/danger'
 import { createFilesGalleryExtension, type FilesGalleryToken } from '~/utils/markdown/extensions/files-gallery'
 import { createGalleryExtension, type GalleryToken } from '~/utils/markdown/extensions/gallery'
 import { createImageExtension, type ImageToken } from '~/utils/markdown/extensions/image'
+import { createMermaidExtension } from '~/utils/markdown/extensions/mermaid'
 import { createWarningExtension } from '~/utils/markdown/extensions/warning'
 
 function isExternalHref(href: string): boolean {
@@ -269,6 +271,7 @@ marked.use(
       createWarningExtension(),
       createDangerExtension(),
       createFilesGalleryExtension(),
+      createMermaidExtension(),
     ],
   },
 )
@@ -283,7 +286,9 @@ export function renderMarkdown(
     walkTokens: (token: Token) => resolveMarkdownToken(token, docName, filePath),
   }) as string
 
-  return sanitize(raw, {
+  const withCopyButtons = wrapCodeBlocksWithCopyButton(raw)
+
+  return sanitize(withCopyButtons, {
     ALLOWED_TAGS: [
       'h1',
       'h2',
@@ -301,6 +306,7 @@ export function renderMarkdown(
       's',
       'code',
       'pre',
+      'button',
       'blockquote',
       'ul',
       'ol',
@@ -329,6 +335,8 @@ export function renderMarkdown(
       'target',
       'rel',
       'download',
+      'type',
+      'aria-label',
       'id',
       'class',
       'src',

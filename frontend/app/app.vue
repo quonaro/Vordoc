@@ -39,6 +39,11 @@ const accentStyle = computed(() => {
 })
 
 const pageTitle = usePageTitle()
+const globalSearchOpen = useGlobalSearchState()
+
+useGlobalSearchShortcut(() => {
+  globalSearchOpen.value = true
+})
 
 useHead(() => ({
   title: pageTitle.fullTitle,
@@ -57,4 +62,5 @@ useHead(() => ({
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <GlobalSearch v-if="globalSearchOpen" @close="globalSearchOpen = false" />
 </template>

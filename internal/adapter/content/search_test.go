@@ -166,6 +166,72 @@ func TestProvider_SearchPages_codeBlock(t *testing.T) {
 	}
 }
 
+func TestProvider_SearchAllDocs(t *testing.T) {
+	root := t.TempDir()
+
+	docA := filepath.Join(root, "doc-a")
+	must(t, os.MkdirAll(docA, 0o755))
+	mustWrite(t, filepath.Join(docA, "config.yaml"), "title: Alpha Docs\n")
+	mustWrite(t, filepath.Join(docA, "index.md"), "---\ntitle: Alpha Home\n---\nWelcome to alpha.")
+	mustWrite(t, filepath.Join(docA, "guide.md"), "---\ntitle: Alpha Guide\n---\nAlpha guide content.")
+
+	docB := filepath.Join(root, "doc-b")
+	must(t, os.MkdirAll(docB, 0o755))
+	mustWrite(t, filepath.Join(docB, "config.yaml"), "title: Beta Docs\n")
+	mustWrite(t, filepath.Join(docB, "index.md"), "---\ntitle: Beta Home\n---\nWelcome to beta.")
+	mustWrite(t, filepath.Join(docB, "setup.md"), "---\ntitle: Beta Setup\n---\nBeta setup content.")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	results, err := p.SearchAllDocs(context.Background(), "beta")
+	must(t, err)
+
+	if len(results) != 1 {
+		t.Fatalf("expected 1 doc result, got %d", len(results))
+	}
+
+	var betaDoc *struct {
+		name  string
+		title string
+		pages int
+	}
+	for _, r := range results {
+		if r.Name == "doc-b" {
+			betaDoc = &struct {
+				name  string
+				title string
+				pages int
+			}{name: r.Name, title: r.Title, pages: len(r.Pages)}
+		}
+	}
+	if betaDoc == nil {
+		t.Fatal("expected doc-b in results")
+	}
+	if betaDoc.title != "Beta Docs" {
+		t.Errorf("expected title 'Beta Docs', got %q", betaDoc.title)
+	}
+	if betaDoc.pages == 0 {
+		t.Error("expected pages in beta doc")
+	}
+}
+
+func TestProvider_SearchAllDocs_emptyQuery(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test\n")
+	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Home\n---\nHome page\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	results, err := p.SearchAllDocs(context.Background(), "")
+	must(t, err)
+	if len(results) != 0 {
+		t.Errorf("expected 0 results for empty query, got %d", len(results))
+	}
+}
+
 func TestSnippet_runeBoundaries(t *testing.T) {
 	// Build text where byte-based slicing would cut through a multi-byte rune.
 	text := strings.Repeat("а", 35) + "x target " + strings.Repeat("б", 100)
