@@ -99,6 +99,10 @@ func (h *DocsHandler) ServeAsset(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusNotFound, "asset_not_found")
 			return
 		}
+		if errors.Is(err, domain.ErrInvalidPath) {
+			writeError(w, http.StatusBadRequest, "invalid_path")
+			return
+		}
 		h.logger.Error("failed to resolve asset",
 			slog.String("error", err.Error()),
 			slog.String("doc", docName),
@@ -116,6 +120,10 @@ func (h *DocsHandler) ServeAsset(w http.ResponseWriter, r *http.Request) {
 		}
 		if errors.Is(err, domain.ErrAssetNotFound) {
 			writeError(w, http.StatusNotFound, "asset_not_found")
+			return
+		}
+		if errors.Is(err, domain.ErrInvalidPath) {
+			writeError(w, http.StatusBadRequest, "invalid_path")
 			return
 		}
 		h.logger.Error("failed to resolve asset access",

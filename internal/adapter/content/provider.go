@@ -245,7 +245,10 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 
 // GetPage returns a page's content and metadata.
 func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (domain.Page, error) {
-	docPath := filepath.Join(p.root, docName)
+	docPath, err := p.docPath(docName)
+	if err != nil {
+		return domain.Page{}, fmt.Errorf("%w: %s/%s", domain.ErrPageNotFound, docName, pagePath)
+	}
 
 	// Resolve page file path
 	pageFile := filepath.Join(docPath, pagePath+".md")

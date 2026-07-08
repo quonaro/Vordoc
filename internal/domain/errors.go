@@ -19,3 +19,6 @@ var ErrAccessDenied = errors.New("access denied")
 
 // ErrAssetNotFound is returned when a static asset does not exist.
 var ErrAssetNotFound = errors.New("asset not found")
+
+// ErrInvalidPath is returned when a path is invalid or would escape the allowed directory.
+var ErrInvalidPath = errors.New("invalid path")

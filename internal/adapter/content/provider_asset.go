@@ -12,16 +12,9 @@ import (
 
 // GetAssetAccess returns the effective access info for an asset path.
 func (p *Provider) GetAssetAccess(ctx context.Context, docName string, assetPath string) (domain.AccessInfo, error) {
-	docPath := filepath.Join(p.root, docName)
-	info, err := os.Stat(docPath)
+	docPath, err := p.docPath(docName)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return domain.AccessInfo{}, fmt.Errorf("%w: %s", domain.ErrDocNotFound, docName)
-		}
-		return domain.AccessInfo{}, fmt.Errorf("stat doc: %w", err)
-	}
-	if !info.IsDir() {
-		return domain.AccessInfo{}, fmt.Errorf("%w: %s is not a directory", domain.ErrDocNotFound, docName)
+		return domain.AccessInfo{}, err
 	}
 
 	fullPath, err := p.GetAssetPath(ctx, docName, assetPath)
@@ -34,7 +27,11 @@ func (p *Provider) GetAssetAccess(ctx context.Context, docName string, assetPath
 
 // GetAssetPath resolves a static asset path inside a documentation directory.
 func (p *Provider) GetAssetPath(ctx context.Context, docName string, assetPath string) (string, error) {
-	docPath := filepath.Join(p.root, docName)
+	docPath, err := p.docPath(docName)
+	if err != nil {
+		return "", err
+	}
+
 	info, err := os.Stat(docPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -58,7 +55,7 @@ func (p *Provider) GetAssetPath(ctx context.Context, docName string, assetPath s
 		return "", fmt.Errorf("resolving asset path: %w", err)
 	}
 	if !strings.HasPrefix(absAsset, absDoc+string(filepath.Separator)) {
-		return "", fmt.Errorf("asset path escapes doc directory")
+		return "", fmt.Errorf("%w: asset path escapes doc directory", domain.ErrInvalidPath)
 	}
 
 	info, err = os.Stat(absAsset)
