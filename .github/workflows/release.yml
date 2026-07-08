@@ -54,7 +54,7 @@ jobs:
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v6 # Обновленная версия
       with:
-        version: latest
+        version: v1.65.0
         args: --timeout=5m
         # Убедись, что в .golangci.yml включены линтеры gofmt/gofumpt
 
