@@ -10,7 +10,7 @@ permissions:
   packages: write # Нужно для пуша в GHCR
 
 env:
-  GO_VERSION: '1.23' # Лучше фиксировать мажорную версию или использовать go-version-file
+  GO_VERSION: '1.26.1' # Match go.mod
   NODE_VERSION: '22' # Node 22 - текущий LTS, стабильнее чем 24 для билдов
   PNPM_VERSION: '9'
 
