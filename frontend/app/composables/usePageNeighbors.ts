@@ -4,6 +4,7 @@ interface PageNode {
   path: string
   title: string
   access?: string
+  access_scope?: string
   has_index?: boolean
   children?: PageNode[]
 }

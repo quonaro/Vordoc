@@ -1,14 +1,16 @@
 package http
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"html"
 	"log/slog"
 	"mime"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -132,6 +134,51 @@ func (h *DocsHandler) ServeAsset(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Cache-Control", "public, max-age=300")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%q", path.Base(assetPath)))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%q", filepath.Base(filePath)))
+
+	if contentType == "image/svg+xml" {
+		if err := serveSVGWithTitle(w, r, filePath, filepath.Base(filePath)); err != nil {
+			h.logger.Error("failed to serve svg asset",
+				slog.String("error", err.Error()),
+				slog.String("doc", docName),
+				slog.String("asset", assetPath),
+			)
+			writeError(w, http.StatusInternalServerError, "failed_to_serve_asset")
+		}
+		return
+	}
+
 	http.ServeFile(w, r, filePath)
+}
+
+var (
+	svgOpenTagRegex  = regexp.MustCompile(`(?i)(<svg[^>]*>)`)
+	svgTitleTagRegex = regexp.MustCompile(`(?i)<title[\s/>]`)
+)
+
+// serveSVGWithTitle serves an SVG asset, injecting a <title> element based on
+// the file name when the SVG does not already contain one. This makes the
+// browser tab title match the file name when the SVG is opened directly.
+func serveSVGWithTitle(w http.ResponseWriter, r *http.Request, filePath, fileName string) error {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	if !svgTitleTagRegex.Match(data) {
+		loc := svgOpenTagRegex.FindIndex(data)
+		if loc != nil {
+			end := loc[1]
+			titleTag := []byte("<title>" + html.EscapeString(fileName) + "</title>")
+			data = append(data[:end], append(titleTag, data[end:]...)...)
+		}
+	}
+
+	fi, err := os.Stat(filePath)
+	if err != nil {
+		return err
+	}
+
+	http.ServeContent(w, r, filePath, fi.ModTime(), bytes.NewReader(data))
+	return nil
 }

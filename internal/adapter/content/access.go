@@ -47,27 +47,35 @@ func resolveAccess(docPath string, pageFile string, fm map[string]any) (string, 
 }
 
 // resolveAccessInfo returns the effective access rule, walking up the directory tree.
-// A node with access: password and no password_hash inherits the hash of the nearest
-// ancestor that has a password_hash. access: none and access: public stop inheritance.
+// A node with access: password and no password_hash inherits the hash and scope of the
+// nearest ancestor that has a password_hash. access: none and access: public stop inheritance.
 func resolveAccessInfo(docPath string, pageFile string, fm map[string]any) domain.AccessInfo {
-	// 1. Frontmatter override: the page itself owns the rule.
+	// 1. Frontmatter override.
 	if access := getString(fm, "access", ""); access != "" {
 		if access == "none" {
-			access = "public"
+			return domain.AccessInfo{Access: "public"}
 		}
-		info := domain.AccessInfo{
-			Access:       access,
-			PasswordHash: getString(fm, "password_hash", ""),
-		}
-		if access == "password" {
+		if hash := getString(fm, "password_hash", ""); hash != "" {
 			rel, _ := filepath.Rel(docPath, pageFile)
 			rel = filepath.ToSlash(rel)
-			info.Scope = strings.TrimSuffix(rel, ".md")
-			if info.Scope == "index" {
-				info.Scope = ""
+			scope := strings.TrimSuffix(rel, ".md")
+			if scope == "index" {
+				scope = ""
+			}
+			return domain.AccessInfo{
+				Access:       "password",
+				PasswordHash: hash,
+				Scope:        scope,
 			}
 		}
-		return info
+		// Frontmatter asks for password but has no hash: inherit from an ancestor.
+		rel, _ := filepath.Rel(docPath, pageFile)
+		rel = filepath.ToSlash(rel)
+		originalScope := strings.TrimSuffix(rel, ".md")
+		if originalScope == "index" {
+			originalScope = ""
+		}
+		return inheritPasswordHash(docPath, filepath.Dir(pageFile), originalScope)
 	}
 
 	// 2. Walk up from page directory to doc root.
@@ -88,13 +96,13 @@ func resolveAccessInfo(docPath string, pageFile string, fm map[string]any) domai
 
 			if !firstSet {
 				firstSet = true
+				if cfg.Access == "public" {
+					return domain.AccessInfo{Access: "public"}
+				}
 				first = domain.AccessInfo{
 					Access:       cfg.Access,
 					PasswordHash: cfg.PasswordHash,
 					Scope:        scope,
-				}
-				if cfg.Access == "public" {
-					return first
 				}
 				if cfg.PasswordHash != "" {
 					return first
@@ -126,6 +134,45 @@ func resolveAccessInfo(docPath string, pageFile string, fm map[string]any) domai
 		return first
 	}
 	return domain.AccessInfo{Access: "public"}
+}
+
+// inheritPasswordHash walks up from childDir to the doc root looking for a password_hash.
+// If a public ancestor is found first, it stops and returns the original scope with no hash.
+// If no ancestor has a hash, it returns the original scope with no hash.
+func inheritPasswordHash(docPath string, childDir string, originalScope string) domain.AccessInfo {
+	docPath = filepath.Clean(docPath)
+	dir := childDir
+
+	for {
+		cfg, found, err := loadAccessConfig(dir)
+		if err == nil && found {
+			if cfg.Access == "public" {
+				return domain.AccessInfo{Access: "password", Scope: originalScope}
+			}
+			if cfg.PasswordHash != "" {
+				rel, _ := filepath.Rel(docPath, dir)
+				scope := filepath.ToSlash(rel)
+				if scope == "." {
+					scope = ""
+				}
+				return domain.AccessInfo{
+					Access:       "password",
+					PasswordHash: cfg.PasswordHash,
+					Scope:        scope,
+				}
+			}
+		}
+		if dir == docPath {
+			break
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+
+	return domain.AccessInfo{Access: "password", Scope: originalScope}
 }
 
 // docConfig holds per-doc metadata.

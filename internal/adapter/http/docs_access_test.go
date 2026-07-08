@@ -37,13 +37,13 @@ func setupProtectedDoc(t *testing.T, handler **DocsHandler) (*httptest.ResponseR
 	*handler = NewDocsHandler(provider, passwordService, "secret", slog.New(slog.NewTextHandler(os.Stderr, nil)))
 
 	r := chi.NewRouter()
-	r.Get("/api/v1/docs", (*handler).ListDocs)
-	r.Get("/api/v1/{doc}/search", (*handler).Search)
-	r.Get("/api/v1/assets/{doc}/*", (*handler).ServeAsset)
-	r.Get("/api/v1/{doc}", (*handler).GetDocOrPage)
-	r.Get("/api/v1/{doc}/{page}", (*handler).GetDocOrPage)
-	r.Post("/api/v1/{doc}", (*handler).VerifyPassword)
-	r.Post("/api/v1/{doc}/{page}", (*handler).VerifyPassword)
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Get("/docs", (*handler).ListDocs)
+		r.Get("/{doc}/search", (*handler).Search)
+		r.Get("/assets/{doc}/*", (*handler).ServeAsset)
+		r.Get("/*", (*handler).GetDocOrPage)
+		r.Post("/*", (*handler).VerifyPassword)
+	})
 
 	return httptest.NewRecorder(), r
 }

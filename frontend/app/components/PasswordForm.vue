@@ -29,7 +29,7 @@ const autoVerify = ref(false)
 const config = useRuntimeConfig()
 
 function effectiveScope(responseScope?: string): string {
-  return responseScope || props.scope || props.pagePath || '_'
+  return responseScope ?? props.scope ?? props.pagePath ?? ''
 }
 
 function storageKey(scope?: string): string {
