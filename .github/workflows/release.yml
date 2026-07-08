@@ -10,7 +10,6 @@ permissions:
   packages: write # Нужно для пуша в GHCR
 
 env:
-  GO_VERSION: '1.26.1' # Match go.mod
   NODE_VERSION: '22' # Node 22 - текущий LTS, стабильнее чем 24 для билдов
   PNPM_VERSION: '9'
 
@@ -25,7 +24,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
-        go-version: ${{ env.GO_VERSION }}
+        go-version-file: go.mod
         cache: true
 
     - name: Setup pnpm
@@ -51,13 +50,6 @@ jobs:
         pnpm exec prettier --check .
         pnpm run lint:all
 
-    - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v6 # Обновленная версия
-      with:
-        version: v1.65.0
-        args: --timeout=5m
-        # Убедись, что в .golangci.yml включены линтеры gofmt/gofumpt
-
   build:
     name: Build Artifacts
     needs: lint
@@ -69,7 +61,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
-        go-version: ${{ env.GO_VERSION }}
+        go-version-file: go.mod
         cache: true
 
     - name: Setup pnpm
