@@ -60,6 +60,15 @@ run:
   vars:
   - "import:env .env"
 
+init:
+  desc: Initialize a welcome documentation in the content root
+  script: |
+    if [ -f ./vordoc ]; then
+      ./vordoc init
+    else
+      go run ./cmd/vordoc init
+    fi
+
 dev:
   script: echo "Starting development server..."
   depends:

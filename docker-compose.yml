@@ -6,6 +6,8 @@ services:
     ports:
       - "${VORDOC_PORT:-12300}:12300"
     env_file: .env
+    environment:
+      VORDOC_INIT: "true"
     volumes:
-      - ./content:/app/content:ro
+      - ./content:/app/content
     restart: unless-stopped

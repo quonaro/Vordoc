@@ -34,6 +34,7 @@ func main() {
 	builder.RegisterNative("run", runServer)
 	builder.RegisterNative("pass", hashPassword)
 	builder.RegisterNative("version", showVersion)
+	builder.RegisterNative("init", initDoc)
 
 	app, err := builder.Build()
 	if err != nil {

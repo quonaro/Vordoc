@@ -41,21 +41,21 @@ RUN CGO_ENABLED=0 go build \
 
 ## Content folder structure
 
-`content` is a mountable volume with user content. In Docker it is mounted read-only:
+`content` is a mountable volume with user content. In Docker Compose it is mounted read-write so the container can initialize default content on first run:
 
-```@/home/quonaro/CascadeProjects/my/Vordoc/docker-compose.yml:9-11
+```@/home/quonaro/CascadeProjects/my/Vordoc/docker-compose.yml:11-12
 volumes:
-  - ./content:/app/content:ro
+  - ./content:/app/content
 ```
 
 ### Content root
 
-| File/folder    | Purpose                                                                                                  |
-| -------------- | -------------------------------------------------------------------------------------------------------- |
-| `config.yaml`  | Global site configuration: header, logo, theme, favicon.                                                   |
+| File/folder    | Purpose                                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `config.yaml`  | Global site configuration: header, logo, theme, favicon.                                                                        |
 | `text.json`    | UI translations. Recursively overrides the embedded `internal/adapter/content/default_text.json`; only changed keys are needed. |
-| `logotype.svg` | Default logotype.                                                                                        |
-| Subfolders     | Each subfolder is a separate documentation (`doc`).                                                      |
+| `logotype.svg` | Default logotype.                                                                                                               |
+| Subfolders     | Each subfolder is a separate documentation (`doc`).                                                                             |
 
 ### Documentation subfolder
 
@@ -76,13 +76,13 @@ content/
     └── public/
 ```
 
-| File          | Purpose                                                                           |
-| ------------- | --------------------------------------------------------------------------------- |
-| `config.yaml` | Documentation `title`, `header`, `access`, and `password_hash` settings.          |
-| `access.yaml` | Alternative/additional access rules file (may duplicate `config.yaml`).           |
-| `index.md`    | Documentation home page.                                                          |
-| `*.md`        | Other pages.                                                                      |
-| `public/`     | Documentation static resources (images, fonts, etc.).                             |
+| File          | Purpose                                                                  |
+| ------------- | ------------------------------------------------------------------------ |
+| `config.yaml` | Documentation `title`, `header`, `access`, and `password_hash` settings. |
+| `access.yaml` | Alternative/additional access rules file (may duplicate `config.yaml`).  |
+| `index.md`    | Documentation home page.                                                 |
+| `*.md`        | Other pages.                                                             |
+| `public/`     | Documentation static resources (images, fonts, etc.).                    |
 
 ### Access control
 
@@ -133,14 +133,15 @@ VORDOC_SHUTDOWN_GRACE=10s
 VORDOC_PAGE_SECRET=CHANGE_ME
 ```
 
-| Variable                | Default               | Description                                                                                       |
-| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------------- |
-| `VORDOC_PORT`           | `12300`               | Backend HTTP server port.                                                                         |
-| `VORDOC_CONTENT`        | `./content`           | Path to the user content root.                                                                    |
-| `VORDOC_LOG_LEVEL`      | `info`                | Log level (`debug`, `info`, `warn`, `error`).                                                     |
-| `VORDOC_LOG_TYPE`       | `pretty`              | Log format (`pretty`, `json`, `text`).                                                            |
-| `VORDOC_SHUTDOWN_GRACE` | `10s`                 | Graceful shutdown timeout.                                                                        |
-| `VORDOC_PAGE_SECRET`    | generated randomly    | Secret for cookie-protected pages. **Set explicitly**, otherwise sessions reset on restart.        |
+| Variable                | Default            | Description                                                                                 |
+| ----------------------- | ------------------ | ------------------------------------------------------------------------------------------- |
+| `VORDOC_PORT`           | `12300`            | Backend HTTP server port.                                                                   |
+| `VORDOC_CONTENT`        | `./content`        | Path to the user content root.                                                              |
+| `VORDOC_LOG_LEVEL`      | `info`             | Log level (`debug`, `info`, `warn`, `error`).                                               |
+| `VORDOC_LOG_TYPE`       | `pretty`           | Log format (`pretty`, `json`, `text`).                                                      |
+| `VORDOC_SHUTDOWN_GRACE` | `10s`              | Graceful shutdown timeout.                                                                  |
+| `VORDOC_PAGE_SECRET`    | generated randomly | Secret for cookie-protected pages. **Set explicitly**, otherwise sessions reset on restart. |
+| `VORDOC_INIT`           | `false`            | Run `vordoc init` before `vordoc run`. Used by the Docker entrypoint.                       |
 
 ## Local development with Lota
 
@@ -191,18 +192,20 @@ docker compose up --build --force-recreate
 1. `frontend-builder` (Node 22 alpine) installs dependencies via pnpm and generates the SPA.
 2. The generated static files are copied to `internal/adapter/http/dist`.
 3. `go-builder` (Go 1.26 alpine) builds the `vordoc` binary.
-4. `runtime` (Alpine 3.21) runs the binary.
+4. `runtime` (Alpine 3.21) runs `docker-entrypoint.sh`, which optionally runs `vordoc init` and then starts the server.
 
 Container:
 
 - exposes port `12300`;
 - reads `.env`;
-- mounts `./content` to `/app/content` read-only.
+- runs `vordoc init` before `vordoc run` when `VORDOC_INIT=true`;
+- mounts `./content` to `/app/content` (read-write by default so `init` can create files).
 
 ### Production
 
 - **Be sure** to replace `VORDOC_PAGE_SECRET`.
 - Use an external volume or bind-mount for `content`.
+- Mount `content` read-only (`./content:/app/content:ro`) and set `VORDOC_INIT=false` when you do not want the container to modify content.
 - When running without Docker, after `lota build` run `./vordoc run`.
 
 ## Useful commands
@@ -214,6 +217,10 @@ Container:
 # Generate a bcrypt password hash for config.yaml
 ./vordoc pass "your-secret"
 # or: ./vordoc pass password="your-secret"
+
+# Initialize a welcome documentation in the content root
+./vordoc init
+# or with a custom doc name: ./vordoc init my-docs
 
 # Run without Lota
 go run ./cmd/vordoc run

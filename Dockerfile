@@ -63,8 +63,11 @@ RUN mkdir -p /app/content
 
 ENV VORDOC_CONTENT=/app/content
 ENV VORDOC_PORT=12300
+ENV VORDOC_INIT=false
 
 EXPOSE 12300
 
-ENTRYPOINT ["vordoc"]
-CMD ["run"]
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
