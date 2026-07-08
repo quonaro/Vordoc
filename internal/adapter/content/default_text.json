@@ -50,7 +50,7 @@
     "failed_to_serve_logo": "Failed to serve logo",
     "failed_to_load_config": "Failed to load configuration",
     "invalid_request_body": "Invalid request body",
-    "password_hash_not_configured": "Password hash not configured",
+    "password_hash_not_configured": "Page access is not configured correctly. Please contact the administrator.",
     "invalid_path": "Invalid path",
     "doc_name_required": "Documentation name is required"
   }
