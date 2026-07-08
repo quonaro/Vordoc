@@ -175,7 +175,7 @@ type docConfig struct {
 func loadDocConfig(path string) (docConfig, error) {
 	var cfg docConfig
 
-	data, err := os.ReadFile(path) // #nosec G304 — путь формируется внутри приложения
+	data, err := os.ReadFile(path) // #nosec G304 — path is built internally
 	if err != nil {
 		if os.IsNotExist(err) {
 			return cfg, nil

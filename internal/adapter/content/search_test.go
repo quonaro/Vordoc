@@ -234,7 +234,7 @@ func TestProvider_SearchAllDocs_emptyQuery(t *testing.T) {
 
 func TestSnippet_runeBoundaries(t *testing.T) {
 	// Build text where byte-based slicing would cut through a multi-byte rune.
-	text := strings.Repeat("а", 35) + "x target " + strings.Repeat("б", 100)
+	text := strings.Repeat("é", 35) + "x target " + strings.Repeat("è", 100)
 	terms := []string{"target"}
 
 	got := snippet(text, terms)

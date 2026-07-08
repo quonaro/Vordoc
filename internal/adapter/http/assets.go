@@ -92,7 +92,7 @@ func (h *AssetHandler) servePath(w http.ResponseWriter, r *http.Request, filePat
 	w.Header().Set("Content-Type", contentType)
 	w.WriteHeader(http.StatusOK)
 	if r.Method == http.MethodGet {
-		// #nosec G705 — data прочитана из встроенной файловой системы
+		// #nosec G705 — data is read from the embedded filesystem
 		if _, err := w.Write(data); err != nil {
 			h.logger.Error("failed to write response", slog.String("error", err.Error()))
 		}

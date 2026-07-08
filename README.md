@@ -1,30 +1,30 @@
 # Vordoc
 
-Vordoc — это генератор/вьюер документации: markdown-страницы из папки `content` отдаются через Go-бэкенд, а интерфейс представляет собой встроенный Nuxt SPA.
+Vordoc is a documentation generator/viewer: Markdown pages from the `content` folder are served by a Go backend, while the UI is an embedded Nuxt SPA.
 
-## Содержание
+## Table of contents
 
-- [Стек и архитектура](#стек-и-архитектура)
-- [Структура папки `content`](#структура-папки-content)
-- [Переменные окружения](#переменные-окружения)
-- [Локальная разработка через Lota](#локальная-разработка-через-lota)
-- [Docker-сборка и запуск](#docker-сборка-и-запуск)
-- [Полезные команды](#полезные-команды)
+- [Stack and architecture](#stack-and-architecture)
+- [Content folder structure](#content-folder-structure)
+- [Environment variables](#environment-variables)
+- [Local development with Lota](#local-development-with-lota)
+- [Docker build and run](#docker-build-and-run)
+- [Useful commands](#useful-commands)
 
-## Стек и архитектура
+## Stack and architecture
 
-- **Бэкенд:** Go 1.26 (`module vordoc`), фреймворк маршрутизации — `go-chi/chi/v5`.
-- **Фронтенд:** Nuxt 3, статическая генерация (`pnpm run generate`).
-- **Сборщик задач:** [Lota](https://github.com/quonaro/Lota).
-- **Контент:** Markdown-файлы, YAML-конфигурации, JSON-строки интерфейса.
+- **Backend:** Go 1.26 (`module vordoc`), routing framework — `go-chi/chi/v5`.
+- **Frontend:** Nuxt 3, static generation (`pnpm run generate`).
+- **Task runner:** [Lota](https://github.com/quonaro/Lota).
+- **Content:** Markdown files, YAML configurations, JSON UI strings.
 
-### Как собирается приложение
+### How the application is built
 
-1. Фронтенд собирается в статику в `frontend/.output/public`.
-2. Статика копируется в `internal/adapter/http/dist`, куда бэкенд подкладывает её через `embed`.
-3. Go-билд формирует единый бинарник `./vordoc`.
+1. The frontend is generated into static files in `frontend/.output/public`.
+2. The static files are copied to `internal/adapter/http/dist`, which the backend embeds.
+3. The Go build produces a single `./vordoc` binary.
 
-Этот же пайплайн используется и в Docker — см. `Dockerfile` (`frontend-builder` → `go-builder` → `alpine`).
+The same pipeline is used inside Docker — see `Dockerfile` (`frontend-builder` → `go-builder` → `alpine`).
 
 ```@/home/quonaro/CascadeProjects/my/Vordoc/Dockerfile:6-48
 FROM node:22-alpine AS frontend-builder
@@ -39,25 +39,25 @@ RUN CGO_ENABLED=0 go build \
     ./cmd/vordoc
 ```
 
-## Структура папки `content`
+## Content folder structure
 
-`content` — это монтируемый том с пользовательским контентом. В Docker он подключается read-only:
+`content` is a mountable volume with user content. In Docker it is mounted read-only:
 
 ```@/home/quonaro/CascadeProjects/my/Vordoc/docker-compose.yml:9-11
 volumes:
   - ./content:/app/content:ro
 ```
 
-### Корень `content`
+### Content root
 
-| Файл/папка     | Назначение                                                                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `config.yaml`  | Глобальная конфигурация сайта: заголовок, логотип, тема, favicon.                                                                           |
-| `text.json`    | Переводы UI. Переопределяет встроенный `internal/adapter/content/default_text.json` рекурсивно: достаточно указать только изменённые ключи. |
-| `logotype.svg` | Логотип по умолчанию.                                                                                                                       |
-| Подпапки       | Каждая подпапка — отдельная документация (`doc`).                                                                                           |
+| File/folder    | Purpose                                                                                                  |
+| -------------- | -------------------------------------------------------------------------------------------------------- |
+| `config.yaml`  | Global site configuration: header, logo, theme, favicon.                                                   |
+| `text.json`    | UI translations. Recursively overrides the embedded `internal/adapter/content/default_text.json`; only changed keys are needed. |
+| `logotype.svg` | Default logotype.                                                                                        |
+| Subfolders     | Each subfolder is a separate documentation (`doc`).                                                      |
 
-### Подпапка документации
+### Documentation subfolder
 
 ```
 content/
@@ -76,24 +76,24 @@ content/
     └── public/
 ```
 
-| Файл          | Назначение                                                                           |
-| ------------- | ------------------------------------------------------------------------------------ |
-| `config.yaml` | `title` документации, настройки `header`, `access` и `password_hash`.                |
-| `access.yaml` | Альтернативный/дополнительный файл правил доступа (может дублировать `config.yaml`). |
-| `index.md`    | Главная страница документации.                                                       |
-| `*.md`        | Остальные страницы.                                                                  |
-| `public/`     | Статические ресурсы документации (изображения, шрифты и т.д.).                       |
+| File          | Purpose                                                                           |
+| ------------- | --------------------------------------------------------------------------------- |
+| `config.yaml` | Documentation `title`, `header`, `access`, and `password_hash` settings.          |
+| `access.yaml` | Alternative/additional access rules file (may duplicate `config.yaml`).           |
+| `index.md`    | Documentation home page.                                                          |
+| `*.md`        | Other pages.                                                                      |
+| `public/`     | Documentation static resources (images, fonts, etc.).                             |
 
-### Права доступа
+### Access control
 
-- По умолчанию документация публичная.
-- `access: password` + `password_hash` включает авторизацию по паролю.
-- Правила наследуются вниз по дереву: дочерняя страница может использовать хеш ближайшего предка.
-- `access: none` или `access: public` сбрасывает наследование.
+- By default, documentation is public.
+- `access: password` + `password_hash` enables password protection.
+- Rules are inherited down the tree: a child page can use the nearest ancestor's hash.
+- `access: none` or `access: public` resets inheritance.
 
-### Настройка интерфейса
+### UI configuration
 
-`content/config.yaml` поддерживает, например:
+`content/config.yaml` supports, for example:
 
 ```yaml
 root:
@@ -118,9 +118,9 @@ theme:
   accent-color: "#3b82f6"
 ```
 
-## Переменные окружения
+## Environment variables
 
-Приложение читает `.env` автоматически (`godotenv.Load()`). В продакшене переменные задаются через реальное окружение.
+The application reads `.env` automatically (`godotenv.Load()`). In production, set variables through the real environment.
 
 ```@/home/quonaro/CascadeProjects/my/Vordoc/.env:1-10
 # Vordoc runtime configuration
@@ -133,34 +133,34 @@ VORDOC_SHUTDOWN_GRACE=10s
 VORDOC_PAGE_SECRET=CHANGE_ME
 ```
 
-| Переменная              | По умолчанию          | Описание                                                                                        |
-| ----------------------- | --------------------- | ----------------------------------------------------------------------------------------------- |
-| `VORDOC_PORT`           | `12300`               | Порт HTTP-сервера бэкенда.                                                                      |
-| `VORDOC_CONTENT`        | `./content`           | Путь к корню пользовательского контента.                                                        |
-| `VORDOC_LOG_LEVEL`      | `info`                | Уровень логирования (`debug`, `info`, `warn`, `error`).                                         |
-| `VORDOC_LOG_TYPE`       | `pretty`              | Формат логов (`pretty`, `json`, `text`).                                                        |
-| `VORDOC_SHUTDOWN_GRACE` | `10s`                 | Таймаут graceful shutdown.                                                                      |
-| `VORDOC_PAGE_SECRET`    | генерируется случайно | Секрет для cookie защищённых страниц. **Задайте явно**, иначе сессии сбросятся при перезапуске. |
+| Variable                | Default               | Description                                                                                       |
+| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------------- |
+| `VORDOC_PORT`           | `12300`               | Backend HTTP server port.                                                                         |
+| `VORDOC_CONTENT`        | `./content`           | Path to the user content root.                                                                    |
+| `VORDOC_LOG_LEVEL`      | `info`                | Log level (`debug`, `info`, `warn`, `error`).                                                     |
+| `VORDOC_LOG_TYPE`       | `pretty`              | Log format (`pretty`, `json`, `text`).                                                            |
+| `VORDOC_SHUTDOWN_GRACE` | `10s`                 | Graceful shutdown timeout.                                                                        |
+| `VORDOC_PAGE_SECRET`    | generated randomly    | Secret for cookie-protected pages. **Set explicitly**, otherwise sessions reset on restart.        |
 
-## Локальная разработка через Lota
+## Local development with Lota
 
-Для разработки предпочтительно использовать [Lota](https://github.com/quonaro/Lota).
+For development, prefer using [Lota](https://github.com/quonaro/Lota).
 
 ```bash
-# Установка Lota (один раз)
+# Install Lota (once)
 go install github.com/quonaro/lota@latest
 ```
 
-### Команды
+### Commands
 
 ```bash
-# Запуск бэкенда (air) и фронтенда (pnpm dev) параллельно
+# Run backend (air) and frontend (pnpm dev) in parallel
 lota dev
 
-# Сборка единого бинарника ./vordoc
+# Build the single ./vordoc binary
 lota build
 
-# Сборка + запуск
+# Build + run
 lota run
 ```
 
@@ -174,54 +174,54 @@ cp -R frontend/.output/public/. internal/adapter/http/dist/
 go build -ldflags="-s -w -X main.version=$COMMIT" -o vordoc ./cmd/vordoc
 ```
 
-- Бэкенд доступен на `http://localhost:12300`.
-- Фронтенд в dev-режиме на `http://localhost:12301`.
-- Lota сама прибивает занятые порты перед стартом.
+- Backend is available at `http://localhost:12300`.
+- Frontend in dev mode is at `http://localhost:12301`.
+- Lota kills occupied ports before starting.
 
-## Docker-сборка и запуск
+## Docker build and run
 
-Проект содержит готовый `Dockerfile` и `docker-compose.yml`.
+The project includes a ready-to-use `Dockerfile` and `docker-compose.yml`.
 
 ```bash
 docker compose up --build --force-recreate
 ```
 
-### Что происходит внутри Docker
+### What happens inside Docker
 
-1. `frontend-builder` (Node 22 alpine) — устанавливает зависимости через pnpm и генерирует SPA.
-2. Сгенерированная статика копируется в `internal/adapter/http/dist`.
-3. `go-builder` (Go 1.26 alpine) — собирает бинарник `vordoc`.
-4. `runtime` (Alpine 3.21) — запускает бинарник.
+1. `frontend-builder` (Node 22 alpine) installs dependencies via pnpm and generates the SPA.
+2. The generated static files are copied to `internal/adapter/http/dist`.
+3. `go-builder` (Go 1.26 alpine) builds the `vordoc` binary.
+4. `runtime` (Alpine 3.21) runs the binary.
 
-Контейнер:
+Container:
 
-- экспонирует порт `12300`;
-- читает `.env`;
-- монтирует `./content` в `/app/content` только для чтения.
+- exposes port `12300`;
+- reads `.env`;
+- mounts `./content` to `/app/content` read-only.
 
-### Продакшен
+### Production
 
-- **Обязательно** замените `VORDOC_PAGE_SECRET`.
-- Используйте внешний том или bind-mount для `content`.
-- При запуске без Docker после `lota build` запустите `./vordoc run`.
+- **Be sure** to replace `VORDOC_PAGE_SECRET`.
+- Use an external volume or bind-mount for `content`.
+- When running without Docker, after `lota build` run `./vordoc run`.
 
-## Полезные команды
+## Useful commands
 
 ```bash
-# Показать версию
+# Show version
 ./vordoc version
 
-# Сгенерировать bcrypt-хеш пароля для config.yaml
+# Generate a bcrypt password hash for config.yaml
 ./vordoc pass "your-secret"
-# или: ./vordoc pass password="your-secret"
+# or: ./vordoc pass password="your-secret"
 
-# Запуск вне Lota
+# Run without Lota
 go run ./cmd/vordoc run
 
-# Сборка бинарника без Lota
+# Build the binary without Lota
 go build -ldflags="-s -w -X main.version=$(git rev-parse --short HEAD)" -o vordoc ./cmd/vordoc
 ```
 
 ---
 
-Лицензия: [MIT](LICENSE) © 2026 quonaro.
+License: [MIT](LICENSE) © 2026 quonaro.

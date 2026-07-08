@@ -102,7 +102,7 @@ func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) 
 func (p *Provider) docAccess(docPath string) (string, string, string) {
 	idx := filepath.Join(docPath, "index.md")
 	var fm map[string]any
-	if data, err := os.ReadFile(idx); err == nil { // #nosec G304 — путь формируется внутри приложения
+	if data, err := os.ReadFile(idx); err == nil { // #nosec G304 — path is built internally
 		fm, _, _ = parseFrontmatter(data)
 	}
 	info := resolveAccessInfo(docPath, idx, fm)
@@ -181,7 +181,7 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 			hasIndex := false
 			show := true
 			idx := filepath.Join(fullPath, "index.md")
-			if data, err := os.ReadFile(idx); err == nil { // #nosec G304 — путь формируется внутри приложения
+			if data, err := os.ReadFile(idx); err == nil { // #nosec G304 — path is built internally
 				hasIndex = true
 				fm, _, _ := parseFrontmatter(data)
 				if t := getString(fm, "title", ""); t != "" {
@@ -210,7 +210,7 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 				continue
 			}
 
-			data, err := os.ReadFile(fullPath) // #nosec G304 — путь формируется внутри приложения
+			data, err := os.ReadFile(fullPath) // #nosec G304 — path is built internally
 			if err != nil {
 				continue
 			}
@@ -265,7 +265,7 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 		return domain.Page{}, fmt.Errorf("%w: %s/%s", domain.ErrPageNotFound, docName, pagePath)
 	}
 
-	data, err := os.ReadFile(pageFile) // #nosec G304 — путь валидируется pagePathInsideDoc
+	data, err := os.ReadFile(pageFile) // #nosec G304 — path is validated by pagePathInsideDoc
 	if err != nil {
 		return domain.Page{}, fmt.Errorf("reading page file: %w", err)
 	}

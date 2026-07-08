@@ -101,7 +101,7 @@ func (h *DocsHandler) setAccessCookie(w http.ResponseWriter, r *http.Request, do
 	raw := fmt.Sprintf("%s.%s", sig, string(data))
 	value := base64.URLEncoding.EncodeToString([]byte(raw))
 
-	// #nosec G124 — Secure отключён, приложение может работать по HTTP; HttpOnly и SameSite установлены.
+	// #nosec G124 — Secure is disabled because the app may run over HTTP; HttpOnly and SameSite are set.
 	http.SetCookie(w, &http.Cookie{
 		Name:     accessCookieName,
 		Value:    value,

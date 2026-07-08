@@ -51,7 +51,7 @@ func (p *Provider) SearchPages(_ context.Context, docName string, query string) 
 		rel, _ := filepath.Rel(docPath, fullPath)
 		rel = filepath.ToSlash(rel)
 
-		data, err := os.ReadFile(fullPath) // #nosec G304 G122 — путь формируется внутри приложения внутри WalkDir
+		data, err := os.ReadFile(fullPath) // #nosec G304 G122 — path is built internally inside WalkDir
 		if err != nil {
 			return nil
 		}

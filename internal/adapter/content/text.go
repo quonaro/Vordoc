@@ -46,7 +46,7 @@ func loadUIText(root string) (map[string]any, error) {
 	}
 
 	path := filepath.Join(root, uiTextFile)
-	data, err := os.ReadFile(path) // #nosec G304 — путь формируется внутри приложения
+	data, err := os.ReadFile(path) // #nosec G304 — path is built internally
 	if err != nil {
 		if os.IsNotExist(err) {
 			return text, nil

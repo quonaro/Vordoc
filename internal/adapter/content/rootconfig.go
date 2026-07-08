@@ -90,7 +90,7 @@ func loadSiteConfig(root string) (siteConfig, error) {
 	var cfg siteConfig
 
 	path := filepath.Join(root, "config.yaml")
-	data, err := os.ReadFile(path) // #nosec G304 — путь формируется внутри приложения
+	data, err := os.ReadFile(path) // #nosec G304 — path is built internally
 	if err != nil {
 		if os.IsNotExist(err) {
 			return defaultSiteConfig(), nil

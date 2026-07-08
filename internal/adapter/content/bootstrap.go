@@ -59,7 +59,7 @@ const defaultLogoSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 
 // EnsureDefaults creates the content root directory, root config.yaml, and the
 // default logo file when they are missing. Existing files are never overwritten.
 func (p *Provider) EnsureDefaults(_ context.Context) error {
-	// #nosec G301 — контент-директория должна быть читаема
+	// #nosec G301 — content directory must be readable
 	if err := os.MkdirAll(p.root, 0o755); err != nil {
 		return fmt.Errorf("creating content root: %w", err)
 	}
@@ -79,7 +79,7 @@ func (p *Provider) ensureRootConfig() error {
 	} else if !os.IsNotExist(err) {
 		return err
 	}
-	// #nosec G306 — конфиг по умолчанию должен быть читаем
+	// #nosec G306 — default config must be readable
 	return os.WriteFile(path, []byte(defaultRootConfigYAML), 0o644)
 }
 
@@ -90,6 +90,6 @@ func (p *Provider) ensureDefaultLogo() error {
 	} else if !os.IsNotExist(err) {
 		return err
 	}
-	// #nosec G306 — логотип по умолчанию должен быть читаем
+	// #nosec G306 — default logo must be readable
 	return os.WriteFile(path, []byte(defaultLogoSVG), 0o644)
 }
