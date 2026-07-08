@@ -5,9 +5,18 @@ import { sanitize } from 'isomorphic-dompurify'
 import { escapeHtmlAttribute } from '~/utils/markdown/escape'
 import { wrapCodeBlocksWithCopyButton } from '~/utils/markdown/extensions/copy-code'
 import { createDangerExtension } from '~/utils/markdown/extensions/danger'
-import { createFilesGalleryExtension, type FilesGalleryToken } from '~/utils/markdown/extensions/files-gallery'
-import { createGalleryExtension, type GalleryToken } from '~/utils/markdown/extensions/gallery'
-import { createImageExtension, type ImageToken } from '~/utils/markdown/extensions/image'
+import {
+  createFilesGalleryExtension,
+  type FilesGalleryToken,
+} from '~/utils/markdown/extensions/files-gallery'
+import {
+  createGalleryExtension,
+  type GalleryToken,
+} from '~/utils/markdown/extensions/gallery'
+import {
+  createImageExtension,
+  type ImageToken,
+} from '~/utils/markdown/extensions/image'
 import { createMermaidExtension } from '~/utils/markdown/extensions/mermaid'
 import { createWarningExtension } from '~/utils/markdown/extensions/warning'
 
@@ -44,7 +53,6 @@ function splitHref(href: string): HrefParts {
 
   return { path, query, fragment }
 }
-
 
 function baseDirFromFilePath(docName: string, filePath: string): string {
   const slashIndex = filePath.lastIndexOf('/')
@@ -85,7 +93,9 @@ export function resolveMarkdownLink(
       resultPath = normalizeIndexPath(pathWithoutMd)
     } else {
       const baseDir = baseDirFromFilePath(docName, filePath)
-      resultPath = normalizeIndexPath(resolveRelativePath(baseDir, pathWithoutMd))
+      resultPath = normalizeIndexPath(
+        resolveRelativePath(baseDir, pathWithoutMd),
+      )
     }
     if (!resultPath.startsWith('/')) {
       resultPath = `/${resultPath}`
@@ -202,8 +212,8 @@ function resolveMarkdownToken(
 
   if (token.type === 'gallery') {
     const gallery = token as GalleryToken
-    gallery.resolvedItems = gallery.items.map((src) =>
-      resolveMarkdownImage(src, docName, filePath) ?? src,
+    gallery.resolvedItems = gallery.items.map(
+      (src) => resolveMarkdownImage(src, docName, filePath) ?? src,
     )
     return
   }
@@ -246,7 +256,8 @@ marked.use(
         const html = marked.Parser.parseInline(token.tokens, {
           async: false,
         }) as string
-        const id = slugify(extractPlainText(token.tokens)) || `heading-${token.depth}`
+        const id =
+          slugify(extractPlainText(token.tokens)) || `heading-${token.depth}`
         return `<h${token.depth} id="${escapeHtmlAttribute(id)}">${html}</h${token.depth}>`
       },
       link(token: Tokens.Link) {
@@ -283,7 +294,8 @@ export function renderMarkdown(
 ): string {
   const raw = marked.parse(content, {
     async: false,
-    walkTokens: (token: Token) => resolveMarkdownToken(token, docName, filePath),
+    walkTokens: (token: Token) =>
+      resolveMarkdownToken(token, docName, filePath),
   }) as string
 
   const withCopyButtons = wrapCodeBlocksWithCopyButton(raw)

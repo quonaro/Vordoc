@@ -30,10 +30,7 @@ export function usePageNeighbors(
     const idx = all.findIndex((page) => page.path === path)
     return {
       prev: idx > 0 ? all[idx - 1] : undefined,
-      next:
-        idx >= 0 && idx < all.length - 1
-          ? all[idx + 1]
-          : undefined,
+      next: idx >= 0 && idx < all.length - 1 ? all[idx + 1] : undefined,
     }
   })
 }

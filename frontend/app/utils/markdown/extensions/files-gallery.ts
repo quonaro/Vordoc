@@ -44,8 +44,12 @@ function basenameFromSrc(src: string): string {
 
 function parseFileArg(arg: string): FilesGalleryItem {
   const separatorIndex = arg.indexOf('|')
-  const src = (separatorIndex === -1 ? arg : arg.slice(0, separatorIndex)).trim()
-  const title = (separatorIndex === -1 ? '' : arg.slice(separatorIndex + 1)).trim()
+  const src = (
+    separatorIndex === -1 ? arg : arg.slice(0, separatorIndex)
+  ).trim()
+  const title = (
+    separatorIndex === -1 ? '' : arg.slice(separatorIndex + 1)
+  ).trim()
   const extension = extractExtension(src)
   return {
     src,

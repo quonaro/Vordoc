@@ -14,7 +14,9 @@ export function createMermaidExtension() {
       return src.match(/```\s*mermaid/)?.index
     },
     tokenizer(src: string) {
-      const match = /^(```)\s*mermaid\s*\n(?:(?!\1\s*$)[\s\S])*\1\s*$/m.exec(src)
+      const match = /^(```)\s*mermaid\s*\n(?:(?!\1\s*$)[\s\S])*\1\s*$/m.exec(
+        src,
+      )
       if (!match) return undefined
       const code = match[0]
         .replace(/^```\s*mermaid\s*\n/, '')

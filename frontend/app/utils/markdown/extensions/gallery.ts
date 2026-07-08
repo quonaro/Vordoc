@@ -9,7 +9,8 @@ export interface GalleryToken extends Tokens.Generic {
   height?: string
 }
 
-const lengthPattern = /^\d+(?:\.\d+)?(?:px|rem|em|%|vh|vw|cm|mm|in|pt|pc|ex|ch)$/i
+const lengthPattern =
+  /^\d+(?:\.\d+)?(?:px|rem|em|%|vh|vw|cm|mm|in|pt|pc|ex|ch)$/i
 const plainNumberPattern = /^\d+$/
 const heightArgPattern = /^height[:=](.+)$/i
 

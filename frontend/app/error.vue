@@ -43,7 +43,9 @@ function clearErrorAndNavigate() {
 <template>
   <div class="min-h-screen bg-background">
     <SiteHeader />
-    <main class="mx-auto flex max-w-7xl flex-col items-center justify-center p-8">
+    <main
+      class="mx-auto flex max-w-7xl flex-col items-center justify-center p-8"
+    >
       <div class="flex max-w-md flex-col items-center text-center">
         <AlertCircle class="mb-4 h-16 w-16 text-muted-foreground" />
         <h1 class="text-4xl font-bold tracking-tight text-foreground">
@@ -55,11 +57,7 @@ function clearErrorAndNavigate() {
         <p class="mt-2 text-muted-foreground">
           {{ description }}
         </p>
-        <UiButton
-          v-if="homePath"
-          class="mt-6"
-          @click="clearErrorAndNavigate"
-        >
+        <UiButton v-if="homePath" class="mt-6" @click="clearErrorAndNavigate">
           {{ t('errors.goHome') }}
         </UiButton>
       </div>

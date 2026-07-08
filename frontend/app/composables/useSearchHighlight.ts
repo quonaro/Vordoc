@@ -25,7 +25,9 @@ function wrapTextNode(node: Text, pattern: RegExp) {
     const end = start + match[0].length
 
     if (start > lastIndex) {
-      fragment.appendChild(document.createTextNode(text.slice(lastIndex, start)))
+      fragment.appendChild(
+        document.createTextNode(text.slice(lastIndex, start)),
+      )
     }
 
     const span = document.createElement('span')
@@ -63,23 +65,19 @@ function highlightTerm(container: HTMLElement, term: string) {
     'gi',
   )
 
-  const walker = document.createTreeWalker(
-    container,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode: (node) => {
-        const parent = node.parentElement
-        if (!parent) return NodeFilter.FILTER_REJECT
-        if (parent.classList.contains(SEARCH_MARK_CLASS)) {
-          return NodeFilter.FILTER_REJECT
-        }
-        if (parent.closest('script, style')) {
-          return NodeFilter.FILTER_REJECT
-        }
-        return NodeFilter.FILTER_ACCEPT
-      },
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) => {
+      const parent = node.parentElement
+      if (!parent) return NodeFilter.FILTER_REJECT
+      if (parent.classList.contains(SEARCH_MARK_CLASS)) {
+        return NodeFilter.FILTER_REJECT
+      }
+      if (parent.closest('script, style')) {
+        return NodeFilter.FILTER_REJECT
+      }
+      return NodeFilter.FILTER_ACCEPT
     },
-  )
+  })
 
   const nodes: Text[] = []
   let node: Node | null

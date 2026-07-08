@@ -33,10 +33,7 @@ export function buildSidebarNodes(
   })
 }
 
-function getDirectoryNodes(
-  pages: PageNode[],
-  currentPath: string,
-): PageNode[] {
+function getDirectoryNodes(pages: PageNode[], currentPath: string): PageNode[] {
   if (!currentPath) {
     return pages
   }

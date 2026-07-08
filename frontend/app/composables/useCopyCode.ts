@@ -23,9 +23,11 @@ export function useCopyCode(containerRef: Ref<HTMLElement | null>) {
   function attach() {
     const container = containerRef.value
     if (!container) return
-    const buttons = container.querySelectorAll<HTMLButtonElement>('.vordoc-copy-btn')
+    const buttons =
+      container.querySelectorAll<HTMLButtonElement>('.vordoc-copy-btn')
     for (const btn of buttons) {
-      if ((btn as unknown as { __copyAttached?: boolean }).__copyAttached) continue
+      if ((btn as unknown as { __copyAttached?: boolean }).__copyAttached)
+        continue
       ;(btn as unknown as { __copyAttached?: boolean }).__copyAttached = true
       btn.textContent = t('copyCode.copy')
       btn.setAttribute('aria-label', t('copyCode.copy'))
