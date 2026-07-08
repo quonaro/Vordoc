@@ -26,10 +26,8 @@
     "description": "This page is protected. Enter the password to continue.",
     "placeholder": "Password",
     "verifying": "Verifying...",
-    "authenticating": "Authenticating...",
     "unlock": "Unlock",
-    "failed": "Failed to verify password",
-    "remember": "Remember"
+    "failed": "Failed to verify password"
   },
   "theme": {
     "system": "System",

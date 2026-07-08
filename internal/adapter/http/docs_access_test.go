@@ -22,14 +22,13 @@ func setupProtectedDoc(t *testing.T, handler **DocsHandler) (*httptest.ResponseR
 
 	docRoot := filepath.Join(root, "admin")
 	must(t, os.MkdirAll(docRoot, 0o755))
-	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Admin Docs\n")
-	mustWrite(t, filepath.Join(docRoot, "access.yaml"), "access: password\npassword_hash: "+hash(t, "secret")+"\n")
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Admin Docs\naccess: password\npassword_hash: "+hash(t, "secret")+"\n")
 	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Admin Home\n---\nAdmin home content\n")
 	mustWrite(t, filepath.Join(docRoot, "settings.md"), "---\ntitle: Settings\n---\nSettings content\n")
 
 	publicDir := filepath.Join(docRoot, "public")
 	must(t, os.MkdirAll(publicDir, 0o755))
-	mustWrite(t, filepath.Join(publicDir, "access.yaml"), "access: none\n")
+	mustWrite(t, filepath.Join(publicDir, "config.yaml"), "access: none\n")
 	mustWrite(t, filepath.Join(publicDir, "info.md"), "---\ntitle: Info\n---\nPublic info\n")
 
 	provider := content.NewProvider(root, slog.New(slog.NewTextHandler(os.Stderr, nil)))

@@ -41,7 +41,6 @@ const docMeta = ref<DocMeta | null>(null)
 const pageData = useState<PageData | null>(`doc-page-${docName}`, () => null)
 const loading = ref(true)
 const passwordRequired = ref(false)
-const passwordScope = ref('')
 const contentRef = shallowRef<HTMLElement | null>(null)
 
 const sidebarNodes = useSidebarNodes(
@@ -79,11 +78,10 @@ async function loadDocMeta(): Promise<boolean> {
   } catch (e: unknown) {
     const err = e as {
       statusCode?: number
-      data?: { password_required?: boolean; scope?: string }
+      data?: { password_required?: boolean }
     }
     if (err?.statusCode === 403 && err?.data?.password_required) {
       passwordRequired.value = true
-      passwordScope.value = err?.data?.scope ?? ''
       return false
     }
     console.error('failed to fetch doc', e)
@@ -101,11 +99,10 @@ async function fetchPage() {
   } catch (e: unknown) {
     const err = e as {
       statusCode?: number
-      data?: { password_required?: boolean; scope?: string }
+      data?: { password_required?: boolean }
     }
     if (err?.statusCode === 403 && err?.data?.password_required) {
       passwordRequired.value = true
-      passwordScope.value = err?.data?.scope ?? ''
       return
     }
     console.error('failed to fetch doc page', e)
@@ -147,18 +144,10 @@ function findPageNode(
 function checkPasswordRequired(): boolean {
   if (!docMeta.value) return false
   if (!pagePath) {
-    if (docMeta.value.access === 'password') {
-      passwordScope.value = docMeta.value.access_scope ?? ''
-      return true
-    }
-    return false
+    return docMeta.value.access === 'password'
   }
   const node = findPageNode(docMeta.value.pages, pagePath)
-  if (node?.access === 'password') {
-    passwordScope.value = node.access_scope ?? ''
-    return true
-  }
-  return false
+  return node?.access === 'password'
 }
 
 pageData.value = null
@@ -207,7 +196,6 @@ loading.value = false
           v-if="passwordRequired"
           :doc="docName"
           :page-path="pagePath"
-          :scope="passwordScope"
           @success="onUnlock"
           @close="navigateTo(`/${docName}`, { replace: true })"
         />

@@ -10,33 +10,27 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// groupConfig holds access rules for a directory group.
+// groupConfig holds access rules extracted from config.yaml.
 type groupConfig struct {
 	Access       string `yaml:"access"`
 	PasswordHash string `yaml:"password_hash"`
 }
 
-// loadAccessConfig reads access.yaml from a directory.
-// It returns the config, a bool indicating whether the file existed, and any error.
+// loadAccessConfig reads access rules from config.yaml in a directory.
+// It returns the config, a bool indicating whether access is configured, and any error.
 func loadAccessConfig(dir string) (groupConfig, bool, error) {
-	path := filepath.Join(dir, "access.yaml")
-	data, err := os.ReadFile(path)
+	cfg, err := loadDocConfig(filepath.Join(dir, "config.yaml"))
 	if err != nil {
-		if os.IsNotExist(err) {
-			return groupConfig{}, false, nil
-		}
-		return groupConfig{}, false, fmt.Errorf("reading access.yaml: %w", err)
+		return groupConfig{}, false, err
 	}
-
-	var cfg groupConfig
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return groupConfig{}, false, fmt.Errorf("parsing access.yaml: %w", err)
+	if cfg.Access == "" {
+		return groupConfig{}, false, nil
 	}
-	if cfg.Access == "" || cfg.Access == "none" {
+	if cfg.Access == "none" {
 		cfg.Access = "public"
 	}
 
-	return cfg, true, nil
+	return groupConfig{Access: cfg.Access, PasswordHash: cfg.PasswordHash}, true, nil
 }
 
 // resolveAccessInfo returns the effective access rule, walking up the directory tree.
@@ -168,10 +162,12 @@ func inheritPasswordHash(docPath string, childDir string, originalScope string) 
 	return domain.AccessInfo{Access: "password", Scope: originalScope}
 }
 
-// docConfig holds per-doc metadata.
+// docConfig holds per-doc metadata and optional access rules.
 type docConfig struct {
-	Title  string        `yaml:"title"`
-	Header *headerConfig `yaml:"header"`
+	Title        string        `yaml:"title"`
+	Header       *headerConfig `yaml:"header"`
+	Access       string        `yaml:"access"`
+	PasswordHash string        `yaml:"password_hash"`
 }
 
 // loadDocConfig reads config.yaml from a doc directory.

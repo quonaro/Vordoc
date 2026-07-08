@@ -275,7 +275,7 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 	relFile, _ := filepath.Rel(docPath, pageFile)
 	relFile = filepath.ToSlash(relFile)
 
-	// Resolve access rules: frontmatter > access.yaml (walk up) > public default
+	// Resolve access rules: frontmatter > config.yaml (walk up) > public default
 	accessInfo := resolveAccessInfo(docPath, pageFile, fm)
 
 	page := domain.Page{

@@ -40,7 +40,6 @@ const docMeta = ref<DocMeta | null>(null)
 const pageData = useState<PageData | null>(`doc-page-${docName}`, () => null)
 const loading = ref(true)
 const passwordRequired = ref(false)
-const passwordScope = ref('')
 const contentRef = shallowRef<HTMLElement | null>(null)
 
 const sidebarNodes = useSidebarNodes(
@@ -74,11 +73,10 @@ async function loadDocMeta(): Promise<boolean> {
   } catch (e: unknown) {
     const err = e as {
       statusCode?: number
-      data?: { password_required?: boolean; scope?: string }
+      data?: { password_required?: boolean }
     }
     if (err?.statusCode === 403 && err?.data?.password_required) {
       passwordRequired.value = true
-      passwordScope.value = err?.data?.scope ?? ''
       return false
     }
     console.error('failed to fetch doc', e)
@@ -96,11 +94,10 @@ async function fetchPage() {
   } catch (e: unknown) {
     const err = e as {
       statusCode?: number
-      data?: { password_required?: boolean; scope?: string }
+      data?: { password_required?: boolean }
     }
     if (err?.statusCode === 403 && err?.data?.password_required) {
       passwordRequired.value = true
-      passwordScope.value = err?.data?.scope ?? ''
       return
     }
     console.error('failed to fetch doc page', e)
@@ -174,7 +171,6 @@ loading.value = false
           v-if="passwordRequired"
           :doc="docName"
           :page-path="''"
-          :scope="passwordScope"
           @success="onUnlock"
           @close="navigateTo('/', { replace: true })"
         />

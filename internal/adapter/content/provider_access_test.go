@@ -43,8 +43,7 @@ func TestProvider_GetPage_inheritedScope(t *testing.T) {
 
 	docRoot := filepath.Join(root, "doc")
 	must(t, os.MkdirAll(docRoot, 0o755))
-	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
-	mustWrite(t, filepath.Join(docRoot, "access.yaml"), "access: password\npassword_hash: "+hash(t, "secret")+"\n")
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\naccess: password\npassword_hash: "+hash(t, "secret")+"\n")
 	mustWrite(t, filepath.Join(docRoot, "guide.md"), "---\ntitle: Guide\n---\nGuide\n")
 
 	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
@@ -70,7 +69,7 @@ func TestProvider_GetPage_folderScope(t *testing.T) {
 	adminDir := filepath.Join(docRoot, "admin")
 	must(t, os.MkdirAll(adminDir, 0o755))
 	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
-	mustWrite(t, filepath.Join(adminDir, "access.yaml"), "access: password\npassword_hash: "+hash(t, "admin")+"\n")
+	mustWrite(t, filepath.Join(adminDir, "config.yaml"), "access: password\npassword_hash: "+hash(t, "admin")+"\n")
 	mustWrite(t, filepath.Join(adminDir, "settings.md"), "---\ntitle: Settings\n---\nSettings\n")
 
 	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
@@ -94,8 +93,8 @@ func TestProvider_GetPage_publicOverride(t *testing.T) {
 	publicDir := filepath.Join(adminDir, "public")
 	must(t, os.MkdirAll(publicDir, 0o755))
 	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
-	mustWrite(t, filepath.Join(adminDir, "access.yaml"), "access: password\npassword_hash: "+hash(t, "admin")+"\n")
-	mustWrite(t, filepath.Join(publicDir, "access.yaml"), "access: none\n")
+	mustWrite(t, filepath.Join(adminDir, "config.yaml"), "access: password\npassword_hash: "+hash(t, "admin")+"\n")
+	mustWrite(t, filepath.Join(publicDir, "config.yaml"), "access: none\n")
 	mustWrite(t, filepath.Join(publicDir, "info.md"), "---\ntitle: Info\n---\nInfo\n")
 
 	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
@@ -117,9 +116,8 @@ func TestProvider_GetPage_inheritHash(t *testing.T) {
 	docRoot := filepath.Join(root, "doc")
 	adminDir := filepath.Join(docRoot, "admin")
 	must(t, os.MkdirAll(adminDir, 0o755))
-	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
-	mustWrite(t, filepath.Join(docRoot, "access.yaml"), "access: password\npassword_hash: "+hash(t, "shared")+"\n")
-	mustWrite(t, filepath.Join(adminDir, "access.yaml"), "access: password\n")
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\naccess: password\npassword_hash: "+hash(t, "shared")+"\n")
+	mustWrite(t, filepath.Join(adminDir, "config.yaml"), "access: password\n")
 	mustWrite(t, filepath.Join(adminDir, "settings.md"), "---\ntitle: Settings\n---\nSettings\n")
 
 	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
@@ -144,8 +142,7 @@ func TestProvider_GetAssetAccess(t *testing.T) {
 	docRoot := filepath.Join(root, "doc")
 	adminDir := filepath.Join(docRoot, "admin")
 	must(t, os.MkdirAll(adminDir, 0o755))
-	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
-	mustWrite(t, filepath.Join(docRoot, "access.yaml"), "access: password\npassword_hash: "+hash(t, "secret")+"\n")
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\naccess: password\npassword_hash: "+hash(t, "secret")+"\n")
 	mustWrite(t, filepath.Join(adminDir, "image.png"), "png")
 
 	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
@@ -166,8 +163,7 @@ func TestProvider_GetAssetAccess_rootAssetProtected(t *testing.T) {
 
 	docRoot := filepath.Join(root, "doc")
 	must(t, os.MkdirAll(docRoot, 0o755))
-	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
-	mustWrite(t, filepath.Join(docRoot, "access.yaml"), "access: password\npassword_hash: "+hash(t, "secret")+"\n")
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\naccess: password\npassword_hash: "+hash(t, "secret")+"\n")
 	mustWrite(t, filepath.Join(docRoot, "logo.png"), "png")
 
 	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
@@ -189,9 +185,8 @@ func TestProvider_GetAssetAccess_publicSubdirAsset(t *testing.T) {
 	docRoot := filepath.Join(root, "doc")
 	publicDir := filepath.Join(docRoot, "public")
 	must(t, os.MkdirAll(publicDir, 0o755))
-	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
-	mustWrite(t, filepath.Join(docRoot, "access.yaml"), "access: password\npassword_hash: "+hash(t, "secret")+"\n")
-	mustWrite(t, filepath.Join(publicDir, "access.yaml"), "access: none\n")
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\naccess: password\npassword_hash: "+hash(t, "secret")+"\n")
+	mustWrite(t, filepath.Join(publicDir, "config.yaml"), "access: none\n")
 	mustWrite(t, filepath.Join(publicDir, "info.md"), "info\n")
 
 	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
