@@ -161,6 +161,70 @@ func TestProvider_GetAssetAccess(t *testing.T) {
 	}
 }
 
+func TestProvider_GetAssetAccess_rootAssetProtected(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
+	mustWrite(t, filepath.Join(docRoot, "access.yaml"), "access: password\npassword_hash: "+hash(t, "secret")+"\n")
+	mustWrite(t, filepath.Join(docRoot, "logo.png"), "png")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	info, err := p.GetAssetAccess(context.Background(), "doc", "logo.png")
+	must(t, err)
+
+	if info.Access != "password" {
+		t.Errorf("expected access password, got %q", info.Access)
+	}
+	if info.Scope != "" {
+		t.Errorf("expected root scope, got %q", info.Scope)
+	}
+}
+
+func TestProvider_GetAssetAccess_publicSubdirAsset(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	publicDir := filepath.Join(docRoot, "public")
+	must(t, os.MkdirAll(publicDir, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
+	mustWrite(t, filepath.Join(docRoot, "access.yaml"), "access: password\npassword_hash: "+hash(t, "secret")+"\n")
+	mustWrite(t, filepath.Join(publicDir, "access.yaml"), "access: none\n")
+	mustWrite(t, filepath.Join(publicDir, "info.md"), "info\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	info, err := p.GetAssetAccess(context.Background(), "doc", "public/info.md")
+	must(t, err)
+
+	if info.Access != "public" {
+		t.Errorf("expected access public, got %q", info.Access)
+	}
+}
+
+func TestProvider_GetPage_publicFrontmatterWithHash(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
+	mustWrite(t, filepath.Join(docRoot, "guide.md"), "---\ntitle: Guide\naccess: public\npassword_hash: "+hash(t, "secret")+"\n---\nGuide\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	page, err := p.GetPage(context.Background(), "doc", "guide")
+	must(t, err)
+
+	if page.Access != "public" {
+		t.Errorf("expected access public, got %q", page.Access)
+	}
+	if page.PasswordHash != "" {
+		t.Errorf("expected empty hash for public page, got %q", page.PasswordHash)
+	}
+}
+
 func hash(t *testing.T, pwd string) string {
 	t.Helper()
 	h, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.MinCost)

@@ -11,7 +11,7 @@ import (
 )
 
 // GetAssetAccess returns the effective access info for an asset path.
-func (p *Provider) GetAssetAccess(_ context.Context, docName string, assetPath string) (domain.AccessInfo, error) {
+func (p *Provider) GetAssetAccess(ctx context.Context, docName string, assetPath string) (domain.AccessInfo, error) {
 	docPath := filepath.Join(p.root, docName)
 	info, err := os.Stat(docPath)
 	if err != nil {
@@ -24,16 +24,16 @@ func (p *Provider) GetAssetAccess(_ context.Context, docName string, assetPath s
 		return domain.AccessInfo{}, fmt.Errorf("%w: %s is not a directory", domain.ErrDocNotFound, docName)
 	}
 
-	fullPath, err := p.GetAssetPath(context.TODO(), docName, assetPath)
+	fullPath, err := p.GetAssetPath(ctx, docName, assetPath)
 	if err != nil {
 		return domain.AccessInfo{}, err
 	}
 
-	return resolveAccessInfo(docPath, filepath.Dir(fullPath), nil), nil
+	return resolveAccessInfo(docPath, fullPath, nil), nil
 }
 
 // GetAssetPath resolves a static asset path inside a documentation directory.
-func (p *Provider) GetAssetPath(_ context.Context, docName string, assetPath string) (string, error) {
+func (p *Provider) GetAssetPath(ctx context.Context, docName string, assetPath string) (string, error) {
 	docPath := filepath.Join(p.root, docName)
 	info, err := os.Stat(docPath)
 	if err != nil {

@@ -179,11 +179,39 @@ func TestDocsHandler_ServeAsset_RequiresPassword(t *testing.T) {
 	var handler *DocsHandler
 	_, r := setupProtectedDoc(t, &handler)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/assets/admin/public/info.md", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/assets/admin/settings.md", nil)
 	rec := httptest.NewRecorder()
 	r.ServeHTTP(rec, req)
 	if rec.Code != http.StatusForbidden {
-		t.Fatalf("expected 403 asset, got %d: %s", rec.Code, rec.Body.String())
+		t.Fatalf("expected 403 protected asset, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestDocsHandler_ServeAsset_ProtectedCacheHeaders(t *testing.T) {
+	var handler *DocsHandler
+	_, r := setupProtectedDoc(t, &handler)
+
+	verifyReq := httptest.NewRequest(http.MethodPost, "/api/v1/admin", bytes.NewReader([]byte(`{"password":"secret"}`)))
+	verifyReq.Header.Set("Content-Type", "application/json")
+	verifyRec := httptest.NewRecorder()
+	r.ServeHTTP(verifyRec, verifyReq)
+	if verifyRec.Code != http.StatusOK {
+		t.Fatalf("expected 200 verify, got %d: %s", verifyRec.Code, verifyRec.Body.String())
+	}
+
+	cookies := verifyRec.Result().Cookies()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/assets/admin/settings.md", nil)
+	for _, c := range cookies {
+		req.AddCookie(c)
+	}
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 asset, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if got := rec.Header().Get("Cache-Control"); got != "private, no-store" {
+		t.Errorf("expected Cache-Control private, no-store, got %q", got)
 	}
 }
 

@@ -38,7 +38,7 @@ function storageKey(scope?: string): string {
 
 function savePassword(pwd: string, scope?: string) {
   try {
-    localStorage.setItem(storageKey(scope), btoa(pwd))
+    sessionStorage.setItem(storageKey(scope), btoa(pwd))
   } catch {
     // ignore storage errors
   }
@@ -46,7 +46,7 @@ function savePassword(pwd: string, scope?: string) {
 
 function clearSavedPassword(scope?: string) {
   try {
-    localStorage.removeItem(storageKey(scope))
+    sessionStorage.removeItem(storageKey(scope))
   } catch {
     // ignore storage errors
   }
@@ -54,10 +54,24 @@ function clearSavedPassword(scope?: string) {
 
 function loadPassword(): string | null {
   try {
-    const raw = localStorage.getItem(storageKey())
+    const raw = sessionStorage.getItem(storageKey())
     return raw ? atob(raw) : null
   } catch {
     return null
+  }
+}
+
+function clearLegacyStorage() {
+  try {
+    const prefix = `vordoc_pwd_${props.doc}_`
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(prefix)) {
+        localStorage.removeItem(key)
+      }
+    }
+  } catch {
+    // ignore storage errors
   }
 }
 
@@ -102,6 +116,7 @@ async function submit() {
 }
 
 onMounted(() => {
+  clearLegacyStorage()
   const saved = loadPassword()
   if (saved) {
     autoVerify.value = true

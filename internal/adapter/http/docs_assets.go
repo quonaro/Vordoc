@@ -22,6 +22,7 @@ import (
 func (h *DocsHandler) ServeLogo(w http.ResponseWriter, r *http.Request) {
 	doc := strings.TrimSpace(r.URL.Query().Get("doc"))
 
+	protected := false
 	if doc != "" {
 		summary, err := h.contentProvider.GetDocSummary(r.Context(), doc)
 		if err != nil {
@@ -37,6 +38,7 @@ func (h *DocsHandler) ServeLogo(w http.ResponseWriter, r *http.Request) {
 			writePasswordRequired(w, summary.Scope)
 			return
 		}
+		protected = summary.Access == "password"
 	}
 
 	logoPath, err := h.contentProvider.GetLogoPath(r.Context(), doc)
@@ -65,7 +67,11 @@ func (h *DocsHandler) ServeLogo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Cache-Control", "public, max-age=300")
+	if protected {
+		w.Header().Set("Cache-Control", "private, no-store")
+	} else {
+		w.Header().Set("Cache-Control", "public, max-age=300")
+	}
 	http.ServeFile(w, r, logoPath)
 }
 
@@ -133,7 +139,11 @@ func (h *DocsHandler) ServeAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Cache-Control", "public, max-age=300")
+	if access.Access == "password" {
+		w.Header().Set("Cache-Control", "private, no-store")
+	} else {
+		w.Header().Set("Cache-Control", "public, max-age=300")
+	}
 	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%q", filepath.Base(filePath)))
 
 	if contentType == "image/svg+xml" {

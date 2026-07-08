@@ -39,20 +39,13 @@ func loadAccessConfig(dir string) (groupConfig, bool, error) {
 	return cfg, true, nil
 }
 
-// resolveAccess determines the access level and password hash for a page.
-// Priority: frontmatter > nearest access.yaml (walking up) > default "public".
-func resolveAccess(docPath string, pageFile string, fm map[string]any) (string, string) {
-	info := resolveAccessInfo(docPath, pageFile, fm)
-	return info.Access, info.PasswordHash
-}
-
 // resolveAccessInfo returns the effective access rule, walking up the directory tree.
 // A node with access: password and no password_hash inherits the hash and scope of the
 // nearest ancestor that has a password_hash. access: none and access: public stop inheritance.
 func resolveAccessInfo(docPath string, pageFile string, fm map[string]any) domain.AccessInfo {
 	// 1. Frontmatter override.
 	if access := getString(fm, "access", ""); access != "" {
-		if access == "none" {
+		if access != "password" {
 			return domain.AccessInfo{Access: "public"}
 		}
 		if hash := getString(fm, "password_hash", ""); hash != "" {
