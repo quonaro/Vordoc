@@ -1,0 +1,19 @@
+run:
+  desc: Start the Vordoc server
+  native: true
+
+pass:
+  desc: Hash a plaintext password for page access
+  native: true
+  args:
+  - "password:str"
+
+version:
+  desc: Show version
+  native: true
+
+init:
+  desc: Initialize a welcome documentation in the content root
+  native: true
+  args:
+  - "name:str?"

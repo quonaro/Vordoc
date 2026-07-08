@@ -34,7 +34,7 @@ internal/adapter/http/dist/*
 !internal/adapter/http/dist/.gitkeep
 
 # Binary
-vordoc
+/vordoc
 
 # Content
 content/**
