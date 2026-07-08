@@ -48,7 +48,8 @@ build:
     cp -R frontend/.output/public/. internal/adapter/http/dist/
 
     echo "==> Building Go binary..."
-    go build -ldflags="-s -w" -o vordoc ./cmd/vordoc
+    COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "dev")
+    go build -ldflags="-s -w -X main.version=$COMMIT" -o vordoc ./cmd/vordoc
 
     echo "==> Build complete: ./vordoc"
 
