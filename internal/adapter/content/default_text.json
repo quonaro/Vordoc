@@ -35,6 +35,11 @@
     "dark": "Dark"
   },
   "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "The requested page does not exist or has been moved.",
+    "genericTitle": "Something went wrong",
+    "genericDescription": "Failed to load the page. Please try again later.",
+    "goHome": "Go home",
     "doc_not_found": "Documentation not found",
     "page_not_found": "Page not found",
     "password_required": "Password required",

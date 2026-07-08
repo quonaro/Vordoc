@@ -88,14 +88,23 @@ async function loadDocMeta(): Promise<boolean> {
   } catch (e: unknown) {
     const err = e as {
       statusCode?: number
-      data?: { password_required?: boolean }
+      data?: { password_required?: boolean; error?: string }
     }
     if (err?.statusCode === 403 && err?.data?.password_required) {
       passwordRequired.value = true
       return false
     }
+    if (err?.statusCode === 404 || err?.data?.error === 'doc_not_found') {
+      throw createError({
+        statusCode: 404,
+        statusMessage: t('errors.doc_not_found'),
+      })
+    }
     console.error('failed to fetch doc', e)
-    return false
+    throw createError({
+      statusCode: err?.statusCode ?? 500,
+      statusMessage: t('errors.failed_to_get_doc'),
+    })
   }
 }
 

@@ -8,24 +8,31 @@ const props = defineProps<{
   header?: HeaderConfig
 }>()
 
-const title = computed(() => props.header?.title || t('app.title'))
-const logo = computed(() => props.header?.logo?.path || '/api/v1/logo')
-const logoSize = computed(() => props.header?.logo?.size ?? 40)
+const siteConfig = useSiteConfig()
+
+const resolvedHeader = computed(
+  () => props.header ?? siteConfig.data.value?.header,
+)
+const headerEnabled = computed(() => resolvedHeader.value?.enable ?? false)
+
+const title = computed(() => resolvedHeader.value?.title || t('app.title'))
+const logo = computed(() => resolvedHeader.value?.logo?.path || '/api/v1/logo')
+const logoSize = computed(() => resolvedHeader.value?.logo?.size ?? 40)
 
 const defaultElements: HeaderElement[] = ['logo', 'search', 'theme-switch']
 const elements = computed(() => {
-  const raw = props.header?.elements
+  const raw = resolvedHeader.value?.elements
   if (raw === undefined || raw === null) return defaultElements
   return raw
 })
 
 const font = computed(() => {
-  const raw = props.header?.font?.name
+  const raw = resolvedHeader.value?.font?.name
   if (!raw) return resolveFont('FabergeDigital.otf')
   return resolveFont(raw)
 })
 
-const fontSize = computed(() => props.header?.font?.size ?? 24)
+const fontSize = computed(() => resolvedHeader.value?.font?.size ?? 24)
 
 const fontFace = computed(() => {
   if (!font.value.isCustom || !font.value.url) return ''
@@ -62,7 +69,7 @@ const positionClass = (id: HeaderElement): string => {
 
 <template>
   <header
-    v-if="header?.enable"
+    v-if="headerEnabled"
     class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b px-4 py-3"
   >
     <div :class="cn('flex items-center gap-3', positionClass('logo'))">
