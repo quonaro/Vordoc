@@ -11,7 +11,7 @@
     "format": "prettier --write .",
     "lint": "eslint .",
     "lint:ox": "oxlint .",
-    "lint:all": "npm run lint && npm run lint:ox && npm run typecheck",
+    "lint:all": "pnpm run lint && pnpm run lint:ox && pnpm run typecheck",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
@@ -33,6 +33,7 @@
   "devDependencies": {
     "@nuxt/eslint-config": "^0.7.6",
     "@tailwindcss/typography": "^0.5.20",
+    "eslint": "^9.39.4",
     "oxlint": "^1.70.0",
     "prettier": "^3.4.0",
     "typescript": "^6.0.3",
