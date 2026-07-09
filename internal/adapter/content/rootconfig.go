@@ -19,8 +19,9 @@ const defaultFontName = "FabergeDigital.otf"
 
 // defaultHeader returns the built-in header defaults.
 func defaultHeader() headerConfig {
+	enable := true
 	return headerConfig{
-		Enable:   true,
+		Enable:   &enable,
 		Elements: []string{"logo", "search", "theme-switch"},
 		Title:    "Vordoc",
 		Logo: &logoConfig{
@@ -45,7 +46,7 @@ func defaultTheme() themeConfig {
 // headerConfig mirrors domain.HeaderConfig for YAML parsing.
 // Elements controls which header elements are rendered and in what order.
 type headerConfig struct {
-	Enable   bool        `yaml:"enable"`
+	Enable   *bool       `yaml:"enable"`
 	Elements []string    `yaml:"elements"`
 	Title    string      `yaml:"title"`
 	Logo     *logoConfig `yaml:"logo"`
@@ -109,6 +110,9 @@ func loadSiteConfig(root string) (siteConfig, error) {
 // built-in defaults. The source value is never mutated.
 func fillHeaderDefaults(src headerConfig) headerConfig {
 	d := defaultHeader()
+	if src.Enable == nil {
+		src.Enable = d.Enable
+	}
 	if src.Elements == nil {
 		src.Elements = d.Elements
 	}
@@ -187,7 +191,7 @@ func (p *Provider) resolveDocHeader(name string, cfg docConfig) *domain.HeaderCo
 
 	h := fillHeaderDefaults(*cfg.Header)
 	return &domain.HeaderConfig{
-		Enable:   h.Enable,
+		Enable:   *h.Enable,
 		Elements: h.Elements,
 		Title:    h.Title,
 		Logo: &domain.LogoConfig{
@@ -256,7 +260,7 @@ func resolveRootConfig(cfg siteConfig) domain.RootConfig {
 		},
 		Favicon: favicon,
 		Header: &domain.HeaderConfig{
-			Enable:   h.Enable,
+			Enable:   *h.Enable,
 			Elements: h.Elements,
 			Title:    h.Title,
 			Logo: &domain.LogoConfig{

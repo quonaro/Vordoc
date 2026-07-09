@@ -77,9 +77,10 @@ func (p *Provider) docLogoPath(doc string) (string, error) {
 }
 
 // resolveLogoPath cleans a logo path relative to the content root and prevents traversal.
+// A leading '/' in filename is treated as relative to the content root, regardless of doc.
 func (p *Provider) resolveLogoPath(doc, filename string) (string, error) {
 	base := p.root
-	if doc != "" {
+	if doc != "" && !strings.HasPrefix(filename, "/") {
 		base = filepath.Join(p.root, doc)
 	}
 	if filename == "" {
