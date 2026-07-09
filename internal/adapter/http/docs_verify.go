@@ -95,21 +95,45 @@ func (h *DocsHandler) verifyPage(w http.ResponseWriter, r *http.Request, docName
 		return
 	}
 
-	if page.Access != "password" {
+	if page.Access == "password" {
+		if page.PasswordHash == "" {
+			writeError(w, http.StatusInternalServerError, "password_hash_not_configured")
+			return
+		}
+
+		if !h.passwordService.Verify(password, page.PasswordHash) {
+			writeError(w, http.StatusUnauthorized, "invalid_password")
+			return
+		}
+
+		h.setAccessCookie(w, r, docName, page.AccessScope)
+		writeJSON(w, http.StatusOK, verifyOutput{Success: true, Scope: page.AccessScope})
+		return
+	}
+
+	// Page is public. If it lives inside a protected doc, unlock the nearest
+	// protected ancestor so the doc metadata and protected siblings become
+	// accessible after the same password is accepted.
+	ancestor, found, err := h.contentProvider.GetProtectedAncestor(r.Context(), docName, page.Path)
+	if err != nil {
+		h.logger.Error("failed to resolve protected ancestor",
+			slog.String("error", err.Error()),
+			slog.String("doc", docName),
+			slog.String("page", pagePath),
+		)
+		writeError(w, http.StatusInternalServerError, "failed_to_verify")
+		return
+	}
+	if !found {
 		writeJSON(w, http.StatusOK, verifyOutput{Success: true})
 		return
 	}
 
-	if page.PasswordHash == "" {
-		writeError(w, http.StatusInternalServerError, "password_hash_not_configured")
-		return
-	}
-
-	if !h.passwordService.Verify(password, page.PasswordHash) {
+	if !h.passwordService.Verify(password, ancestor.PasswordHash) {
 		writeError(w, http.StatusUnauthorized, "invalid_password")
 		return
 	}
 
-	h.setAccessCookie(w, r, docName, page.AccessScope)
-	writeJSON(w, http.StatusOK, verifyOutput{Success: true, Scope: page.AccessScope})
+	h.setAccessCookie(w, r, docName, ancestor.Scope)
+	writeJSON(w, http.StatusOK, verifyOutput{Success: true, Scope: ancestor.Scope})
 }

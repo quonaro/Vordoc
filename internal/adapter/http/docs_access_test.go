@@ -119,6 +119,44 @@ func TestDocsHandler_PublicOverride(t *testing.T) {
 	}
 }
 
+func TestDocsHandler_PublicPageInsideProtectedDocUnlocksAncestor(t *testing.T) {
+	var handler *DocsHandler
+	_, r := setupProtectedDoc(t, &handler)
+
+	verifyReq := httptest.NewRequest(http.MethodPost, "/api/v1/admin/public/info", bytes.NewReader([]byte(`{"password":"secret"}`)))
+	verifyReq.Header.Set("Content-Type", "application/json")
+	verifyRec := httptest.NewRecorder()
+	r.ServeHTTP(verifyRec, verifyReq)
+	if verifyRec.Code != http.StatusOK {
+		t.Fatalf("expected 200 verify, got %d: %s", verifyRec.Code, verifyRec.Body.String())
+	}
+
+	cookies := verifyRec.Result().Cookies()
+	if len(cookies) == 0 {
+		t.Fatalf("expected cookie after verify")
+	}
+
+	metaReq := httptest.NewRequest(http.MethodGet, "/api/v1/admin", nil)
+	for _, c := range cookies {
+		metaReq.AddCookie(c)
+	}
+	metaRec := httptest.NewRecorder()
+	r.ServeHTTP(metaRec, metaReq)
+	if metaRec.Code != http.StatusOK {
+		t.Fatalf("expected 200 metadata, got %d: %s", metaRec.Code, metaRec.Body.String())
+	}
+
+	pageReq := httptest.NewRequest(http.MethodGet, "/api/v1/admin/settings", nil)
+	for _, c := range cookies {
+		pageReq.AddCookie(c)
+	}
+	pageRec := httptest.NewRecorder()
+	r.ServeHTTP(pageRec, pageReq)
+	if pageRec.Code != http.StatusOK {
+		t.Fatalf("expected 200 page, got %d: %s", pageRec.Code, pageRec.Body.String())
+	}
+}
+
 func TestDocsHandler_ListDocs_HidesProtectedDescription(t *testing.T) {
 	var handler *DocsHandler
 	_, r := setupProtectedDoc(t, &handler)

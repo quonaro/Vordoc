@@ -8,6 +8,7 @@ type PageNode struct {
 	Order       int        `json:"order,omitempty"`
 	Access      string     `json:"access,omitempty"`
 	AccessScope string     `json:"access_scope,omitempty"`
+	LockColor   string     `json:"lock_color,omitempty"`
 	HasIndex    bool       `json:"has_index,omitempty"`
 	Show        bool       `json:"show,omitempty"`
 	Children    []PageNode `json:"children,omitempty"`
@@ -61,6 +62,7 @@ type Doc struct {
 	Description  string        `json:"description,omitempty"`
 	Access       string        `json:"access,omitempty"`
 	AccessScope  string        `json:"access_scope,omitempty"`
+	LockColor    string        `json:"lock_color,omitempty"`
 	PasswordHash string        `json:"-"`
 	Pages        []PageNode    `json:"pages,omitempty"`
 	IndexPage    *Page         `json:"index_page,omitempty"`

@@ -4,6 +4,7 @@ const { t } = useText()
 const props = defineProps<{
   doc: string
   pagePath: string
+  mode?: 'doc' | 'page'
 }>()
 
 const emit = defineEmits<{
@@ -32,7 +33,11 @@ async function verify(pwd: string): Promise<void> {
   error.value = null
 
   try {
-    await $fetch(`${config.public.apiBase}/v1/${props.doc}/${props.pagePath}`, {
+    const endpoint =
+      props.mode === 'doc'
+        ? `${config.public.apiBase}/v1/${props.doc}`
+        : `${config.public.apiBase}/v1/${props.doc}/${props.pagePath}`
+    await $fetch(endpoint, {
       method: 'POST',
       credentials: 'include',
       body: { password: pwd },

@@ -2,6 +2,7 @@
 import type { HeaderConfig } from '~/composables/useSiteConfig'
 import { findTocTitleByLink } from '~/composables/useToc'
 import { renderMarkdown } from '~/utils/markdown'
+import { LockKeyhole } from '@lucide/vue'
 
 const { t } = useText()
 
@@ -10,6 +11,7 @@ interface PageNode {
   title: string
   access?: string
   access_scope?: string
+  lock_color?: string
   children?: PageNode[]
 }
 
@@ -19,6 +21,7 @@ interface DocMeta {
   description?: string
   access?: string
   access_scope?: string
+  lock_color?: string
   pages?: PageNode[]
   header?: HeaderConfig
 }
@@ -41,6 +44,7 @@ const docMeta = ref<DocMeta | null>(null)
 const pageData = useState<PageData | null>(`doc-page-${docName}`, () => null)
 const loading = ref(true)
 const passwordRequired = ref(false)
+const passwordMode = ref<'doc' | 'page'>('page')
 const contentRef = shallowRef<HTMLElement | null>(null)
 
 const theme = useTheme()
@@ -94,6 +98,7 @@ async function loadDocMeta(): Promise<boolean> {
       data?: { password_required?: boolean; error?: string }
     }
     if (err?.statusCode === 403 && err?.data?.password_required) {
+      passwordMode.value = 'doc'
       passwordRequired.value = true
       return false
     }
@@ -124,6 +129,7 @@ async function fetchPage() {
       data?: { password_required?: boolean; error?: string }
     }
     if (err?.statusCode === 403 && err?.data?.password_required) {
+      passwordMode.value = 'page'
       passwordRequired.value = true
       return
     }
@@ -156,39 +162,9 @@ const renderedContent = computed(() => {
   )
 })
 
-function findPageNode(
-  nodes: PageNode[] | undefined,
-  path: string,
-): PageNode | undefined {
-  if (!nodes) return undefined
-  for (const node of nodes) {
-    if (node.path === path) {
-      return node
-    }
-    if (node.children?.length) {
-      const found = findPageNode(node.children, path)
-      if (found) return found
-    }
-  }
-  return undefined
-}
-
-function checkPasswordRequired(): boolean {
-  if (!docMeta.value) return false
-  if (!pagePath) {
-    return docMeta.value.access === 'password'
-  }
-  const node = findPageNode(docMeta.value.pages, pagePath)
-  return node?.access === 'password'
-}
-
 const unlocked = await loadDocMeta()
 if (unlocked) {
-  if (checkPasswordRequired()) {
-    passwordRequired.value = true
-  } else {
-    await fetchPage()
-  }
+  await fetchPage()
 }
 loading.value = false
 </script>
@@ -202,9 +178,14 @@ loading.value = false
         <nav v-if="docMeta?.pages?.length" class="sticky top-8 space-y-1">
           <NuxtLink
             :to="`/${docName}`"
-            class="mb-4 block font-semibold hover:text-primary"
+            class="mb-4 flex items-center gap-2 font-semibold hover:text-primary"
           >
-            {{ docMeta.title }}
+            <span class="flex-1">{{ docMeta.title }}</span>
+            <LockKeyhole
+              v-if="docMeta.access === 'password'"
+              class="h-3.5 w-3.5"
+              :style="{ color: docMeta.lock_color }"
+            />
           </NuxtLink>
           <SidebarTree
             :nodes="sidebarNodes"
@@ -226,6 +207,7 @@ loading.value = false
           v-if="passwordRequired"
           :doc="docName"
           :page-path="pagePath"
+          :mode="passwordMode"
           @success="onUnlock"
           @close="navigateTo(`/${docName}`, { replace: true })"
         />

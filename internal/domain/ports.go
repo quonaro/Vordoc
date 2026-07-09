@@ -16,6 +16,9 @@ type ContentProvider interface {
 	// GetPage returns a page's content and metadata.
 	GetPage(ctx context.Context, doc string, page string) (Page, error)
 
+	// GetProtectedAncestor returns the nearest password-protected ancestor for a page.
+	GetProtectedAncestor(ctx context.Context, doc string, page string) (AccessInfo, bool, error)
+
 	// SearchPages searches for query across all pages of a documentation.
 	SearchPages(ctx context.Context, doc string, query string) ([]SearchResult, error)
 

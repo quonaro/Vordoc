@@ -3,6 +3,7 @@ package content
 
 import (
 	"fmt"
+	"hash/fnv"
 	"os"
 	"path/filepath"
 	"strings"
@@ -122,6 +123,55 @@ func resolveAccessInfo(docPath string, pageFile string, fm map[string]any) domai
 		return first
 	}
 	return domain.AccessInfo{Access: "public"}
+}
+
+// hashToColor returns a deterministic HSL color for a password hash.
+// Empty hashes produce an empty color.
+func hashToColor(hash string) string {
+	if hash == "" {
+		return ""
+	}
+	h := fnv.New32a()
+	// #nosec G104 — hash.Write never errors on this implementation.
+	_, _ = h.Write([]byte(hash))
+	hue := h.Sum32() % 360
+	return fmt.Sprintf("hsl(%d 70%% 45%%)", hue)
+}
+
+// FindProtectedAncestor walks up from pageFile to the doc root and returns the
+// nearest ancestor directory that has access: password with a non-empty hash.
+// It ignores public resets in between, so a public page inside a protected doc
+// still resolves to the protected doc's scope. The second return value is false
+// when no protected ancestor exists.
+func FindProtectedAncestor(docPath string, pageFile string) (domain.AccessInfo, bool) {
+	docPath = filepath.Clean(docPath)
+	dir := filepath.Dir(pageFile)
+
+	for {
+		cfg, found, err := loadAccessConfig(dir)
+		if err == nil && found && cfg.Access == "password" && cfg.PasswordHash != "" {
+			rel, _ := filepath.Rel(docPath, dir)
+			scope := filepath.ToSlash(rel)
+			if scope == "." {
+				scope = ""
+			}
+			return domain.AccessInfo{
+				Access:       cfg.Access,
+				PasswordHash: cfg.PasswordHash,
+				Scope:        scope,
+			}, true
+		}
+		if dir == docPath {
+			break
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+
+	return domain.AccessInfo{}, false
 }
 
 // inheritPasswordHash walks up from childDir to the doc root looking for a password_hash.

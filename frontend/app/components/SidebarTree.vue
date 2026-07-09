@@ -5,6 +5,8 @@ interface PageNode {
   path: string
   title: string
   access?: string
+  access_scope?: string
+  lock_color?: string
   has_index?: boolean
   show?: boolean
   children?: PageNode[]
@@ -46,7 +48,11 @@ function isDirectory(node: PageNode): boolean {
         <Folder v-if="isDirectory(node)" class="h-3.5 w-3.5" />
         <FileText v-else class="h-3.5 w-3.5" />
         <span class="flex-1">{{ node.title }}</span>
-        <LockKeyhole v-if="isProtected(node)" class="ml-auto h-3.5 w-3.5" />
+        <LockKeyhole
+          v-if="isProtected(node)"
+          class="ml-auto h-3.5 w-3.5"
+          :style="{ color: node.lock_color }"
+        />
       </NuxtLink>
       <div v-else class="space-y-1">
         <NuxtLink
@@ -62,7 +68,11 @@ function isDirectory(node: PageNode): boolean {
         >
           <Folder class="h-3.5 w-3.5" />
           <span class="flex-1">{{ node.title }}</span>
-          <LockKeyhole v-if="isProtected(node)" class="ml-auto h-3.5 w-3.5" />
+          <LockKeyhole
+            v-if="isProtected(node)"
+            class="ml-auto h-3.5 w-3.5"
+            :style="{ color: node.lock_color }"
+          />
         </NuxtLink>
         <span
           v-else
@@ -70,7 +80,11 @@ function isDirectory(node: PageNode): boolean {
         >
           <Folder class="h-3.5 w-3.5" />
           <span class="flex-1">{{ node.title }}</span>
-          <LockKeyhole v-if="isProtected(node)" class="ml-auto h-3.5 w-3.5" />
+          <LockKeyhole
+            v-if="isProtected(node)"
+            class="ml-auto h-3.5 w-3.5"
+            :style="{ color: node.lock_color }"
+          />
         </span>
         <div class="ml-3 border-l-2 border-border pl-3">
           <SidebarTree
