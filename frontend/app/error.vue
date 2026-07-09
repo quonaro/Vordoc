@@ -44,14 +44,18 @@ function clearErrorAndNavigate() {
   <div class="min-h-screen bg-background">
     <SiteHeader />
     <main
-      class="mx-auto flex max-w-7xl flex-col items-center justify-center p-8"
+      class="mx-auto flex max-w-7xl flex-col items-center justify-center p-4 md:p-8"
     >
       <div class="flex max-w-md flex-col items-center text-center">
-        <AlertCircle class="mb-4 h-16 w-16 text-muted-foreground" />
-        <h1 class="text-4xl font-bold tracking-tight text-foreground">
+        <AlertCircle
+          class="mb-4 h-12 w-12 text-muted-foreground md:h-16 md:w-16"
+        />
+        <h1
+          class="text-3xl font-bold tracking-tight text-foreground md:text-4xl"
+        >
           {{ statusCode }}
         </h1>
-        <p class="mt-2 text-xl font-semibold text-foreground">
+        <p class="mt-2 text-lg font-semibold text-foreground md:text-xl">
           {{ title }}
         </p>
         <p class="mt-2 text-muted-foreground">

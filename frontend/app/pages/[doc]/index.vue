@@ -11,6 +11,10 @@ interface PageNode {
   path: string
   title: string
   access?: string
+  access_scope?: string
+  lock_color?: string
+  has_index?: boolean
+  show?: boolean
   children?: PageNode[]
 }
 
@@ -29,6 +33,7 @@ interface DocMeta {
   description?: string
   access?: string
   access_scope?: string
+  lock_color?: string
   pages?: PageNode[]
   index_page?: PageData
   header?: HeaderConfig
@@ -163,8 +168,22 @@ loading.value = false
 
 <template>
   <div class="min-h-screen bg-background">
-    <SiteHeader :header="docMeta?.header" />
-    <div class="mx-auto flex max-w-7xl gap-8 p-8">
+    <SiteHeader :header="docMeta?.header">
+      <template #mobile-leading>
+        <MobileDocNav
+          :doc-name="docName"
+          :doc-title="docMeta?.title ?? docName"
+          :pages="docMeta?.pages ?? []"
+          :current-path="currentPath"
+          :access="docMeta?.access"
+          :lock-color="docMeta?.lock_color"
+        />
+      </template>
+      <template #mobile-trailing>
+        <MobileTocNav :items="tocItems" :active-link="activeLink" />
+      </template>
+    </SiteHeader>
+    <div class="mx-auto flex max-w-7xl gap-4 p-4 md:gap-8 md:p-8">
       <!-- Sidebar -->
       <aside class="hidden w-64 shrink-0 lg:block">
         <nav v-if="docMeta?.pages?.length" class="sticky top-8 space-y-1">
@@ -183,7 +202,7 @@ loading.value = false
       </aside>
 
       <!-- Content -->
-      <main class="flex-1 min-w-0">
+      <main class="min-w-0 flex-1">
         <Breadcrumbs
           :doc-title="docMeta?.title ?? docName"
           :doc-name="docName"

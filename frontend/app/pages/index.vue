@@ -45,22 +45,22 @@ function isProtected(doc: DocMeta): boolean {
 <template>
   <div class="min-h-screen bg-background">
     <SiteHeader :header="header" />
-    <div class="p-8">
-      <div class="mx-auto max-w-4xl space-y-8">
-        <div v-if="enableRootPage" class="grid gap-4 sm:grid-cols-2">
+    <div class="p-4 md:p-8">
+      <div class="mx-auto max-w-4xl space-y-6 md:space-y-8">
+        <div v-if="enableRootPage" class="grid gap-3 sm:grid-cols-2 md:gap-4">
           <NuxtLink
             v-for="doc in docs"
             :key="doc.name"
             :to="`/${doc.name}`"
-            class="group rounded-lg border bg-card p-6 transition-colors hover:bg-accent hover:text-accent-foreground"
+            class="group rounded-lg border bg-card p-4 transition-colors hover:bg-accent hover:text-accent-foreground md:p-6"
           >
             <div class="flex items-center gap-2">
               <LockKeyhole
                 v-if="isProtected(doc)"
-                class="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground"
+                class="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-accent-foreground"
               />
               <h2
-                class="text-xl font-semibold group-hover:text-accent-foreground"
+                class="text-lg font-semibold group-hover:text-accent-foreground md:text-xl"
               >
                 {{ doc.title }}
               </h2>

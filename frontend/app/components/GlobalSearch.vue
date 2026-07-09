@@ -165,19 +165,25 @@ onMounted(() => {
         :class="[
           inline
             ? 'relative w-full'
-            : 'fixed inset-0 z-[100] w-full bg-black/50 p-4 backdrop-blur-sm',
+            : 'fixed inset-0 z-[100] w-full bg-black/50 p-0 md:p-4 backdrop-blur-sm',
         ]"
         @click.self="!inline && close()"
       >
         <div
           :class="[
-            'flex w-full flex-col overflow-hidden rounded-xl border bg-card shadow-2xl',
+            'search-dialog flex w-full flex-col overflow-hidden border bg-card shadow-2xl',
             inline
-              ? 'max-w-none'
-              : 'absolute left-1/2 top-1/2 max-h-[80vh] w-full max-w-2xl -translate-x-1/2 -translate-y-1/2',
+              ? 'max-w-none rounded-xl'
+              : 'fixed bottom-0 left-0 right-0 h-[85vh] rounded-t-xl md:absolute md:bottom-auto md:left-1/2 md:right-auto md:top-1/2 md:h-auto md:max-h-[80vh] md:w-full md:max-w-2xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-xl',
           ]"
           @keydown="onKeydown"
         >
+          <div
+            v-if="!inline"
+            class="mx-auto mt-2 h-1.5 w-12 shrink-0 rounded-full bg-muted md:hidden"
+            aria-hidden="true"
+          />
+
           <div class="relative flex items-center gap-3 border-b px-4 py-3">
             <Search class="h-5 w-5 shrink-0 text-muted-foreground" />
             <input
@@ -207,7 +213,7 @@ onMounted(() => {
             ref="resultsRef"
             :class="[
               'overflow-y-auto',
-              inline ? 'max-h-[50vh]' : 'max-h-[60vh]',
+              inline ? 'max-h-[50vh]' : 'flex-1 md:max-h-[60vh]',
             ]"
           >
             <div
@@ -299,7 +305,7 @@ onMounted(() => {
 
           <div
             v-if="!inline"
-            class="flex items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground"
+            class="hidden items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground md:flex"
           >
             <span>{{ t('search.globalHint') }}</span>
             <span class="flex items-center gap-1">
@@ -316,3 +322,36 @@ onMounted(() => {
     </Teleport>
   </ClientOnly>
 </template>
+
+<style scoped>
+.search-dialog {
+  padding-bottom: env(safe-area-inset-bottom);
+  animation: sheet-in 0.25s ease-out;
+}
+
+@media (min-width: 768px) {
+  .search-dialog {
+    animation: dialog-in 0.2s ease-out;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+</style>

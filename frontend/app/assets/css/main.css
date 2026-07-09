@@ -244,7 +244,17 @@
   }
 
   .files-gallery {
-    @apply grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4;
+    @apply grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 md:gap-4;
+  }
+
+  .prose table {
+    @apply block max-w-full overflow-x-auto;
+  }
+
+  @media (max-width: 640px) {
+    .gallery {
+      @apply h-48;
+    }
   }
 
   .files-gallery__item {

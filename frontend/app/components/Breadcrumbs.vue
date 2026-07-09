@@ -57,15 +57,15 @@ const crumbs = computed(() => {
 
 <template>
   <nav
-    class="mb-6 inline-flex items-center gap-1 rounded-lg border bg-card px-4 py-2 text-sm shadow-sm"
+    class="mb-4 flex flex-wrap items-center gap-1 rounded-lg border bg-card px-3 py-2 text-sm shadow-sm md:mb-6 md:px-4"
   >
     <NuxtLink
       :to="`/${docName}`"
-      class="flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
+      class="flex min-w-0 items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
       :class="{ 'font-medium text-primary': !crumbs.length }"
     >
       <Home :size="16" />
-      <span>{{ docTitle }}</span>
+      <span class="truncate">{{ docTitle }}</span>
     </NuxtLink>
 
     <template v-for="(crumb, i) in crumbs" :key="crumb.to">
@@ -73,14 +73,17 @@ const crumbs = computed(() => {
       <NuxtLink
         v-if="i < crumbs.length - 1 && crumb.has_index"
         :to="crumb.to"
-        class="text-muted-foreground transition-colors hover:text-foreground"
+        class="min-w-0 truncate text-muted-foreground transition-colors hover:text-foreground"
       >
         {{ crumb.title }}
       </NuxtLink>
-      <span v-else-if="i < crumbs.length - 1" class="text-muted-foreground">
+      <span
+        v-else-if="i < crumbs.length - 1"
+        class="min-w-0 truncate text-muted-foreground"
+      >
         {{ crumb.title }}
       </span>
-      <span v-else class="font-medium text-primary">
+      <span v-else class="min-w-0 truncate font-medium text-primary">
         {{ crumb.title }}
       </span>
     </template>

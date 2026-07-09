@@ -238,9 +238,9 @@ onMounted(() => {
           'flex items-center transition-all duration-300',
           scrolled
             ? floatingActive
-              ? 'fixed left-1/2 top-4 z-[100] w-[90%] max-w-2xl -translate-x-1/2 scale-100 rounded-md border border-input bg-background/95 opacity-100 shadow-xl backdrop-blur'
-              : 'fixed left-1/2 top-4 z-[100] w-[90%] max-w-2xl -translate-x-1/2 scale-100 rounded-md border border-input bg-background/60 opacity-70 shadow-xl backdrop-blur'
-            : 'fixed left-1/2 top-4 z-[100] w-[90%] max-w-2xl -translate-x-1/2 scale-[0.98] rounded-md border border-input bg-background/60 opacity-0 shadow-xl backdrop-blur pointer-events-none',
+              ? 'fixed left-1/2 top-3 z-[100] w-[calc(100%-2rem)] max-w-none -translate-x-1/2 scale-100 rounded-md border border-input bg-background/95 opacity-100 shadow-xl backdrop-blur md:w-[90%] md:max-w-2xl md:top-4'
+              : 'fixed left-1/2 top-3 z-[100] w-[calc(100%-2rem)] max-w-none -translate-x-1/2 scale-100 rounded-md border border-input bg-background/60 opacity-70 shadow-xl backdrop-blur md:w-[90%] md:max-w-2xl md:top-4'
+            : 'fixed left-1/2 top-3 z-[100] w-[calc(100%-2rem)] max-w-none -translate-x-1/2 scale-[0.98] rounded-md border border-input bg-background/60 opacity-0 shadow-xl backdrop-blur pointer-events-none md:w-[90%] md:max-w-2xl md:top-4',
         ]"
         @mouseenter="floatingHovered = true"
         @mouseleave="floatingHovered = false"

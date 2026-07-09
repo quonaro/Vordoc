@@ -57,45 +57,91 @@ useHead(() => ({
 const positionClass = (id: HeaderElement): string => {
   const idx = elements.value.indexOf(id)
   if (idx === -1) return 'hidden'
-  const starts = ['col-start-1', 'col-start-2', 'col-start-3']
-  const aligns = [
-    'justify-self-start',
-    'justify-self-center',
-    'justify-self-end',
-  ]
-  return `${starts[idx]} ${aligns[idx]}`
+  const starts: Record<HeaderElement, string> = {
+    logo: 'md:col-start-1',
+    search: 'md:col-start-2',
+    'theme-switch': 'md:col-start-3',
+  }
+  const aligns: Record<HeaderElement, string> = {
+    logo: 'md:justify-self-start',
+    search: 'md:justify-self-center',
+    'theme-switch': 'md:justify-self-end',
+  }
+  return `${starts[id]} ${aligns[id]}`
 }
 </script>
 
 <template>
-  <header
-    v-if="headerEnabled"
-    class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b px-4 py-3"
-  >
-    <div :class="cn('flex items-center gap-3', positionClass('logo'))">
-      <img
-        :src="logo"
-        :alt="t('app.logoAlt')"
-        :style="{ height: `${logoSize}px`, width: 'auto' }"
-      />
-      <span
-        class="site-header-title leading-none"
-        :style="{
-          fontFamily: `${font.family}, ui-serif, Georgia, serif`,
-          fontSize: `${fontSize}px`,
-        }"
-        >{{ title }}</span
-      >
+  <header v-if="headerEnabled" class="border-b px-4 py-3">
+    <!-- Mobile layout -->
+    <div class="flex flex-col gap-2 md:hidden">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex min-w-0 items-center gap-3">
+          <img
+            :src="logo"
+            :alt="t('app.logoAlt')"
+            :style="{ height: `${logoSize}px`, width: 'auto' }"
+          />
+          <span
+            class="site-header-title min-w-0 truncate leading-none"
+            :style="{
+              fontFamily: `${font.family}, ui-serif, Georgia, serif`,
+              '--header-font-size': `${fontSize}px`,
+            }"
+            >{{ title }}</span
+          >
+        </div>
+        <ThemeSelector />
+      </div>
+      <div class="flex items-center gap-2">
+        <div v-if="$slots['mobile-leading']">
+          <slot name="mobile-leading" />
+        </div>
+        <GlobalSearchTrigger class="min-w-0 flex-1" />
+        <div v-if="$slots['mobile-trailing']">
+          <slot name="mobile-trailing" />
+        </div>
+      </div>
     </div>
-    <GlobalSearchTrigger
-      :class="cn('w-full max-w-xl', positionClass('search'))"
-    />
-    <ThemeSelector :class="positionClass('theme-switch')" />
+
+    <!-- Desktop layout -->
+    <div
+      class="hidden md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center md:gap-4"
+    >
+      <div
+        :class="cn('flex min-w-0 items-center gap-3', positionClass('logo'))"
+      >
+        <img
+          :src="logo"
+          :alt="t('app.logoAlt')"
+          :style="{ height: `${logoSize}px`, width: 'auto' }"
+        />
+        <span
+          class="site-header-title min-w-0 truncate leading-none"
+          :style="{
+            fontFamily: `${font.family}, ui-serif, Georgia, serif`,
+            '--header-font-size': `${fontSize}px`,
+          }"
+          >{{ title }}</span
+        >
+      </div>
+      <GlobalSearchTrigger
+        :class="cn('w-full max-w-xl', positionClass('search'))"
+      />
+      <ThemeSelector :class="positionClass('theme-switch')" />
+    </div>
   </header>
 </template>
 
 <style scoped>
 .site-header-title {
   font-weight: 700;
+  font-size: calc(var(--header-font-size) * 0.75);
+}
+
+@media (min-width: 768px) {
+  .site-header-title {
+    font-size: var(--header-font-size);
+  }
 }
 </style>

@@ -21,8 +21,9 @@ const { t } = useText()
 
 const linkClass = (align: 'start' | 'end'): string => {
   const base =
-    'group flex max-w-[calc(50%-0.5rem)] flex-col gap-1 rounded-lg border border-border bg-background p-4 transition-colors hover:border-primary'
-  const alignClass = align === 'start' ? 'items-start' : 'items-end text-right'
+    'group flex w-full flex-col gap-1 rounded-lg border border-border bg-background p-4 transition-colors hover:border-primary md:max-w-[calc(50%-0.5rem)]'
+  const alignClass =
+    align === 'start' ? 'items-start' : 'items-end md:text-right'
   const loadingClass = props.loading ? 'cursor-wait opacity-60' : ''
   return `${base} ${alignClass} ${loadingClass}`
 }
@@ -37,7 +38,7 @@ const neighbors = usePageNeighbors(
 <template>
   <nav
     v-if="neighbors.prev || neighbors.next"
-    class="mt-12 flex justify-between gap-4 border-t border-border pt-8"
+    class="mt-8 flex flex-col justify-between gap-3 border-t border-border pt-6 md:mt-12 md:flex-row md:gap-4 md:pt-8"
     aria-label="page"
     :aria-busy="loading"
   >
