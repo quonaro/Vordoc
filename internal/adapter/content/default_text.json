@@ -34,6 +34,9 @@
     "previous": "Previous",
     "next": "Next"
   },
+  "offline": {
+    "warning": "No internet connection. The page is shown in offline mode."
+  },
   "password": {
     "title": "Password required",
     "description": "This page is protected. Enter the password to continue.",

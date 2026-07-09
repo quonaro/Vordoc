@@ -1,5 +1,18 @@
 export type UIText = Record<string, unknown>
 
+const STORAGE_KEY = 'vordoc:ui-text:v1'
+
+function readStoredText(): UIText | null {
+  if (!import.meta.client) return null
+  const raw = localStorage.getItem(STORAGE_KEY)
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as UIText
+  } catch {
+    return null
+  }
+}
+
 function getByPath(obj: UIText | undefined, path: string): string | undefined {
   if (!obj || typeof obj !== 'object') return undefined
 
@@ -16,13 +29,22 @@ function getByPath(obj: UIText | undefined, path: string): string | undefined {
 
 export function useText() {
   const config = useRuntimeConfig()
-  const state = useState<UIText | null>('ui-text', () => null)
+  const state = useState<UIText | null>('ui-text', () => readStoredText())
 
-  async function load(): Promise<UIText> {
+  async function load(): Promise<UIText | null> {
     if (state.value) return state.value
-    const data = await $fetch<UIText>(`${config.public.apiBase}/v1/text`)
-    state.value = data
-    return data
+
+    try {
+      const data = await $fetch<UIText>(`${config.public.apiBase}/v1/text`)
+      state.value = data
+      if (import.meta.client) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+      }
+      return data
+    } catch (err) {
+      console.error('failed to load UI text', err)
+      return state.value
+    }
   }
 
   function t(path: string): string {

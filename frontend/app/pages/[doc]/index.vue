@@ -2,6 +2,8 @@
 import type { HeaderConfig } from '~/composables/useSiteConfig'
 import { findTocTitleByLink } from '~/composables/useToc'
 import { renderMarkdown } from '~/utils/markdown'
+import { cacheApiResponse } from '~/utils/apiCache'
+import { prefetchDocPages } from '~/composables/usePagePrefetch'
 
 const { t } = useText()
 
@@ -80,10 +82,9 @@ pageTitle.set(() => [docMeta.value?.title, activeSectionTitle.value])
 
 async function loadDocMeta(): Promise<boolean> {
   try {
-    docMeta.value = await $fetch<DocMeta>(
-      `${config.public.apiBase}/v1/${docName}`,
-      { credentials: 'include' },
-    )
+    const url = `${config.public.apiBase}/v1/${docName}`
+    docMeta.value = await $fetch<DocMeta>(url, { credentials: 'include' })
+    await cacheApiResponse(url, docMeta.value)
     return true
   } catch (e: unknown) {
     const err = e as {
@@ -110,10 +111,9 @@ async function loadDocMeta(): Promise<boolean> {
 
 async function fetchPage() {
   try {
-    pageData.value = await $fetch<PageData>(
-      `${config.public.apiBase}/v1/${docName}/`,
-      { credentials: 'include' },
-    )
+    const url = `${config.public.apiBase}/v1/${docName}/`
+    pageData.value = await $fetch<PageData>(url, { credentials: 'include' })
+    await cacheApiResponse(url, pageData.value)
     passwordRequired.value = false
   } catch (e: unknown) {
     const err = e as {
@@ -150,6 +150,7 @@ const renderedContent = computed(() => {
 
 const unlocked = await loadDocMeta()
 if (unlocked) {
+  void prefetchDocPages(docName, docMeta.value?.pages ?? [])
   if (docMeta.value?.index_page) {
     pageData.value = docMeta.value.index_page
     passwordRequired.value = false
