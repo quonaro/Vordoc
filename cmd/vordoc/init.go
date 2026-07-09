@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"vordoc/internal/adapter/content"
 	"vordoc/internal/service"
 	"vordoc/shared/config"
 	"vordoc/shared/logging"
@@ -26,7 +27,7 @@ const (
 	adminPassword  = "admin"
 )
 
-func initDoc(_ context.Context, nctx engine.NativeContext) error {
+func initDoc(ctx context.Context, nctx engine.NativeContext) error {
 	_ = godotenv.Load()
 
 	logger := logging.New("vordoc", config.LogsConfig{Level: "info", Type: "pretty"})
@@ -60,6 +61,11 @@ func initDoc(_ context.Context, nctx engine.NativeContext) error {
 		return fmt.Errorf("copying templates: %w", err)
 	}
 
+	contentProvider := content.NewProvider(cfg.Content.Root, logger)
+	if err := contentProvider.EnsureDefaults(ctx); err != nil {
+		return fmt.Errorf("ensuring content defaults: %w", err)
+	}
+
 	_, _ = fmt.Fprintf(nctx.Stdout, "initialized documentation '%s' in %s\n", name, filepath.Join(cfg.Content.Root, name))
 	return nil
 }
@@ -88,6 +94,12 @@ func copyTemplateDir(srcRel, dstDir, name string, replacements map[string]string
 		dstPath := filepath.Join(dstDir, dstName)
 
 		if entry.IsDir() {
+			if _, err := os.Stat(dstPath); err == nil {
+				_, _ = fmt.Fprintf(os.Stdout, "warning: %s already exists, skipping\n", dstPath)
+				continue
+			} else if !os.IsNotExist(err) {
+				return fmt.Errorf("checking directory %s: %w", dstPath, err)
+			}
 			// #nosec G301 — content directory must be readable
 			if err := os.MkdirAll(dstPath, 0o755); err != nil {
 				return fmt.Errorf("creating directory %s: %w", dstPath, err)
@@ -118,7 +130,7 @@ func copyTemplateDir(srcRel, dstDir, name string, replacements map[string]string
 
 func writeIfNotExists(path string, data []byte) error {
 	if _, err := os.Stat(path); err == nil {
-		_, _ = fmt.Fprintf(os.Stdout, "skipped %s (already exists)\n", path)
+		_, _ = fmt.Fprintf(os.Stdout, "warning: %s already exists, skipping\n", path)
 		return nil
 	} else if !os.IsNotExist(err) {
 		return fmt.Errorf("checking %s: %w", path, err)

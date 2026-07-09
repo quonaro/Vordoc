@@ -331,16 +331,18 @@
     @apply bg-zinc-100 text-zinc-600;
   }
 
-  .hljs {
+  .prose pre:not(.mermaid) {
+    @apply bg-muted text-foreground;
+  }
+
+  .dark .prose pre:not(.mermaid) {
     background-color: #252525;
+    color: #abb2bf;
   }
 
-  .prose pre:not(.mermaid, .hljs) {
-    @apply bg-neutral-100;
-  }
-
-  .dark .prose pre:not(.mermaid, .hljs) {
-    @apply bg-neutral-700;
+  .prose pre code.hljs {
+    background-color: transparent;
+    color: inherit;
   }
 }
 
