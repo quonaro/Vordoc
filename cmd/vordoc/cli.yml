@@ -13,7 +13,7 @@ version:
   native: true
 
 init:
-  desc: Initialize a welcome documentation in the content root
+  desc: Initialize a full-featured demo documentation (components, links, anchors, auth)
   native: true
   args:
   - "name:str?"

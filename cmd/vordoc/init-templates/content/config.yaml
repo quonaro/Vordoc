@@ -1,0 +1,18 @@
+root:
+  enable: true
+  title: "Vordoc Demo"
+
+header:
+  enable: true
+  elements: ["logo", "search", "theme-switch"]
+  title: "Vordoc Demo"
+  logo:
+    path: "logotype.svg"
+    size: 40
+  font:
+    name: "FabergeDigital.otf"
+    size: 24
+
+theme:
+  default: "system"
+  accent-color: "#3b82f6"

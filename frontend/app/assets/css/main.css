@@ -331,9 +331,16 @@
     @apply bg-zinc-100 text-zinc-600;
   }
 
-  .hljs,
-  .prose pre {
+  .hljs {
     background-color: #252525;
+  }
+
+  .prose pre:not(.mermaid, .hljs) {
+    @apply bg-neutral-100;
+  }
+
+  .dark .prose pre:not(.mermaid, .hljs) {
+    @apply bg-neutral-700;
   }
 }
 
@@ -357,6 +364,11 @@
   .mermaid {
     opacity: 0;
     transition: opacity 0.2s ease;
+    @apply rounded-lg border border-border bg-neutral-100 p-4;
+  }
+
+  .dark .mermaid {
+    @apply bg-neutral-800;
   }
 
   .mermaid[data-processed='true'] {

@@ -27,6 +27,12 @@ export function useMermaid(
     )
     if (!nodes.length) return
 
+    for (const node of nodes) {
+      if (!node.hasAttribute('data-raw')) {
+        node.setAttribute('data-raw', node.innerHTML)
+      }
+    }
+
     if (!initialized) {
       init()
     }
@@ -53,6 +59,10 @@ export function useMermaid(
       '.mermaid[data-processed="true"]',
     )
     for (const node of nodes) {
+      const raw = node.getAttribute('data-raw')
+      if (raw !== null) {
+        node.innerHTML = raw
+      }
       node.removeAttribute('data-processed')
     }
     render()

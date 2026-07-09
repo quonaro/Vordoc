@@ -1,0 +1,24 @@
+{
+  "app": {
+    "title": "Vordoc Demo"
+  },
+  "root": {
+    "availableDocumentation": "Доступная документация"
+  },
+  "search": {
+    "placeholder": "Искать в документации...",
+    "globalPlaceholder": "Поиск по документации..."
+  },
+  "copyCode": {
+    "copy": "Копировать",
+    "copied": "Скопировано",
+    "failed": "Ошибка копирования"
+  },
+  "gallery": {
+    "close": "Закрыть просмотр",
+    "openPreview": "Открыть просмотр",
+    "download": "Скачать",
+    "previous": "Назад",
+    "next": "Вперёд"
+  }
+}

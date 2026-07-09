@@ -18,8 +18,21 @@
   },
   "search": {
     "placeholder": "Search...",
+    "globalPlaceholder": "Search documentation...",
     "searching": "Searching...",
     "noResults": "No results found."
+  },
+  "copyCode": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "failed": "Failed to copy"
+  },
+  "gallery": {
+    "close": "Close preview",
+    "openPreview": "Open preview",
+    "download": "Download",
+    "previous": "Previous",
+    "next": "Next"
   },
   "password": {
     "title": "Password required",
