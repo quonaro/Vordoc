@@ -241,7 +241,7 @@ function resolveMarkdownToken(
   }
 }
 
-function createMarkedInstance(): Marked {
+function createMarkedInstance(docName: string, filePath: string): Marked {
   return new Marked(
     markedHighlight({
       emptyLangClass: 'hljs',
@@ -286,6 +286,11 @@ function createMarkedInstance(): Marked {
         createMermaidExtension(),
       ],
     },
+    {
+      walkTokens(token: Token) {
+        resolveMarkdownToken(token, docName, filePath)
+      },
+    },
   )
 }
 
@@ -294,11 +299,9 @@ export function renderMarkdown(
   docName: string,
   filePath: string,
 ): string {
-  const marked = createMarkedInstance()
+  const marked = createMarkedInstance(docName, filePath)
   const raw = marked.parse(content, {
     async: false,
-    walkTokens: (token: Token) =>
-      resolveMarkdownToken(token, docName, filePath),
   }) as string
 
   const withCopyButtons = wrapCodeBlocksWithCopyButton(raw)
