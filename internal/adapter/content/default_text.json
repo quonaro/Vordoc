@@ -17,7 +17,8 @@
     "nextPage": "Next page"
   },
   "sidebar": {
-    "back": "Back"
+    "back": "Back",
+    "empty": "No pages yet."
   },
   "search": {
     "placeholder": "Search...",

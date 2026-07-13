@@ -1,0 +1,83 @@
+{
+  "app": {
+    "title": "Vordoc",
+    "logoAlt": "логотип",
+    "titleSeparator": "·"
+  },
+  "root": {
+    "availableDocumentation": "Доступная документация",
+    "loading": "Загрузка...",
+    "noDocumentation": "Документация не найдена.",
+    "disabled": "Выбор документации отключён."
+  },
+  "doc": {
+    "noContent": "Содержимое недоступно.",
+    "onThisPage": "На этой странице",
+    "previousPage": "Предыдущая страница",
+    "nextPage": "Следующая страница"
+  },
+  "sidebar": {
+    "back": "Назад",
+    "empty": "Здесь пока пусто."
+  },
+  "search": {
+    "placeholder": "Искать в документации...",
+    "globalPlaceholder": "Поиск по документации...",
+    "searching": "Идёт поиск...",
+    "noResults": "Ничего не найдено"
+  },
+  "copyCode": {
+    "copy": "Копировать",
+    "copied": "Скопировано",
+    "failed": "Ошибка копирования"
+  },
+  "gallery": {
+    "close": "Закрыть просмотр",
+    "openPreview": "Открыть просмотр",
+    "download": "Скачать",
+    "previous": "Назад",
+    "next": "Вперёд"
+  },
+  "offline": {
+    "warning": "Нет подключения к интернету. Страница отображается в офлайн-режиме."
+  },
+  "password": {
+    "title": "Требуется пароль",
+    "description": "Эта страница защищена. Введите пароль, чтобы продолжить.",
+    "placeholder": "Пароль",
+    "verifying": "Проверка...",
+    "unlock": "Разблокировать",
+    "failed": "Не удалось проверить пароль"
+  },
+  "theme": {
+    "system": "Системная",
+    "light": "Светлая",
+    "dark": "Тёмная"
+  },
+  "errors": {
+    "notFoundTitle": "Страница не найдена",
+    "notFoundDescription": "Запрошенная страница не существует или была перемещена.",
+    "genericTitle": "Что-то пошло не так",
+    "genericDescription": "Не удалось загрузить страницу. Попробуйте позже.",
+    "goHome": "На главную",
+    "goBack": "Назад",
+    "doc_not_found": "Документация не найдена",
+    "page_not_found": "Страница не найдена",
+    "password_required": "Требуется пароль",
+    "invalid_password": "Неверный пароль",
+    "access_denied": "Доступ запрещён",
+    "failed_to_verify": "Не удалось проверить пароль",
+    "failed_to_search": "Не удалось выполнить поиск",
+    "failed_to_list_docs": "Не удалось получить список документации",
+    "failed_to_get_doc": "Не удалось получить документацию",
+    "failed_to_get_page": "Не удалось получить страницу",
+    "failed_to_resolve_logo": "Не удалось определить логотип",
+    "logo_not_found": "Логотип не найден",
+    "failed_to_serve_logo": "Не удалось отдать логотип",
+    "failed_to_load_config": "Не удалось загрузить конфигурацию",
+    "invalid_request_body": "Неверное тело запроса",
+    "password_hash_not_configured": "Доступ к странице настроен неправильно. Обратитесь к администратору.",
+    "invalid_path": "Неверный путь",
+    "doc_name_required": "Требуется имя документации"
+  }
+}

@@ -1,4 +1,4 @@
-import { marked, type Token, type Tokens } from 'marked'
+import { Marked, marked, type Token, type Tokens } from 'marked'
 import { markedHighlight } from 'marked-highlight'
 import hljs from 'highlight.js'
 import { sanitize } from 'isomorphic-dompurify'
@@ -241,57 +241,60 @@ function resolveMarkdownToken(
   }
 }
 
-marked.use(
-  markedHighlight({
-    emptyLangClass: 'hljs',
-    langPrefix: 'hljs language-',
-    highlight(code, lang) {
-      const language = lang && hljs.getLanguage(lang) ? lang : 'plaintext'
-      return hljs.highlight(code, { language }).value
-    },
-  }),
-  {
-    renderer: {
-      heading(token: Tokens.Heading) {
-        const html = marked.Parser.parseInline(token.tokens, {
-          async: false,
-        }) as string
-        const id =
-          slugify(extractPlainText(token.tokens)) || `heading-${token.depth}`
-        return `<h${token.depth} id="${escapeHtmlAttribute(id)}">${html}</h${token.depth}>`
+function createMarkedInstance(): Marked {
+  return new Marked(
+    markedHighlight({
+      emptyLangClass: 'hljs',
+      langPrefix: 'hljs language-',
+      highlight(code, lang) {
+        const language = lang && hljs.getLanguage(lang) ? lang : 'plaintext'
+        return hljs.highlight(code, { language }).value
       },
-      link(token: Tokens.Link) {
-        const href = escapeHtmlAttribute(token.href)
-        const text = marked.Parser.parseInline(token.tokens, {
-          async: false,
-        }) as string
-        const title = token.title
-          ? ` title="${escapeHtmlAttribute(token.title)}"`
-          : ''
-        const externalAttrs = isWebHref(token.href)
-          ? ' target="_blank" rel="noopener noreferrer"'
-          : ''
-        return `<a class="markdown-link" href="${href}"${title}${externalAttrs}>${text}</a>`
+    }),
+    {
+      renderer: {
+        heading(token: Tokens.Heading) {
+          const html = marked.Parser.parseInline(token.tokens, {
+            async: false,
+          }) as string
+          const id =
+            slugify(extractPlainText(token.tokens)) || `heading-${token.depth}`
+          return `<h${token.depth} id="${escapeHtmlAttribute(id)}">${html}</h${token.depth}>`
+        },
+        link(token: Tokens.Link) {
+          const href = escapeHtmlAttribute(token.href)
+          const text = marked.Parser.parseInline(token.tokens, {
+            async: false,
+          }) as string
+          const title = token.title
+            ? ` title="${escapeHtmlAttribute(token.title)}"`
+            : ''
+          const externalAttrs = isWebHref(token.href)
+            ? ' target="_blank" rel="noopener noreferrer"'
+            : ''
+          return `<a class="markdown-link" href="${href}"${title}${externalAttrs}>${text}</a>`
+        },
       },
     },
-  },
-  {
-    extensions: [
-      createGalleryExtension(),
-      createImageExtension(),
-      createWarningExtension(),
-      createDangerExtension(),
-      createFilesGalleryExtension(),
-      createMermaidExtension(),
-    ],
-  },
-)
+    {
+      extensions: [
+        createGalleryExtension(),
+        createImageExtension(),
+        createWarningExtension(),
+        createDangerExtension(),
+        createFilesGalleryExtension(),
+        createMermaidExtension(),
+      ],
+    },
+  )
+}
 
 export function renderMarkdown(
   content: string,
   docName: string,
   filePath: string,
 ): string {
+  const marked = createMarkedInstance()
   const raw = marked.parse(content, {
     async: false,
     walkTokens: (token: Token) =>

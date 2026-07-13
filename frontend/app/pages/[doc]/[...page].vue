@@ -194,28 +194,36 @@ loading.value = false
     <div class="mx-auto flex max-w-7xl gap-4 p-4 md:gap-8 md:p-8">
       <!-- Sidebar -->
       <aside class="hidden w-64 shrink-0 lg:block">
-        <nav v-if="docMeta?.pages?.length" class="sticky top-8 space-y-1">
-          <NuxtLink
-            :to="`/${docName}`"
-            class="mb-4 flex items-center gap-2 font-semibold hover:text-primary"
-          >
-            <span class="flex-1">{{ docMeta.title }}</span>
-            <LockKeyhole
-              v-if="docMeta.access === 'password'"
-              class="h-3.5 w-3.5"
-              :style="{ color: docMeta.lock_color }"
+        <nav v-if="docMeta" class="sticky top-8">
+          <div class="rounded-lg border bg-card p-3 shadow-sm md:p-4">
+            <NuxtLink
+              :to="`/${docName}`"
+              class="flex items-center gap-2 text-base font-semibold hover:text-primary"
+            >
+              <span class="flex-1 truncate">{{ docMeta.title }}</span>
+              <LockKeyhole
+                v-if="docMeta.access === 'password'"
+                class="h-3.5 w-3.5"
+                :style="{ color: docMeta.lock_color }"
+              />
+            </NuxtLink>
+            <div class="my-3 border-t border-border" />
+            <SidebarBack
+              :doc-name="docName"
+              :current-path="pagePath"
+              :pages="docMeta?.pages ?? []"
+              class="mb-2"
             />
-          </NuxtLink>
-          <SidebarBack
-            :doc-name="docName"
-            :current-path="pagePath"
-            :pages="docMeta?.pages ?? []"
-          />
-          <SidebarTree
-            :nodes="sidebarNodes"
-            :doc-name="docName"
-            :current-path="pagePath"
-          />
+            <SidebarTree
+              v-if="docMeta?.pages?.length"
+              :nodes="sidebarNodes"
+              :doc-name="docName"
+              :current-path="pagePath"
+            />
+            <p v-else class="text-sm text-muted-foreground">
+              {{ t('sidebar.empty') }}
+            </p>
+          </div>
         </nav>
       </aside>
 

@@ -14,17 +14,12 @@ export function createMermaidExtension() {
       return src.match(/```\s*mermaid/)?.index
     },
     tokenizer(src: string) {
-      const match = /^(```)\s*mermaid\s*\n(?:(?!\1\s*$)[\s\S])*\1\s*$/m.exec(
-        src,
-      )
+      const match = /^(```)\s*mermaid\s*\n([\s\S]*?)\n\1\s*(?:\n|$)/.exec(src)
       if (!match) return undefined
-      const code = match[0]
-        .replace(/^```\s*mermaid\s*\n/, '')
-        .replace(/```\s*$/, '')
       return {
         type: 'mermaid',
         raw: match[0],
-        text: code.trim(),
+        text: (match[2] ?? '').trim(),
       } as MermaidToken
     },
     renderer(token: Token) {
