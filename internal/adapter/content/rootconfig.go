@@ -12,6 +12,7 @@ import (
 )
 
 const defaultLogoFile = "logotype.svg"
+const defaultLogoLink = "/"
 
 const defaultLogoSize = 40
 const defaultFontSize = 24
@@ -27,6 +28,7 @@ func defaultHeader() headerConfig {
 		Logo: &logoConfig{
 			Path: defaultLogoFile,
 			Size: defaultLogoSize,
+			Link: defaultLogoLink,
 		},
 		Font: &fontConfig{
 			Name: defaultFontName,
@@ -57,6 +59,7 @@ type headerConfig struct {
 type logoConfig struct {
 	Path string `yaml:"path"`
 	Size int    `yaml:"size"`
+	Link string `yaml:"link"`
 }
 
 // fontConfig mirrors domain.FontConfig for YAML parsing.
@@ -128,6 +131,9 @@ func fillHeaderDefaults(src headerConfig) headerConfig {
 		if src.Logo.Size == 0 {
 			src.Logo.Size = d.Logo.Size
 		}
+		if src.Logo.Link == "" {
+			src.Logo.Link = d.Logo.Link
+		}
 	}
 	if src.Font == nil {
 		src.Font = d.Font
@@ -184,6 +190,7 @@ func (p *Provider) resolveDocHeader(name string, cfg docConfig) *domain.HeaderCo
 			Logo: &domain.LogoConfig{
 				Path: fmt.Sprintf("/api/v1/logo?doc=%s", name),
 				Size: rootHeader.Logo.Size,
+				Link: rootHeader.Logo.Link,
 			},
 			Font: rootHeader.Font,
 		}
@@ -197,6 +204,7 @@ func (p *Provider) resolveDocHeader(name string, cfg docConfig) *domain.HeaderCo
 		Logo: &domain.LogoConfig{
 			Path: fmt.Sprintf("/api/v1/logo?doc=%s", name),
 			Size: h.Logo.Size,
+			Link: h.Logo.Link,
 		},
 		Font: &domain.FontConfig{
 			Name: h.Font.Name,
@@ -266,6 +274,7 @@ func resolveRootConfig(cfg siteConfig) domain.RootConfig {
 			Logo: &domain.LogoConfig{
 				Path: "/api/v1/logo",
 				Size: h.Logo.Size,
+				Link: h.Logo.Link,
 			},
 			Font: &domain.FontConfig{
 				Name: h.Font.Name,

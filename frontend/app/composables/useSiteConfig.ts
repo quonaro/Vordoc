@@ -3,6 +3,7 @@ const STORAGE_KEY = 'vordoc:site-config:v2'
 export interface LogoConfig {
   path?: string
   size?: number
+  link?: string
 }
 
 export interface FontConfig {

@@ -32,8 +32,6 @@ export function useText() {
   const state = useState<UIText | null>('ui-text', () => readStoredText())
 
   async function load(): Promise<UIText | null> {
-    if (state.value) return state.value
-
     try {
       const data = await $fetch<UIText>(`${config.public.apiBase}/v1/text`)
       state.value = data

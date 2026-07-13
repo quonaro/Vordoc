@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { AlertCircle } from '@lucide/vue'
 
+defineOptions({ inheritAttrs: false })
+
 const { t } = useText()
 const siteConfig = useSiteConfig()
 const error = useError()
+const router = useRouter()
+const globalSearchOpen = useGlobalSearchState()
+
+useGlobalSearchShortcut(() => {
+  globalSearchOpen.value = true
+})
 
 onMounted(() => {
   siteConfig.load().catch(() => {})
@@ -38,6 +46,11 @@ function clearErrorAndNavigate() {
     navigateTo(homePath.value)
   }
 }
+
+function clearErrorAndGoBack() {
+  clearError()
+  router.back()
+}
 </script>
 
 <template>
@@ -61,10 +74,16 @@ function clearErrorAndNavigate() {
         <p class="mt-2 text-muted-foreground">
           {{ description }}
         </p>
-        <UiButton v-if="homePath" class="mt-6" @click="clearErrorAndNavigate">
-          {{ t('errors.goHome') }}
-        </UiButton>
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <UiButton variant="outline" @click="clearErrorAndGoBack">
+            {{ t('errors.goBack') }}
+          </UiButton>
+          <UiButton v-if="homePath" @click="clearErrorAndNavigate">
+            {{ t('errors.goHome') }}
+          </UiButton>
+        </div>
       </div>
     </main>
   </div>
+  <GlobalSearch v-if="globalSearchOpen" @close="globalSearchOpen = false" />
 </template>

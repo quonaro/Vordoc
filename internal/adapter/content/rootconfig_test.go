@@ -74,3 +74,57 @@ func TestProvider_GetLogoPath_leading_slash_is_content_root(t *testing.T) {
 		t.Errorf("GetLogoPath = %q, want %q", path, want)
 	}
 }
+
+func TestProvider_GetRootConfig_logo_link_defaults_to_root(t *testing.T) {
+	root := t.TempDir()
+	mustWrite(t, filepath.Join(root, "config.yaml"), "root:\n  title: Test\n")
+	mustWrite(t, filepath.Join(root, "index.md"), "---\ntitle: Home\n---\nHome\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	cfg, err := p.GetRootConfig(context.Background())
+	must(t, err)
+
+	if cfg.Header == nil || cfg.Header.Logo == nil {
+		t.Fatal("expected header logo config")
+	}
+	if cfg.Header.Logo.Link != "/" {
+		t.Errorf("logo link = %q, want %q", cfg.Header.Logo.Link, "/")
+	}
+}
+
+func TestProvider_GetRootConfig_logo_link_override(t *testing.T) {
+	root := t.TempDir()
+	mustWrite(t, filepath.Join(root, "config.yaml"), "root:\n  title: Test\nheader:\n  logo:\n    link: /docs\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	cfg, err := p.GetRootConfig(context.Background())
+	must(t, err)
+
+	if cfg.Header == nil || cfg.Header.Logo == nil {
+		t.Fatal("expected header logo config")
+	}
+	if cfg.Header.Logo.Link != "/docs" {
+		t.Errorf("logo link = %q, want %q", cfg.Header.Logo.Link, "/docs")
+	}
+}
+
+func TestProvider_GetDoc_logo_link_inherits_from_root(t *testing.T) {
+	root := t.TempDir()
+	mustWrite(t, filepath.Join(root, "config.yaml"), "root:\n  title: Test\nheader:\n  logo:\n    link: /home\n")
+
+	docRoot := filepath.Join(root, "doc")
+	must(t, os.MkdirAll(docRoot, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test\n")
+	mustWrite(t, filepath.Join(docRoot, "index.md"), "---\ntitle: Home\n---\nHome\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	doc, err := p.GetDoc(context.Background(), "doc")
+	must(t, err)
+
+	if doc.Header == nil || doc.Header.Logo == nil {
+		t.Fatal("expected doc header logo config")
+	}
+	if doc.Header.Logo.Link != "/home" {
+		t.Errorf("doc logo link = %q, want %q", doc.Header.Logo.Link, "/home")
+	}
+}

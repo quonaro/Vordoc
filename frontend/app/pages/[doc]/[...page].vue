@@ -107,12 +107,14 @@ async function loadDocMeta(): Promise<boolean> {
       throw createError({
         statusCode: 404,
         statusMessage: t('errors.doc_not_found'),
+        fatal: true,
       })
     }
     console.error('failed to fetch doc', e)
     throw createError({
       statusCode: err?.statusCode ?? 500,
       statusMessage: t('errors.failed_to_get_doc'),
+      fatal: true,
     })
   }
 }
@@ -137,12 +139,14 @@ async function fetchPage() {
       throw createError({
         statusCode: 404,
         statusMessage: t('errors.page_not_found'),
+        fatal: true,
       })
     }
     console.error('failed to fetch doc page', e)
     throw createError({
       statusCode: err?.statusCode ?? 500,
       statusMessage: t('errors.failed_to_get_page'),
+      fatal: true,
     })
   }
 }

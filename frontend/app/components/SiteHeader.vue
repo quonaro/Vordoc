@@ -17,6 +17,7 @@ const headerEnabled = computed(() => resolvedHeader.value?.enable ?? false)
 
 const title = computed(() => resolvedHeader.value?.title || t('app.title'))
 const logo = computed(() => resolvedHeader.value?.logo?.path || '/api/v1/logo')
+const logoLink = computed(() => resolvedHeader.value?.logo?.link || '/')
 const logoSize = computed(() => resolvedHeader.value?.logo?.size ?? 40)
 
 const defaultElements: HeaderElement[] = ['logo', 'search', 'theme-switch']
@@ -76,7 +77,7 @@ const positionClass = (id: HeaderElement): string => {
     <!-- Mobile layout -->
     <div class="flex flex-col gap-2 md:hidden">
       <div class="flex items-center justify-between gap-2">
-        <div class="flex min-w-0 items-center gap-3">
+        <NuxtLink :to="logoLink" class="flex min-w-0 items-center gap-3">
           <img
             :src="logo"
             :alt="t('app.logoAlt')"
@@ -90,7 +91,7 @@ const positionClass = (id: HeaderElement): string => {
             }"
             >{{ title }}</span
           >
-        </div>
+        </NuxtLink>
         <ThemeSelector />
       </div>
       <div class="flex items-center gap-2">
@@ -108,7 +109,8 @@ const positionClass = (id: HeaderElement): string => {
     <div
       class="hidden md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center md:gap-4"
     >
-      <div
+      <NuxtLink
+        :to="logoLink"
         :class="cn('flex min-w-0 items-center gap-3', positionClass('logo'))"
       >
         <img
@@ -124,7 +126,7 @@ const positionClass = (id: HeaderElement): string => {
           }"
           >{{ title }}</span
         >
-      </div>
+      </NuxtLink>
       <GlobalSearchTrigger
         :class="cn('w-full max-w-xl', positionClass('search'))"
       />

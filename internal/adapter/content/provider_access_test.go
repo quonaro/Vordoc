@@ -110,6 +110,34 @@ func TestProvider_GetPage_publicOverride(t *testing.T) {
 	}
 }
 
+func TestProvider_GetPage_infoMdDirectoryIndex(t *testing.T) {
+	root := t.TempDir()
+
+	docRoot := filepath.Join(root, "doc")
+	adminDir := filepath.Join(docRoot, "admin")
+	publicDir := filepath.Join(adminDir, "public")
+	must(t, os.MkdirAll(publicDir, 0o755))
+	mustWrite(t, filepath.Join(docRoot, "config.yaml"), "title: Test Doc\n")
+	mustWrite(t, filepath.Join(adminDir, "config.yaml"), "access: password\npassword_hash: "+hash(t, "admin")+"\n")
+	mustWrite(t, filepath.Join(publicDir, "config.yaml"), "access: none\n")
+	mustWrite(t, filepath.Join(publicDir, "info.md"), "---\ntitle: Info\n---\nInfo\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	page, err := p.GetPage(context.Background(), "doc", "admin/public")
+	must(t, err)
+
+	if page.Title != "Info" {
+		t.Errorf("expected title Info, got %q", page.Title)
+	}
+	if page.FilePath != "admin/public/info.md" {
+		t.Errorf("expected FilePath admin/public/info.md, got %q", page.FilePath)
+	}
+	if page.Access != "public" {
+		t.Errorf("expected access public, got %q", page.Access)
+	}
+}
+
 func TestProvider_GetPage_inheritHash(t *testing.T) {
 	root := t.TempDir()
 

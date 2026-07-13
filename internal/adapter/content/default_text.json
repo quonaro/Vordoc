@@ -56,6 +56,7 @@
     "genericTitle": "Something went wrong",
     "genericDescription": "Failed to load the page. Please try again later.",
     "goHome": "Go home",
+    "goBack": "Go back",
     "doc_not_found": "Documentation not found",
     "page_not_found": "Page not found",
     "password_required": "Password required",

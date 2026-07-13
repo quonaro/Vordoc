@@ -27,6 +27,7 @@ type HeaderConfig struct {
 type LogoConfig struct {
 	Path string `json:"path,omitempty"`
 	Size int    `json:"size,omitempty"`
+	Link string `json:"link,omitempty"`
 }
 
 // FontConfig represents the font settings for a header.

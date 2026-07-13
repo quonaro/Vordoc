@@ -119,6 +119,18 @@ func TestDocsHandler_PublicOverride(t *testing.T) {
 	}
 }
 
+func TestDocsHandler_PublicOverride_DirectoryIndex(t *testing.T) {
+	var handler *DocsHandler
+	_, r := setupProtectedDoc(t, &handler)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/public", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 public directory index, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
 func TestDocsHandler_PublicPageInsideProtectedDocUnlocksAncestor(t *testing.T) {
 	var handler *DocsHandler
 	_, r := setupProtectedDoc(t, &handler)

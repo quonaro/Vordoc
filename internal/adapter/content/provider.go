@@ -248,27 +248,12 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 
 // GetPage returns a page's content and metadata.
 func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (domain.Page, error) {
-	docPath, err := p.docPath(docName)
+	pageFile, docPath, err := p.resolvePageFile(docName, pagePath)
 	if err != nil {
-		return domain.Page{}, fmt.Errorf("%w: %s/%s", domain.ErrPageNotFound, docName, pagePath)
+		return domain.Page{}, err
 	}
 
-	// Resolve page file path
-	pageFile := filepath.Join(docPath, pagePath+".md")
-	if _, err := os.Stat(pageFile); err != nil {
-		// Try index.md if path is empty or ends with /
-		altPath := filepath.Join(docPath, pagePath, "index.md")
-		if _, err2 := os.Stat(altPath); err2 == nil {
-			pageFile = altPath
-		} else {
-			return domain.Page{}, fmt.Errorf("%w: %s/%s", domain.ErrPageNotFound, docName, pagePath)
-		}
-	}
-	if !pagePathInsideDoc(docPath, pageFile) {
-		return domain.Page{}, fmt.Errorf("%w: %s/%s", domain.ErrPageNotFound, docName, pagePath)
-	}
-
-	data, err := os.ReadFile(pageFile) // #nosec G304 — path is validated by pagePathInsideDoc
+	data, err := os.ReadFile(pageFile) // #nosec G304 — path is validated by resolvePageFile
 	if err != nil {
 		return domain.Page{}, fmt.Errorf("reading page file: %w", err)
 	}
@@ -303,22 +288,9 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 // GetProtectedAncestor returns the nearest password-protected ancestor for a page.
 // It is used to unlock a public page that lives inside a protected documentation.
 func (p *Provider) GetProtectedAncestor(_ context.Context, docName string, pagePath string) (domain.AccessInfo, bool, error) {
-	docPath, err := p.docPath(docName)
+	pageFile, docPath, err := p.resolvePageFile(docName, pagePath)
 	if err != nil {
 		return domain.AccessInfo{}, false, err
-	}
-
-	pageFile := filepath.Join(docPath, pagePath+".md")
-	if _, err := os.Stat(pageFile); err != nil {
-		altPath := filepath.Join(docPath, pagePath, "index.md")
-		if _, err2 := os.Stat(altPath); err2 == nil {
-			pageFile = altPath
-		} else {
-			return domain.AccessInfo{}, false, fmt.Errorf("%w: %s/%s", domain.ErrPageNotFound, docName, pagePath)
-		}
-	}
-	if !pagePathInsideDoc(docPath, pageFile) {
-		return domain.AccessInfo{}, false, fmt.Errorf("%w: %s/%s", domain.ErrPageNotFound, docName, pagePath)
 	}
 
 	info, found := FindProtectedAncestor(docPath, pageFile)

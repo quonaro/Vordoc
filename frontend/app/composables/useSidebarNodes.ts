@@ -26,9 +26,17 @@ export function buildSidebarNodes(
   currentPath: string,
 ): PageNode[] {
   const directoryNodes = getDirectoryNodes(pages, currentPath)
-  return directoryNodes.map((node) => {
+  return trimDepth(directoryNodes, 2)
+}
+
+function trimDepth(nodes: PageNode[], depth: number): PageNode[] {
+  if (depth <= 0) return []
+
+  return nodes.map((node) => {
     const copy: PageNode = { ...node }
-    delete copy.children
+    if (copy.children) {
+      copy.children = trimDepth(copy.children, depth - 1)
+    }
     return copy
   })
 }
