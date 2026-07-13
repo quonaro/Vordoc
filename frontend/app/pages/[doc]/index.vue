@@ -195,6 +195,11 @@ loading.value = false
           >
             {{ docMeta.title }}
           </NuxtLink>
+          <SidebarBack
+            :doc-name="docName"
+            :current-path="currentPath"
+            :pages="docMeta?.pages ?? []"
+          />
           <SidebarTree
             :nodes="sidebarNodes"
             :doc-name="docName"

@@ -206,6 +206,11 @@ loading.value = false
               :style="{ color: docMeta.lock_color }"
             />
           </NuxtLink>
+          <SidebarBack
+            :doc-name="docName"
+            :current-path="pagePath"
+            :pages="docMeta?.pages ?? []"
+          />
           <SidebarTree
             :nodes="sidebarNodes"
             :doc-name="docName"

@@ -16,6 +16,9 @@
     "previousPage": "Previous page",
     "nextPage": "Next page"
   },
+  "sidebar": {
+    "back": "Back"
+  },
   "search": {
     "placeholder": "Search...",
     "globalPlaceholder": "Search documentation...",
