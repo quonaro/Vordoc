@@ -216,6 +216,7 @@ func inheritPasswordHash(docPath string, childDir string, originalScope string) 
 // docConfig holds per-doc metadata and optional access rules.
 type docConfig struct {
 	Title        string        `yaml:"title"`
+	Icon         string        `yaml:"icon"`
 	Header       *headerConfig `yaml:"header"`
 	Access       string        `yaml:"access"`
 	PasswordHash string        `yaml:"password_hash"`

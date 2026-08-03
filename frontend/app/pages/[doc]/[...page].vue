@@ -7,10 +7,13 @@ import { prefetchDocPages } from '~/composables/usePagePrefetch'
 import { LockKeyhole } from '@lucide/vue'
 
 const { t } = useText()
+const siteConfig = useSiteConfig()
+const showBackBtn = computed(() => !!siteConfig.data.value?.header?.logo?.link)
 
 interface PageNode {
   path: string
   title: string
+  icon?: string
   access?: string
   access_scope?: string
   lock_color?: string
@@ -20,6 +23,7 @@ interface PageNode {
 interface DocMeta {
   name: string
   title: string
+  icon?: string
   description?: string
   access?: string
   access_scope?: string
@@ -181,6 +185,7 @@ loading.value = false
         <MobileDocNav
           :doc-name="docName"
           :doc-title="docMeta?.title ?? docName"
+          :doc-icon="docMeta?.icon"
           :pages="docMeta?.pages ?? []"
           :current-path="pagePath"
           :access="docMeta?.access"
@@ -200,6 +205,9 @@ loading.value = false
               :to="`/${docName}`"
               class="flex items-center gap-2 text-base font-semibold hover:text-primary"
             >
+              <span v-if="docMeta.icon" class="text-lg leading-none">{{
+                docMeta.icon
+              }}</span>
               <span class="flex-1 truncate">{{ docMeta.title }}</span>
               <LockKeyhole
                 v-if="docMeta.access === 'password'"
@@ -209,9 +217,11 @@ loading.value = false
             </NuxtLink>
             <div class="my-3 border-t border-border" />
             <SidebarBack
+              v-if="showBackBtn"
               :doc-name="docName"
               :current-path="pagePath"
               :pages="docMeta?.pages ?? []"
+              :home-link="siteConfig.data.value?.header?.logo?.link"
               class="mb-2"
             />
             <SidebarTree

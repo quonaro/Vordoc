@@ -75,6 +75,7 @@ func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) 
 	doc := domain.Doc{
 		Name:   name,
 		Title:  cfg.Title,
+		Icon:   cfg.Icon,
 		Header: p.resolveDocHeader(name, cfg),
 	}
 
@@ -89,6 +90,9 @@ func (p *Provider) GetDoc(ctx context.Context, name string) (domain.Doc, error) 
 		doc.Description = idx.Description
 		if doc.Title == "" && idx.Title != "" {
 			doc.Title = idx.Title
+		}
+		if doc.Icon == "" && idx.Icon != "" {
+			doc.Icon = idx.Icon
 		}
 	}
 
@@ -142,6 +146,7 @@ func (p *Provider) GetDocSummary(_ context.Context, name string) (domain.DocSumm
 	return domain.DocSummary{
 		Name:         name,
 		Title:        title,
+		Icon:         cfg.Icon,
 		Access:       access,
 		PasswordHash: passwordHash,
 		Scope:        scope,
@@ -188,12 +193,18 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 				if t := getString(fm, "title", ""); t != "" {
 					node.Title = t
 				}
+				node.Icon = getString(fm, "icon", "")
 				node.Order = getInt(fm, "order", 0)
 				info := resolveAccessInfo(docPath, idx, fm)
 				node.Access = info.Access
 				node.AccessScope = info.Scope
 				node.LockColor = hashToColor(info.PasswordHash)
 				show = getBool(fm, "show", true)
+			}
+			if node.Icon == "" {
+				if cfg, err := loadDocConfig(filepath.Join(fullPath, "config.yaml")); err == nil {
+					node.Icon = cfg.Icon
+				}
 			}
 			if !show {
 				continue
@@ -218,6 +229,7 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 			}
 			fm, _, _ := parseFrontmatter(data)
 			title := getString(fm, "title", strings.TrimSuffix(name, ".md"))
+			icon := getString(fm, "icon", "")
 			order := getInt(fm, "order", 0)
 			info := resolveAccessInfo(docPath, fullPath, fm)
 			show := getBool(fm, "show", true)
@@ -227,6 +239,7 @@ func (p *Provider) scanDir(dir string, docPath string) ([]domain.PageNode, error
 			nodes = append(nodes, domain.PageNode{
 				Path:        strings.TrimSuffix(rel, ".md"),
 				Title:       title,
+				Icon:        icon,
 				Order:       order,
 				Access:      info.Access,
 				AccessScope: info.Scope,
@@ -274,6 +287,7 @@ func (p *Provider) GetPage(_ context.Context, docName string, pagePath string) (
 		Path:         pagePath,
 		FilePath:     relFile,
 		Title:        getString(fm, "title", filepath.Base(pagePath)),
+		Icon:         getString(fm, "icon", ""),
 		Description:  getString(fm, "description", ""),
 		Order:        getInt(fm, "order", 0),
 		Content:      body,

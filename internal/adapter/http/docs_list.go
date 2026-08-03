@@ -19,6 +19,7 @@ func (h *DocsHandler) ListDocs(w http.ResponseWriter, r *http.Request) {
 		summary := docSummary{Name: name, Title: name, Access: "public"}
 		if s, err := h.contentProvider.GetDocSummary(r.Context(), name); err == nil {
 			summary.Title = s.Title
+			summary.Icon = s.Icon
 			summary.Access = s.Access
 			if s.Access != "password" || h.hasValidCookie(r, name, s.Scope) {
 				summary.Description = s.Description

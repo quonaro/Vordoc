@@ -6,6 +6,7 @@ const { t } = useText()
 interface DocMeta {
   name: string
   title: string
+  icon?: string
   description?: string
   access?: string
 }
@@ -55,6 +56,9 @@ function isProtected(doc: DocMeta): boolean {
             class="group rounded-lg border bg-card p-4 transition-colors hover:bg-accent hover:text-accent-foreground md:p-6"
           >
             <div class="flex items-center gap-2">
+              <span v-if="doc.icon" class="text-xl leading-none">{{
+                doc.icon
+              }}</span>
               <LockKeyhole
                 v-if="isProtected(doc)"
                 class="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-accent-foreground"

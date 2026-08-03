@@ -5,6 +5,7 @@ import type { PageNode } from '~/composables/useSidebarNodes'
 const props = defineProps<{
   docName: string
   docTitle: string
+  docIcon?: string
   pages: PageNode[]
   currentPath: string
   access?: string
@@ -66,6 +67,9 @@ watch(() => props.currentPath, close)
             class="flex min-w-0 items-center gap-2 font-semibold hover:text-primary"
             @click="close"
           >
+            <span v-if="docIcon" class="text-lg leading-none">{{
+              docIcon
+            }}</span>
             <span class="truncate">{{ docTitle }}</span>
             <LockKeyhole
               v-if="access === 'password'"

@@ -1,5 +1,6 @@
 ---
 title: Админ-раздел
+icon: 🔒
 description: Доступ по паролю admin
 order: 0
 ---

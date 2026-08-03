@@ -73,7 +73,7 @@ const positionClass = (id: HeaderElement): string => {
 </script>
 
 <template>
-  <header v-if="headerEnabled" class="border-b px-4 py-3">
+  <header v-if="headerEnabled" class="border-b bg-card px-4 py-3 shadow-sm">
     <!-- Mobile layout -->
     <div class="flex flex-col gap-2 md:hidden">
       <div class="flex items-center justify-between gap-2">

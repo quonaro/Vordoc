@@ -1,5 +1,6 @@
 ---
 title: Закрытый раздел
+icon: 👥
 description: Доступ по паролю member
 order: 0
 ---

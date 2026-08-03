@@ -4,6 +4,7 @@ import { FileText, Folder, LockKeyhole } from '@lucide/vue'
 interface PageNode {
   path: string
   title: string
+  icon?: string
   access?: string
   access_scope?: string
   lock_color?: string
@@ -45,7 +46,10 @@ function isDirectory(node: PageNode): boolean {
           'hover:text-primary': !isActive(node.path),
         }"
       >
-        <Folder v-if="isDirectory(node)" class="h-3.5 w-3.5" />
+        <span v-if="node.icon" class="text-base leading-none">{{
+          node.icon
+        }}</span>
+        <Folder v-else-if="isDirectory(node)" class="h-3.5 w-3.5" />
         <FileText v-else class="h-3.5 w-3.5" />
         <span class="flex-1">{{ node.title }}</span>
         <LockKeyhole
@@ -66,7 +70,10 @@ function isDirectory(node: PageNode): boolean {
             'hover:text-primary': !isActive(node.path),
           }"
         >
-          <Folder class="h-3.5 w-3.5" />
+          <span v-if="node.icon" class="text-base leading-none">{{
+            node.icon
+          }}</span>
+          <Folder v-else class="h-3.5 w-3.5" />
           <span class="flex-1">{{ node.title }}</span>
           <LockKeyhole
             v-if="isProtected(node)"
@@ -78,7 +85,10 @@ function isDirectory(node: PageNode): boolean {
           v-else
           class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground"
         >
-          <Folder class="h-3.5 w-3.5" />
+          <span v-if="node.icon" class="text-base leading-none">{{
+            node.icon
+          }}</span>
+          <Folder v-else class="h-3.5 w-3.5" />
           <span class="flex-1">{{ node.title }}</span>
           <LockKeyhole
             v-if="isProtected(node)"

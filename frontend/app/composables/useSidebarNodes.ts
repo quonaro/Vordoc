@@ -3,6 +3,7 @@ import { computed, unref } from 'vue'
 export interface PageNode {
   path: string
   title: string
+  icon?: string
   access?: string
   access_scope?: string
   has_index?: boolean

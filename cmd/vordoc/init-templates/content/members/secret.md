@@ -1,5 +1,6 @@
 ---
 title: Секретная страница
+icon: 🤫
 description: Наследует доступ из папки members
 order: 1
 ---

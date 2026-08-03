@@ -31,6 +31,7 @@ func NewDocsHandler(contentProvider domain.ContentProvider, passwordService *ser
 type docSummary struct {
 	Name        string `json:"name"`
 	Title       string `json:"title"`
+	Icon        string `json:"icon,omitempty"`
 	Description string `json:"description,omitempty"`
 	Access      string `json:"access,omitempty"`
 }

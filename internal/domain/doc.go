@@ -5,6 +5,7 @@ package domain
 type PageNode struct {
 	Path        string     `json:"path"`
 	Title       string     `json:"title"`
+	Icon        string     `json:"icon,omitempty"`
 	Order       int        `json:"order,omitempty"`
 	Access      string     `json:"access,omitempty"`
 	AccessScope string     `json:"access_scope,omitempty"`
@@ -60,6 +61,7 @@ type RootConfig struct {
 type Doc struct {
 	Name         string        `json:"name"`
 	Title        string        `json:"title"`
+	Icon         string        `json:"icon,omitempty"`
 	Description  string        `json:"description,omitempty"`
 	Access       string        `json:"access,omitempty"`
 	AccessScope  string        `json:"access_scope,omitempty"`
@@ -76,6 +78,7 @@ type Page struct {
 	Path         string `json:"path"`
 	FilePath     string `json:"filePath"`
 	Title        string `json:"title"`
+	Icon         string `json:"icon,omitempty"`
 	Description  string `json:"description,omitempty"`
 	Order        int    `json:"order,omitempty"`
 	Content      string `json:"content,omitempty"`
@@ -105,6 +108,7 @@ type AccessInfo struct {
 type DocSummary struct {
 	Name         string
 	Title        string
+	Icon         string
 	Description  string
 	Access       string
 	PasswordHash string

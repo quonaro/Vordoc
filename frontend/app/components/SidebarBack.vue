@@ -12,6 +12,7 @@ const props = defineProps<{
   docName: string
   currentPath: string
   pages: PageNode[]
+  homeLink?: string
 }>()
 
 const { t } = useText()
@@ -28,7 +29,9 @@ function findNode(nodes: PageNode[], target: string): PageNode | null {
 }
 
 const parentLink = computed(() => {
-  if (!props.currentPath) return null
+  if (!props.currentPath) {
+    return props.homeLink || null
+  }
   const segments = props.currentPath.split('/')
   while (segments.length > 0) {
     segments.pop()
