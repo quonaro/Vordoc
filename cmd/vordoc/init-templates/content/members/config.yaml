@@ -1,3 +1,15 @@
 icon: 👥
 access: password
 password_hash: __MEMBER_HASH__
+
+pages:
+  "index.md":
+    title: "Закрытый раздел"
+    icon: 👥
+    description: "Доступ по паролю member"
+    order: 0
+  "secret.md":
+    title: "Секретная страница"
+    icon: 🤫
+    description: "Наследует доступ из папки members"
+    order: 1

@@ -1,10 +1,3 @@
----
-title: Полноценный пример Vordoc
-icon: 👋
-description: Демонстрация нескольких документаций, кастомных компонентов, ссылок, якорей и авторизации
-order: 0
----
-
 # Полноценный пример Vordoc
 
 Этот проект создан командой `vordoc init` и показывает, как организовать несколько независимых документаций в одном сайте.
@@ -23,26 +16,25 @@ content/
 ├── config.yaml
 ├── text.json
 ├── welcome/
-│   ├── config.yaml
+│   ├── config.yaml      # pages: index.md
 │   └── index.md
 ├── components/
-│   ├── config.yaml
+│   ├── config.yaml      # pages: index.md
 │   ├── index.md
 │   └── public/
 │       ├── sample.svg
 │       └── notes.txt
 ├── links/
-│   ├── config.yaml
+│   ├── config.yaml      # pages: index.md
 │   └── index.md
-├── members/        # пароль: member
-│   ├── config.yaml
+├── members/             # пароль: member
+│   ├── config.yaml      # pages: index.md, secret.md
 │   ├── index.md
 │   └── secret.md
-└── admin/          # пароль: admin
-    ├── config.yaml
+└── admin/               # пароль: admin
+    ├── config.yaml      # pages: index.md, public/info.md (access: none)
     ├── index.md
-    └── public/     # публичный override
-        ├── config.yaml
+    └── public/
         └── info.md
 ```
 

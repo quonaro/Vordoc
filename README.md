@@ -65,29 +65,47 @@ content/
 ├── text.json
 ├── logotype.svg
 ├── public/
-│   ├── config.yaml
 │   └── guide/
 │       └── getting-started.md
 └── admin/
-    ├── config.yaml
-    ├── access.yaml
+    ├── config.yaml      # title, access, pages: …
     ├── index.md
     ├── settings.md
     └── public/
 ```
 
-| File          | Purpose                                                                  |
-| ------------- | ------------------------------------------------------------------------ |
-| `config.yaml` | Documentation `title`, `header`, `access`, and `password_hash` settings. |
-| `access.yaml` | Alternative/additional access rules file (may duplicate `config.yaml`).  |
-| `index.md`    | Documentation home page.                                                 |
-| `*.md`        | Other pages.                                                             |
-| `public/`     | Documentation static resources (images, fonts, etc.).                    |
+| File          | Purpose                                                                                            |
+| ------------- | -------------------------------------------------------------------------------------------------- |
+| `config.yaml` | Documentation `title`, `header`, `access`, `password_hash`, and `pages:` metadata for `.md` files. |
+| `index.md`    | Documentation home page.                                                                           |
+| `*.md`        | Other pages — pure Markdown, no frontmatter needed.                                                |
+| `public/`     | Documentation static resources (images, fonts, etc.).                                              |
+
+### Page metadata in `pages:`
+
+Page-level metadata (`title`, `icon`, `description`, `order`, `show`, `access`, `password_hash`) lives in the `pages:` section of `config.yaml`, keyed by the page's path relative to the config's directory:
+
+```yaml
+pages:
+  "index.md":
+    title: "Getting Started"
+    icon: 📖
+    description: "Introduction"
+    order: 0
+  "guide/config.md":
+    title: "Configuration"
+    icon: ⚙️
+    order: 1
+    show: false
+```
+
+YAML frontmatter in `.md` files is still supported as a fallback for backward compatibility, but the recommended approach is `pages:` in `config.yaml`.
 
 ### Access control
 
 - By default, documentation is public.
 - `access: password` + `password_hash` enables password protection.
+- Per-page access override: set `access` (and optionally `password_hash`) on a page entry in `pages:`.
 - Rules are inherited down the tree: a child page can use the nearest ancestor's hash.
 - `access: none` or `access: public` resets inheritance.
 
@@ -110,8 +128,8 @@ header:
     path: "logotype.svg"
     size: 40
   font:
-    name: "FabergeDigital"
-    size: 42
+    name: "Roboto-Regular.ttf"
+    size: 36
 
 theme:
   default: "system"

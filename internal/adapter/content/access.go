@@ -215,11 +215,23 @@ func inheritPasswordHash(docPath string, childDir string, originalScope string) 
 
 // docConfig holds per-doc metadata and optional access rules.
 type docConfig struct {
-	Title        string        `yaml:"title"`
-	Icon         string        `yaml:"icon"`
-	Header       *headerConfig `yaml:"header"`
-	Access       string        `yaml:"access"`
-	PasswordHash string        `yaml:"password_hash"`
+	Title        string                `yaml:"title"`
+	Icon         string                `yaml:"icon"`
+	Header       *headerConfig         `yaml:"header"`
+	Access       string                `yaml:"access"`
+	PasswordHash string                `yaml:"password_hash"`
+	Pages        map[string]pageConfig `yaml:"pages"`
+}
+
+// pageConfig holds per-page metadata from the pages: section in config.yaml.
+type pageConfig struct {
+	Title        string `yaml:"title"`
+	Icon         string `yaml:"icon"`
+	Description  string `yaml:"description"`
+	Order        int    `yaml:"order"`
+	Show         *bool  `yaml:"show"`
+	Access       string `yaml:"access"`
+	PasswordHash string `yaml:"password_hash"`
 }
 
 // loadDocConfig reads config.yaml from a doc directory.

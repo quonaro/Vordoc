@@ -1,10 +1,3 @@
----
-title: Кастомные компоненты
-icon: 🧩
-description: Примеры Warning, Danger, Gallery, Image, FilesGallery, Mermaid и подсветки кода
-order: 1
----
-
 # Кастомные компоненты
 
 Vordoc расширяет стандартный Markdown собственными виджетами.

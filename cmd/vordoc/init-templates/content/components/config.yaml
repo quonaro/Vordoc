@@ -1,3 +1,10 @@
 icon: 🧩
 title: "Кастомные компоненты"
 description: "Демонстрация Markdown-виджетов: callouts, галереи, изображения, диаграммы, блоки кода"
+
+pages:
+  "index.md":
+    title: "Кастомные компоненты"
+    icon: 🧩
+    description: "Примеры Warning, Danger, Gallery, Image, FilesGallery, Mermaid и подсветки кода"
+    order: 1

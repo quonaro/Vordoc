@@ -59,15 +59,40 @@ func (p *Provider) GetAssetPath(_ context.Context, docName string, assetPath str
 	}
 
 	info, err = os.Stat(absAsset)
+	if err == nil {
+		if info.IsDir() {
+			return "", fmt.Errorf("asset path is a directory")
+		}
+		return absAsset, nil
+	}
+	if !os.IsNotExist(err) {
+		return "", fmt.Errorf("stat asset: %w", err)
+	}
+
+	// Fallback: look for the asset in the content root directory.
+	rootPath := filepath.Join(p.root, safePath)
+	absRoot, err := filepath.Abs(rootPath)
+	if err != nil {
+		return "", fmt.Errorf("resolving root asset path: %w", err)
+	}
+	absContentRoot, err := filepath.Abs(p.root)
+	if err != nil {
+		return "", fmt.Errorf("resolving content root: %w", err)
+	}
+	if !strings.HasPrefix(absRoot, absContentRoot+string(filepath.Separator)) {
+		return "", fmt.Errorf("%w: asset path escapes content root", domain.ErrInvalidPath)
+	}
+
+	info, err = os.Stat(absRoot)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return "", fmt.Errorf("%w: %s", domain.ErrAssetNotFound, assetPath)
 		}
-		return "", fmt.Errorf("stat asset: %w", err)
+		return "", fmt.Errorf("stat root asset: %w", err)
 	}
 	if info.IsDir() {
 		return "", fmt.Errorf("asset path is a directory")
 	}
 
-	return absAsset, nil
+	return absRoot, nil
 }

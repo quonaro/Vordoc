@@ -1,3 +1,16 @@
 icon: 🔒
 access: password
 password_hash: __ADMIN_HASH__
+
+pages:
+  "index.md":
+    title: "Админ-раздел"
+    icon: 🔒
+    description: "Доступ по паролю admin"
+    order: 0
+  "public/info.md":
+    title: "Публичная страница в админ-разделе"
+    icon: 🌐
+    description: "Сброс наследования пароля через access: none"
+    order: 0
+    access: none
