@@ -53,6 +53,9 @@ useHead(() => ({
   style: fontFace.value
     ? [{ innerHTML: fontFace.value, type: 'text/css' }]
     : [],
+  link: font.value.googleFontsUrl
+    ? [{ rel: 'stylesheet', href: font.value.googleFontsUrl }]
+    : [],
 }))
 
 const positionClass = (id: HeaderElement): string => {
