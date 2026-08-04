@@ -34,9 +34,22 @@ export function useTheme() {
     localStorage.setItem(STORAGE_KEY, theme.value)
   }
 
+  const TRANSITION_DURATION = 150
+
+  function withTransition(fn: () => void) {
+    if (!import.meta.client) return fn()
+    const html = document.documentElement
+    html.classList.add('theme-transitioning')
+    fn()
+    setTimeout(
+      () => html.classList.remove('theme-transitioning'),
+      TRANSITION_DURATION,
+    )
+  }
+
   function setTheme(value: ThemeMode) {
     theme.value = value
-    applyTheme()
+    withTransition(() => applyTheme())
   }
 
   function updateSystemDark() {
@@ -56,7 +69,7 @@ export function useTheme() {
       const media = window.matchMedia('(prefers-color-scheme: dark)')
       media.addEventListener('change', () => {
         updateSystemDark()
-        applyTheme()
+        withTransition(() => applyTheme())
       })
     }
   })

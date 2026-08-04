@@ -102,9 +102,7 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(async () => {
           const cached =
-            (await caches.match(request)) ||
-            (await caches.match('/')) ||
-            (await caches.match('/index.html'))
+            (await caches.match(request)) || (await caches.match('/'))
 
           if (cached) {
             return cached

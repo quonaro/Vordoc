@@ -40,16 +40,17 @@ const homePath = computed(() => {
   return '/'
 })
 
-function clearErrorAndNavigate() {
-  clearError()
-  if (homePath.value) {
-    navigateTo(homePath.value)
-  }
+async function clearErrorAndNavigate() {
+  if (!homePath.value) return
+  await clearError({ redirect: homePath.value })
 }
 
 function clearErrorAndGoBack() {
-  clearError()
-  router.back()
+  if (window.history.length > 1) {
+    router.back()
+  } else if (homePath.value) {
+    clearError({ redirect: homePath.value })
+  }
 }
 </script>
 

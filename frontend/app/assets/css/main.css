@@ -446,6 +446,19 @@
 }
 
 @layer base {
+  .theme-transitioning,
+  .theme-transitioning *,
+  .theme-transitioning *::before,
+  .theme-transitioning *::after {
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease,
+      fill 150ms ease,
+      stroke 150ms ease,
+      outline-color 150ms ease !important;
+  }
+
   * {
     @apply border-border;
   }
