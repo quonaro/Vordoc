@@ -31,6 +31,9 @@ type ContentProvider interface {
 	// GetLogoPath returns the filesystem path to the logo for a doc or the root site.
 	GetLogoPath(ctx context.Context, doc string) (string, error)
 
+	// GetFaviconPath returns the filesystem path to the site favicon.
+	GetFaviconPath(ctx context.Context) (string, error)
+
 	// GetAssetPath returns the filesystem path to a static asset inside a documentation directory.
 	GetAssetPath(ctx context.Context, doc string, assetPath string) (string, error)
 

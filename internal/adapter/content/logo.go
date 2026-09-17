@@ -2,7 +2,6 @@ package content
 
 import (
 	"context"
-	"fmt"
 	"mime"
 	"path/filepath"
 	"strings"
@@ -87,16 +86,7 @@ func (p *Provider) resolveLogoPath(doc, filename string) (string, error) {
 		filename = defaultLogoFile
 	}
 
-	path := filepath.Join(base, filename)
-	rel, err := filepath.Rel(p.root, path)
-	if err != nil {
-		return "", fmt.Errorf("invalid logo path: %w", err)
-	}
-	if strings.HasPrefix(rel, ".."+string(filepath.Separator)) || rel == ".." || filepath.IsAbs(rel) {
-		return "", fmt.Errorf("logo path escapes content root")
-	}
-
-	return filepath.Join(p.root, rel), nil
+	return p.safeContentPath(base, filename)
 }
 
 // logoMimeType returns the MIME type for a logo file based on its extension.

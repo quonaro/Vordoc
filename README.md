@@ -118,7 +118,7 @@ root:
   enable: true
   title: "Vordoc"
 
-favicon: "favicon.ico"
+favicon: "favicon.ico" # relative to the content root, served via /api/v1/favicon
 
 header:
   enable: true

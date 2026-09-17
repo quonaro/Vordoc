@@ -75,6 +75,45 @@ func TestProvider_GetLogoPath_leading_slash_is_content_root(t *testing.T) {
 	}
 }
 
+func TestProvider_GetRootConfig_favicon_relative_maps_to_api(t *testing.T) {
+	root := t.TempDir()
+	mustWrite(t, filepath.Join(root, "config.yaml"), "favicon: \"favicon.ico\"\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	cfg, err := p.GetRootConfig(context.Background())
+	must(t, err)
+
+	if cfg.Favicon != "/api/v1/favicon" {
+		t.Errorf("favicon = %q, want %q", cfg.Favicon, "/api/v1/favicon")
+	}
+}
+
+func TestProvider_GetRootConfig_favicon_absolute_url_passthrough(t *testing.T) {
+	root := t.TempDir()
+	mustWrite(t, filepath.Join(root, "config.yaml"), "favicon: \"https://example.com/icon.ico\"\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	cfg, err := p.GetRootConfig(context.Background())
+	must(t, err)
+
+	if cfg.Favicon != "https://example.com/icon.ico" {
+		t.Errorf("favicon = %q, want the absolute URL unchanged", cfg.Favicon)
+	}
+}
+
+func TestProvider_GetRootConfig_favicon_defaults_to_embedded(t *testing.T) {
+	root := t.TempDir()
+	mustWrite(t, filepath.Join(root, "config.yaml"), "root:\n  title: Test\n")
+
+	p := NewProvider(root, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	cfg, err := p.GetRootConfig(context.Background())
+	must(t, err)
+
+	if cfg.Favicon != "/favicon.ico" {
+		t.Errorf("favicon = %q, want %q", cfg.Favicon, "/favicon.ico")
+	}
+}
+
 func TestProvider_GetRootConfig_logo_link_defaults_to_root(t *testing.T) {
 	root := t.TempDir()
 	mustWrite(t, filepath.Join(root, "config.yaml"), "root:\n  title: Test\n")

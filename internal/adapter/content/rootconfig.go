@@ -256,17 +256,12 @@ func resolveRootConfig(cfg siteConfig) domain.RootConfig {
 		r = fillRootPageDefaults(*cfg.Root)
 	}
 
-	favicon := cfg.Favicon
-	if favicon == "" {
-		favicon = "/favicon.ico"
-	}
-
 	return domain.RootConfig{
 		Root: domain.RootPageConfig{
 			Enable: r.Enable,
 			Title:  r.Title,
 		},
-		Favicon: favicon,
+		Favicon: resolveFavicon(cfg.Favicon),
 		Header: &domain.HeaderConfig{
 			Enable:   *h.Enable,
 			Elements: h.Elements,

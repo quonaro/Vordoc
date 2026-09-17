@@ -59,6 +59,7 @@ func NewServer(cfg Config, _ config.Config, logger *slog.Logger, handlers Handle
 		r.Get("/text", handlers.Config.GetText)
 		r.Get("/docs", handlers.Docs.ListDocs)
 		r.Get("/logo", handlers.Docs.ServeLogo)
+		r.Get("/favicon", handlers.Docs.ServeFavicon)
 		r.Get("/assets/{doc}/*", handlers.Docs.ServeAsset)
 		r.Get("/search", handlers.Docs.GlobalSearch)
 		r.Get("/{doc}/search", handlers.Docs.Search)
