@@ -77,6 +77,11 @@ func NewServer(cfg Config, _ config.Config, logger *slog.Logger, handlers Handle
 		}
 	})
 
+	// Browsers request /favicon.ico on their own, before the SPA declares the
+	// configured icon, so serve it from the content root instead of the embedded
+	// frontend default.
+	r.Get("/favicon.ico", handlers.Docs.ServeRootFavicon(http.HandlerFunc(handlers.Assets.Serve)))
+
 	// Static SPA: must be registered after all API routes so that /api and /health
 	// are handled by the handlers above. Any unmatched path falls back to index.html.
 	r.Get("/*", handlers.Assets.Serve)

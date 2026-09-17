@@ -15,7 +15,8 @@ const defaultRootConfigYAML = `# Vordoc root site configuration.
 #   enable:         show a root page listing all documentations (true/false)
 #   title:          title shown on the root page
 # favicon:          path to the favicon, relative to the content root
-#                   (served via /api/v1/favicon); an absolute URL is used as is
+#                   (served via /favicon.ico and /api/v1/favicon);
+#                   an absolute URL is used as is
 # header:           site-wide header settings
 #   enable:         show the header (true/false)
 #   elements:       ordered list of header elements: logo, search, theme-switch

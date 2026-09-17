@@ -28,13 +28,43 @@ func (h *DocsHandler) ServeFavicon(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ext := strings.ToLower(filepath.Ext(faviconPath))
+	serveFaviconFile(w, r, faviconPath)
+}
+
+// ServeRootFavicon serves the content favicon at the conventional /favicon.ico
+// path. Browsers request that path on their own before the SPA can declare the
+// configured icon, so it must not fall through to the embedded frontend default
+// while a content favicon exists. The fallback handler serves the embedded
+// asset when the content root has no favicon.
+func (h *DocsHandler) ServeRootFavicon(fallback http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		faviconPath, err := h.contentProvider.GetFaviconPath(r.Context())
+		if err != nil {
+			h.logger.Error("failed to resolve favicon", slog.String("error", err.Error()))
+			fallback.ServeHTTP(w, r)
+			return
+		}
+
+		if _, err := os.Stat(faviconPath); err != nil { // #nosec G703 — path is validated by contentProvider
+			if !os.IsNotExist(err) {
+				h.logger.Error("failed to stat favicon", slog.String("error", err.Error()))
+			}
+			fallback.ServeHTTP(w, r)
+			return
+		}
+
+		serveFaviconFile(w, r, faviconPath)
+	}
+}
+
+// serveFaviconFile writes a favicon file with its content type.
+func serveFaviconFile(w http.ResponseWriter, r *http.Request, path string) {
 	contentType := "application/octet-stream"
-	if mt := mime.TypeByExtension(ext); mt != "" {
+	if mt := mime.TypeByExtension(strings.ToLower(filepath.Ext(path))); mt != "" {
 		contentType = mt
 	}
 
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Cache-Control", "public, max-age=300")
-	http.ServeFile(w, r, faviconPath) // #nosec G703 — path is validated by contentProvider
+	http.ServeFile(w, r, path) // #nosec G703 — path is validated by contentProvider
 }

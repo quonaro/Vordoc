@@ -44,6 +44,59 @@ func TestDocsHandler_ServeFavicon(t *testing.T) {
 	}
 }
 
+func TestDocsHandler_ServeRootFavicon_prefers_content(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "config.yaml"), []byte("favicon: \"favicon.ico\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "favicon.ico"), []byte("content-icon"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	provider := content.NewProvider(root, slog.New(slog.NewTextHandler(os.Stderr, nil)))
+	handler := NewDocsHandler(provider, service.NewPasswordService(), "secret", slog.New(slog.NewTextHandler(os.Stderr, nil)))
+
+	fallback := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("embedded-icon"))
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/favicon.ico", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeRootFavicon(fallback).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if rec.Body.String() != "content-icon" {
+		t.Errorf("body = %q, want the content favicon", rec.Body.String())
+	}
+}
+
+func TestDocsHandler_ServeRootFavicon_falls_back_to_embedded(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "config.yaml"), []byte("favicon: \"favicon.ico\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	provider := content.NewProvider(root, slog.New(slog.NewTextHandler(os.Stderr, nil)))
+	handler := NewDocsHandler(provider, service.NewPasswordService(), "secret", slog.New(slog.NewTextHandler(os.Stderr, nil)))
+
+	fallback := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("embedded-icon"))
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/favicon.ico", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeRootFavicon(fallback).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
+	}
+	if rec.Body.String() != "embedded-icon" {
+		t.Errorf("body = %q, want the fallback handler output", rec.Body.String())
+	}
+}
+
 func TestDocsHandler_ServeFavicon_missing(t *testing.T) {
 	root := t.TempDir()
 	if err := os.WriteFile(filepath.Join(root, "config.yaml"), []byte("favicon: \"favicon.ico\"\n"), 0o644); err != nil {
